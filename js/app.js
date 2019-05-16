@@ -21,7 +21,7 @@ function fileInputHandler(file) {
     }
 }
 
-// d3.csv("tree_chart.csv").then(d => drawTree(d));
+d3.csv("tree_chart.csv").then(d => drawTree(d));
 
 function drawTree(data) {
     // Config
