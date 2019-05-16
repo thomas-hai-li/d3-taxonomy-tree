@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Tree Layout</title>
+    <link rel="stylesheet" href="css/main.css">
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh3u" crossorigin="anonymous"> -->
+</head>
+<body>
+<div class="container">
+    <h1>Interactive Visualization: Tree Chart</h1>
+    <div class="mainView">
+        <div>
+            <svg id="Display"></svg>
+        </div>
+        <div id="Toolbar">
+            <div>
+                <h3>Upload</h3>
+                <input type="file" id="Upload">
+            </div>
+            <div>
+                <h3>Zoom</h3>
+                <button class="ZoomButton" id="ZoomIn">+</button>
+                <button class="ZoomButton" id="ZoomOut">-</button>
+            </div>
+            <div>
+                <h3>Font</h3>
+                <button class="fontButton" id="fontUp">+</button>
+                <button class="fontButton" id="fontDown">-</button>
+            </div>
+            <div>
+                <h3>Toggle</h3>
+                <button id="ToggleNodeLabels">Labels</button>
+                <button id="ToggleNodeCircles">Nodes</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="js/d3.js"></script>
+<script src="js/app.js"></script>
+</html>

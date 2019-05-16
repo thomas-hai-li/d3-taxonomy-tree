@@ -1,0 +1,69 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+h1 {
+    text-indent: 10px;
+    color: white;
+    background-color: steelblue;
+}
+
+.mainView {
+    display: flex;
+}
+
+/* TOOLBAR */
+
+#Toolbar {
+    margin-bottom: 10px;
+    position: absolute;
+    align-items: center;
+    background-color: lightgray;
+}
+
+h3 {
+    margin: 10px 20px;
+    display: inline-flex;
+    width: 60px;
+}
+
+.onView {
+    opacity: 0.5;
+    
+    transition: all 0.3s;
+    -webkit-transition: all 0.3s;
+    -moz-transition: all 0.3s;
+}
+
+input[type=file]{ 
+    color:transparent;
+}
+
+/* DISPLAY */
+.nodeLabel  {
+    /* Makes the text much easier to read */
+    text-shadow: 
+    -1px -1px 3px white,
+    -1px  1px 3px white,
+    1px -1px 3px white,
+    1px  1px 3px white;
+
+    pointer-events: none;
+}
+
+.hideElement {
+    display: none;
+}
+
+.tooltip {	
+    position: absolute;			
+    text-align: center;			
+    width: auto;
+    height: 15px;					
+    padding: 2px;				
+    font: 12px sans-serif;		
+    background: lightsteelblue;	
+    border: 0px;		
+    border-radius: 8px;			
+    pointer-events: none;			
+}
