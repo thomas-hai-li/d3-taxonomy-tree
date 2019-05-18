@@ -15,9 +15,7 @@ h1 {
 /* TOOLBAR */
 
 #Toolbar {
-    margin-bottom: 10px;
     position: absolute;
-    align-items: center;
     background-color: lightgray;
 }
 
