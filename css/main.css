@@ -38,6 +38,14 @@ input[type=file]{
 }
 
 /* DISPLAY */
+.node {
+    cursor: pointer;
+}
+
+.node-normalized {
+    r: 3;
+}
+
 .nodeLabel  {
     /* Makes the text much easier to read */
     text-shadow: 

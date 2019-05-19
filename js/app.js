@@ -42,7 +42,7 @@ function drawTree(data) {
     
     // Tree layout
     let tree = d3.tree()
-        .size([height - 100, width - 600]);
+        .size([height - 100, width - 500]);
     
     let stratify = d3.stratify()
         .parentId(d => d.id.substring(0, d.id.lastIndexOf("@")));
@@ -171,7 +171,7 @@ function toolbarEnable() {
 
     d3.select("#ToggleNodeCircles").on("click", () => {
         for (let i = 0; i < nodeCircles.length; i++) {
-            nodeCircles[i].classList.toggle("hideElement");
+            nodeCircles[i].classList.toggle("node-normalized");
         }
     });
 
