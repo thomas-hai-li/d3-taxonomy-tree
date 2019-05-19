@@ -74,8 +74,9 @@ function drawTree(data) {
         .attr("transform", d => "translate(" + d.y + "," + d.x + ")")
 
     node.append("circle")
-        .attr("r", 2.5)
-        .style("fill", d => d.children ? "#555" : "#999")
+        .attr("r", d => Math.log10(d.data.value) + 2)
+        .style("fill", d => d.children ? "#555" : "#555")
+        .style("opacity", 0.7)
         .on("mouseover", d => {
             tooltip.transition()
                 .duration(500)
@@ -97,6 +98,7 @@ function drawTree(data) {
         .style("text-anchor", d => d._children ? "end" : "start")
         .style("font", "sans-serif")
         .style("font-size", 10)
+        .style("fill", "black")
         .text(d => d.id.substring(d.id.lastIndexOf("@") + 1))
 
     // Zoom and pan
