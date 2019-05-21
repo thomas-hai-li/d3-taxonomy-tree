@@ -1,3 +1,4 @@
+// File upload:
 let input = document.querySelector("input");
 
 input.addEventListener("change", (e) => {
@@ -13,7 +14,7 @@ function fileInputHandler(file) {
         reader.onload = e => {
             data = reader.result;                   // string of csv
             parsedData_tree = d3.csvParse(data);    // array of csv entries
-            drawTree(parsedData_tree);
+            showData(parsedData_tree);
         }
         reader.readAsText(file);
     } else {
@@ -21,36 +22,61 @@ function fileInputHandler(file) {
     }
 }
 
-d3.csv("tree_chart.csv").then(d => drawTree(d));
+// APP MAIN:
 
-function drawTree(data) {
-    // Config
-    let width = window.innerWidth - 20,
+d3.csv("tree_chart.csv").then(d => showData(d));
+let display = {};
+
+function showData(data) {
+    // Setup: window dimensions and elements
+    const config = setup();
+    // Build Tree: obtain tree and root
+    const treeData = buildTree(config, data);
+    // Update: draw nodes and links
+    update(treeData);
+    // Interactivity: enable zoom and toolbar
+    enableZoom();
+    enableToolbar();
+}
+
+function setup() {
+    const width = window.innerWidth - 20,
         height = window.innerHeight - 100;
-    
-    let color = d3.scaleOrdinal(d3.schemeCategory10);
     
     let svg = d3.select("#Display")
         .attr("width", width)
         .attr("height", height)
         .style("background-color", "white")
         .style("border", "1px solid black");
-    
-    let ng = svg.append("g").attr("transform", "translate(150,50)");   // will contain the tree layout
+        
+    let ng = svg.append("g").attr("transform", "translate(150,50)");
 
-    let tooltip = d3.select("body").append("div").attr("class", "tooltip")  // will contain tooltip upon node hover
-    
-    // Tree layout
-    let tree = d3.tree()
+    display = { svg, ng }
+    return { width, height };
+}
+
+function buildTree(setup, data) {
+    const { width, height } = setup;
+
+    const tree = d3.tree()
         .size([height - 100, width - 500]);
-    
-    let stratify = d3.stratify()
+
+    const stratify = d3.stratify()
         .parentId(d => d.id.substring(0, d.id.lastIndexOf("@")));
-    
-    let root = stratify(data)
+
+    const root = stratify(data)
         .sort((a, b) => (a.height - b.height) || a.id.localeCompare(b.id));
+    
+    return { tree, root };
+}
+
+function update(treeData) {
+    let { ng } = display;
+    let { tree, root } = treeData;
 
     // Draw links
+    let color = d3.scaleOrdinal(d3.schemeCategory10);
+
     let link = ng.selectAll(".link")
         .data(tree(root).descendants().slice(1))    // array of descendants excluding index 0 (cellular organisms has no parent)
         .enter().append("path")
@@ -72,6 +98,8 @@ function drawTree(data) {
         .enter().append("g")
         .attr("class", d => "node" + (d.children ? " node--internal" : " node--leaf"))
         .attr("transform", d => "translate(" + d.y + "," + d.x + ")")
+    
+    let tooltip = d3.select("body").append("div").attr("class", "tooltip")  // will contain tooltip upon node hover
 
     node.append("circle")
         .attr("r", d => Math.log10(d.data.value) + 2)
@@ -100,8 +128,11 @@ function drawTree(data) {
         .style("font-size", 10)
         .style("fill", "black")
         .text(d => d.id.substring(d.id.lastIndexOf("@") + 1))
+}
 
-    // Zoom and pan
+function enableZoom() {
+    // Enables zoom + pan, and zoom buttons on the toolbar
+    let { svg, ng } = display;
     let zoom = d3.zoom()
         .scaleExtent([0.4, 10])
         .on("zoom", zoomed);
@@ -132,18 +163,13 @@ function drawTree(data) {
     d3.select("#ZoomOut").on("click", () => {
         zoom.scaleBy(svg.transition().duration(300), 1 / 1.3);
     })
-
-    toolbarEnable();
 }
 
-function toolbarEnable() {
-
-    let toolbar = d3.select("#Toolbar")
-        .attr("class", "onView")
+function enableToolbar() {
+    const labels = document.querySelectorAll(".nodeLabel");
+    d3.select("#Toolbar").attr("class", "onView")
 
     // Font buttons
-    const labels = document.querySelectorAll(".nodeLabel");
-
     d3.select("#fontUp").on("click", () => {
         for (let i = 0; i < labels.length; i++) {
             let currentFont = labels[i].style.fontSize;
