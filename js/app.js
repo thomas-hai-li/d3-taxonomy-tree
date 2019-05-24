@@ -24,19 +24,16 @@ function fileInputHandler(file) {
 
 // APP MAIN:
 
-d3.csv("tree_chart.csv").then(d => showData(d));
-let display = {};
+d3.csv("small_sample.csv").then(d => showData(d));
+let display = {},
+    treeData = {};
 
 function showData(data) {
-    // Setup: window dimensions and elements
-    const config = setup();
-    // Build Tree: obtain tree and root
-    const treeData = buildTree(config, data);
-    // Update: draw nodes and links
-    update(treeData);
-    // Interactivity: enable zoom and toolbar
-    enableZoom();
-    enableToolbar();
+    let config = setup();       // Setup: window dimensions and elements
+    buildTree(config, data);    // Build Tree: obtain tree and root
+    update(treeData.root);      // Update: draw nodes and links
+
+    // enableZoom();    re-enable once collapsing nodes can be smoothly integrated with zoom 
 }
 
 function setup() {
@@ -66,48 +63,49 @@ function buildTree(setup, data) {
 
     const root = stratify(data)
         .sort((a, b) => (a.height - b.height) || a.id.localeCompare(b.id));
-    
-    return { tree, root };
+
+    treeData = { tree, root };
 }
 
-function update(treeData) {
-    let { ng } = display;
-    let { tree, root } = treeData;
+function update(source) {
+    const { ng } = display,
+        { tree, root } = treeData,
+        color = d3.scaleOrdinal(d3.schemeCategory10);
+        updateDuration = 2000,
+        tooltipDuration = 500;
+    
+    tree(root);
 
-    // Draw links
-    let color = d3.scaleOrdinal(d3.schemeCategory10);
-
+    // Enter links
     let link = ng.selectAll(".link")
-        .data(tree(root).descendants().slice(1))    // array of descendants excluding index 0 (cellular organisms has no parent)
-        .enter().append("path")
+        .data(root.descendants().slice(1));
+
+    let linkEnter = link.enter().append("path")
         .attr("class", "link")
-        .style("stroke", color)
-        .style("fill", "none")
-        .style("stroke-opacity", 0.4)
-        .style("stroke-width", 1)
+    
+    // Update and exit links
+    link.merge(linkEnter)
         .attr("d", d => {
             return "M" + d.y + "," + d.x                            // Move to coords (y,x), this is flipped to make the tree horizontal instead of vertical
                 + "C" + (d.y + d.parent.y) / 2 + "," + d.x          // Draw a cubic Bézier curve
                 + " " + (d.y + d.parent.y) / 2 + "," + d.parent.x
                 + " " + d.parent.y + "," + d.parent.x;
-        });
-    
-    // Draw nodes
-    let node = ng.selectAll(".node")
-        .data(root.descendants())   // array of all descendants
-        .enter().append("g")
-        .attr("class", d => "node" + (d.children ? " node--internal" : " node--leaf"))
-        .attr("transform", d => "translate(" + d.y + "," + d.x + ")")
-    
-    let tooltip = d3.select("body").append("div").attr("class", "tooltip")  // will contain tooltip upon node hover
+        })
+        .attr("stroke-opacity", 0.4);
 
-    node.append("circle")
-        .attr("r", d => Math.log10(d.data.value) + 2)
-        .style("fill", d => d.children ? "#555" : "#555")
-        .style("opacity", 0.7)
+    link.exit().remove();
+    
+    // Enter nodes
+    let node = ng.selectAll("g.node")
+        .data(root.descendants());
+    
+    let tooltip = d3.select(".tooltip");
+    
+    let nodeEnter = node.enter().append("g")
+        .attr("class", "node")
         .on("mouseover", d => {
             tooltip.transition()
-                .duration(500)
+                .duration(tooltipDuration)
                 .style("opacity", .9);
             tooltip.html("Value: " + d.data.value)
                 .style("left", (d3.event.pageX) + "px")
@@ -115,19 +113,58 @@ function update(treeData) {
         })
         .on("mouseout", d => {
             tooltip.transition()
-                .duration(500)
+                .duration(tooltipDuration)
                 .style("opacity", 0);
+        })
+        // Collapse children nodes:
+        .on("click", function(d) {
+            if (d.children) {
+                d._children = d.children;
+                d.children = null;
+                this.classList.add("node-collapsed");
+            } else {
+                d.children = d._children;
+                d._children = null;
+                this.classList.remove("node-collapsed");
+            }
+            // Remove the tooltip
+            tooltip.transition()
+                .duration(tooltipDuration)
+                .style("opacity", 0);
+
+            update(d);
         });
 
-    node.append("text")
+    // Update nodes
+    let nodeUpdate = node.merge(nodeEnter)
+        .attr("transform", d => "translate(" + d.y + "," + d.x + ")")
+        .attr("fill-opacity", 1);
+
+    nodeUpdate.selectAll("circle").remove();
+    nodeUpdate.selectAll("text").remove();
+
+    nodeUpdate.append("circle")
+        .attr("r", d => Math.log10(d.data.value) + 2)
+        .style("fill", "#555")
+        .style("opacity", 0.7);
+
+    nodeUpdate.append("text")
         .attr("class", "nodeLabel")
         .attr("dy", 4)
         .attr("x", d => d.depth === 0 ? -105 : 6)
-        .style("text-anchor", d => d._children ? "end" : "start")
+        .style("text-anchor", "start")
         .style("font", "sans-serif")
         .style("font-size", 10)
         .style("fill", "black")
-        .text(d => d.id.substring(d.id.lastIndexOf("@") + 1))
+        .text(d => d.id.substring(d.id.lastIndexOf("@") + 1));
+    
+    // Exit Notes
+    node.exit()
+        .attr("transform", d => "translate(" + d.parent.y + "," + d.parent.x + ")")
+        .style("fill-opacity", 0)
+        .remove()
+
+    enableToolbar();
 }
 
 function enableZoom() {
@@ -155,13 +192,14 @@ function enableZoom() {
     }
 
     svg.call(zoom);
-
+    
+    // Setup zoom on toolbar:
+    let duration = 300;
     d3.select("#ZoomIn").on("click", () => {
-        zoom.scaleBy(svg.transition().duration(300), 1.3);
+        zoom.scaleBy(svg.transition().duration(duration), 1.3);
     })
-
     d3.select("#ZoomOut").on("click", () => {
-        zoom.scaleBy(svg.transition().duration(300), 1 / 1.3);
+        zoom.scaleBy(svg.transition().duration(duration), 1 / 1.3);
     })
 }
 
