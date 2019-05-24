@@ -24,7 +24,7 @@ function fileInputHandler(file) {
 
 // APP MAIN:
 
-d3.csv("small_sample.csv").then(d => showData(d));
+d3.csv("big_sample.csv").then(d => showData(d));
 let display = {},
     treeData = {};
 
