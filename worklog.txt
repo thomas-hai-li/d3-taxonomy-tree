@@ -1,5 +1,5 @@
 // Name: Thomas Hai Li
-// Document Description: write down thoughts and document ideas as the project progresses
+// Document Description: write down thoughts & document problems and solutions as the project progresses
 
 
 Tue May 14 17:08:31 2019
