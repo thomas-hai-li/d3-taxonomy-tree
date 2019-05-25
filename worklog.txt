@@ -1,0 +1,92 @@
+// Name: Thomas Hai Li
+// Document Description: write down thoughts and document ideas as the project progresses
+
+
+Tue May 14 17:08:31 2019
+
+    - How to listen for and upload a file?
+        - we need an <input> element, select it, and create an event listener
+        - file is obtained with event.target.files[0]
+        - file is then passed into a fileInputHandler function to detect file type and file size
+        - file is finally parsed with d3.csvParse() into data and passed into an acting function; here, it is tree(data, div)
+
+    - How is taxonomy MS data parsed?
+        - first, create a stratify() function with d3 and set parentID; use this function and pass in the data
+            - this will detect each parent, and create an object data structure of nodes and children (starting at the root)
+        - DRAW LINKS:
+            - select all links, set data as all descendents (excludes root node) 
+        - DRAW NODES:
+            - select all node classes, set all data, append <g>, set class as leaf or internal, and set (x,y) location using transform attribute
+            - append <circle>, color based on biologic class taxon
+            - append text label, an apply a few stylings to it
+    Next:
+        - Experiment with trees
+        - Think about interactivity
+
+
+Wed May 15 17:31:58 2019
+
+    TREE LAYOUT ZOOM AND PAN:
+        - two types of zoom
+        - canvas vs recalc. positions
+        - basic zoom: item size scales by the zoom, but node and link positions/size are not recalculated
+        - we want to be able to recalulate positions and fix node size upon zoom
+
+    Resources:
+        https://github.com/d3/d3-zoom
+        https://www.d3-graph-gallery.com/graph/interactivity_zoom.html 
+        https://www.datamake.io/blog/d3-zoom 
+
+
+Wed May 22 17:32:04 2019
+
+    POLISHING:
+        - collapse children nodes (most important)
+        - experiment with color scheme: based on taxonomic classes / branches + links
+        - make UI look more presentable; make it look like production!
+
+    TO THINK ABOUT:
+        - responsive web: try toggling children as window shrinks/grows
+        - React.js: used for clean/modular JS; make small projects and implement components into main app as I progress
+
+
+Fri May 24 15:17:20 2019
+
+     DEBUGGING - COLLAPSE CHILDREN NODES:
+        The bug:    When collapsing nodes, the UI reflects the removal n-number of nodes from the END of the tree,
+                    where n = number of total children of node clicked
+
+        Observations:
+        - links still work
+        - not a scope issue (treeData.root and root in update() point to the same memory location)
+        - data in treeData.root reflects the CORRECT information (collasped children stored in _children temp variable)
+        - node value on hover is CORRECT
+        - node size and label is WRONG (see .png)
+        
+        Conclusion:
+        - Everything in the node <g> reflects the correct data EXCEPT for the label
+        - Since all bound data is correct, this is purely a DOM update issue
+
+        Approach:
+        - Figure out why nodes elements from the END are being removed and investigate this disconnect from the UI and the data
+
+        Solution (~ 5PM):
+        - Instead of appending text labels with enterNodes, appened them with updateNodes...
+        - ...for this to work, all text labels must be removed and re-appened with each update()
+        - Why nodes from the end were being removed: it only seemed like this due to the transition() animation (solution is to remove animations for now)
+
+
+    IDEAS FOR LATER:
+        - Backend: useful for making computations that would take too much memory in the browser
+
+            - client request => json to server => process => json to client => render results in browser
+            
+            - compute simple statistics to compare relative values between taxonomic classes (ie. max species, relative class values)
+                - display this in a bar chart
+                - consider notes in Week 2: Dealing with Data (includes stats, filtering, sorting, etc)
+
+        - UI: - enlarge node on hover, display value within node
+              - consistent color scheme
+              - differnt charts
+
+        - Features: export to SVG
