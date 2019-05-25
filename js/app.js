@@ -33,7 +33,7 @@ function showData(data) {
     buildTree(config, data);    // Build Tree: obtain tree and root
     update(treeData.root);      // Update: draw nodes and links
 
-    // enableZoom();    re-enable once collapsing nodes can be smoothly integrated with zoom 
+    enableZoom();    // re-enable once collapsing nodes can be smoothly integrated with zoom 
 }
 
 function setup() {
@@ -107,7 +107,7 @@ function update(source) {
             tooltip.transition()
                 .duration(tooltipDuration)
                 .style("opacity", .9);
-            tooltip.html("Value: " + d.data.value)
+            tooltip.html("Value: " + d.data.value + "<br>")
                 .style("left", (d3.event.pageX) + "px")
                 .style("top", (d3.event.pageY - 20) + "px");
         })
@@ -116,7 +116,6 @@ function update(source) {
                 .duration(tooltipDuration)
                 .style("opacity", 0);
         })
-        // Collapse children nodes:
         .on("click", function(d) {
             if (d.children) {
                 d._children = d.children;
@@ -144,8 +143,7 @@ function update(source) {
     nodeUpdate.selectAll("text").remove();
 
     nodeUpdate.append("circle")
-        .attr("r", d => Math.log10(d.data.value) + 2)
-        .style("fill", "#555")
+        .attr("r", d => Math.log10(d.data.value + 1) + 2)
         .style("opacity", 0.7);
 
     nodeUpdate.append("text")
@@ -177,24 +175,27 @@ function enableZoom() {
     function zoomed() {
         let transform = d3.event.transform;
 
-        // scale nodes
-        ng.selectAll(".node").attr("transform", d => {
-            return "translate(" + transform.applyX(d.y) + "," + transform.applyY(d.x) + ")";
-        });
+        // This type of zoom integrates well with the collapse-node feature
+        ng.attr('transform', transform);
 
-        // scale links
-        ng.selectAll(".link").attr("d", d => {
-            return "M" + transform.applyX(d.y) + "," + transform.applyY(d.x)
-                + "C" + (transform.applyX(d.y) + transform.applyX(d.parent.y)) / 2 + "," + transform.applyY(d.x)
-                + " " + (transform.applyX(d.y) + transform.applyX(d.parent.y)) / 2 + "," + transform.applyY(d.parent.x)
-                + " " + transform.applyX(d.parent.y) + "," + transform.applyY(d.parent.x);
-        });
+        // // scale nodes
+        // ng.selectAll(".node").attr("transform", d => {
+        //     return "translate(" + transform.applyX(d.y) + "," + transform.applyY(d.x) + ")";
+        // });
+
+        // // scale links
+        // ng.selectAll(".link").attr("d", d => {
+        //     return "M" + transform.applyX(d.y) + "," + transform.applyY(d.x)
+        //         + "C" + (transform.applyX(d.y) + transform.applyX(d.parent.y)) / 2 + "," + transform.applyY(d.x)
+        //         + " " + (transform.applyX(d.y) + transform.applyX(d.parent.y)) / 2 + "," + transform.applyY(d.parent.x)
+        //         + " " + transform.applyX(d.parent.y) + "," + transform.applyY(d.parent.x);
+        // });
     }
 
     svg.call(zoom);
     
     // Setup zoom on toolbar:
-    let duration = 300;
+    let duration = 2000;
     d3.select("#ZoomIn").on("click", () => {
         zoom.scaleBy(svg.transition().duration(duration), 1.3);
     })
@@ -231,11 +232,11 @@ function enableToolbar() {
     });
 
     // Toggle buttons
-    let nodeCircles = document.querySelectorAll("circle");
+    let nodes = document.querySelectorAll(".node");
 
     d3.select("#ToggleNodeCircles").on("click", () => {
-        for (let i = 0; i < nodeCircles.length; i++) {
-            nodeCircles[i].classList.toggle("node-normalized");
+        for (let i = 0; i < nodes.length; i++) {
+            nodes[i].classList.toggle("node-normalized");
         }
     });
 

@@ -44,16 +44,21 @@ input[type=file]{
 }
 
 .link {
-    stroke: steelblue;
+    stroke: rgb(110, 110, 110);
     fill: none;
     stroke-width: 1;
 }
 
-.node {
+.node circle {
+    fill: rgba(0, 0, 0, 0.527);
     cursor: pointer;
 }
 
-.node-normalized {
+.node-collapsed circle {
+    fill: rgb(0, 108, 180);
+}
+
+.node-normalized circle {
     r: 3;
 }
 
