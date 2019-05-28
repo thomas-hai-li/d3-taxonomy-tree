@@ -184,20 +184,20 @@ function enableZoom() {
         let transform = d3.event.transform;
 
         // This type of zoom integrates well with the collapse-node feature
-        ng.attr('transform', transform);
+        // ng.attr('transform', transform);
 
-        // // scale nodes
-        // ng.selectAll(".node").attr("transform", d => {
-        //     return "translate(" + transform.applyX(d.y) + "," + transform.applyY(d.x) + ")";
-        // });
+        // scale nodes
+        ng.selectAll(".node").attr("transform", d => {
+            return "translate(" + transform.applyX(d.y) + "," + transform.applyY(d.x) + ")";
+        });
 
-        // // scale links
-        // ng.selectAll(".link").attr("d", d => {
-        //     return "M" + transform.applyX(d.y) + "," + transform.applyY(d.x)
-        //         + "C" + (transform.applyX(d.y) + transform.applyX(d.parent.y)) / 2 + "," + transform.applyY(d.x)
-        //         + " " + (transform.applyX(d.y) + transform.applyX(d.parent.y)) / 2 + "," + transform.applyY(d.parent.x)
-        //         + " " + transform.applyX(d.parent.y) + "," + transform.applyY(d.parent.x);
-        // });
+        // scale links
+        ng.selectAll(".link").attr("d", d => {
+            return "M" + transform.applyX(d.y) + "," + transform.applyY(d.x)
+                + "C" + (transform.applyX(d.y) + transform.applyX(d.parent.y)) / 2 + "," + transform.applyY(d.x)
+                + " " + (transform.applyX(d.y) + transform.applyX(d.parent.y)) / 2 + "," + transform.applyY(d.parent.x)
+                + " " + transform.applyX(d.parent.y) + "," + transform.applyY(d.parent.x);
+        });
     }
 
     svg.call(zoom);
@@ -219,9 +219,7 @@ function enableToolbar() {
     // Font buttons
     d3.select("#fontUp").on("click", () => {
         for (let i = 0; i < labels.length; i++) {
-            let currentFont = labels[i].style.fontSize;
-            let fontSize = parseFloat(currentFont.slice(0, currentFont.indexOf("p"))) // strip off "px"
-
+            let fontSize = parseFloat(labels[i].style.fontSize);
             if (fontSize < 20) {
                 labels[i].style.fontSize = fontSize + 1;
             }
@@ -230,9 +228,7 @@ function enableToolbar() {
 
     d3.select("#fontDown").on("click", () => {
         for (let i = 0; i < labels.length; i++) {
-            let currentFont = labels[i].style.fontSize;
-            let fontSize = parseFloat(currentFont.slice(0, currentFont.indexOf("p"))); // strip off "px"
-
+            let fontSize = parseFloat(labels[i].style.fontSize);
             if (fontSize > 9) {
                 labels[i].style.fontSize = fontSize - 1;
             }
