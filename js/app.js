@@ -33,7 +33,9 @@ function showData(data) {
     buildTree(config, data);    // Build Tree: obtain tree and root
     update(treeData.root);      // Update: draw nodes and links
 
-    enableZoom();    // re-enable once collapsing nodes can be smoothly integrated with zoom 
+    // Utils:
+    enableToolbar();
+    enableZoom();
 }
 
 function setup() {
@@ -141,16 +143,29 @@ function update(source) {
     nodeUpdate.selectAll("circle").remove();
     nodeUpdate.selectAll("text").remove();
 
-    const color = d3.scaleOrdinal()
+    const colorTaxonomicRank = d3.scaleOrdinal()
         .domain(d3.range(0, 10))
         .range(d3.schemeCategory10);
+    
+    const colorBranch = d3.scaleOrdinal()
+        .range(d3.schemePaired);
 
     nodeUpdate.append("circle")
         .attr("r", d => Math.log10(d.data.value + 1) + 2)
         .style("fill", d => {
-            id = d.id;
-            count = (id.match(/@/g) || []).length;
-            return color(count);
+            ranks = d.id.split("@");
+            count = ranks.length - 1;
+
+            if (count === 1){
+                console.log(ranks)
+            }
+
+
+            if (count > 1) {    // If taxonomic rank is above domain (ie. Bacteria), color based on branch
+                domain = ranks[2];
+                return colorBranch(domain)
+            }
+            return colorTaxonomicRank(count);
         })
         .style("opacity", 0.7);
 
@@ -168,9 +183,7 @@ function update(source) {
     node.exit()
         .attr("transform", d => "translate(" + d.parent.y + "," + d.parent.x + ")")
         .style("fill-opacity", 0)
-        .remove()
-
-    enableToolbar();
+        .remove();
 }
 
 function enableZoom() {
