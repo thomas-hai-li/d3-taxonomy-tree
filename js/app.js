@@ -153,17 +153,15 @@ function update(source) {
     nodeUpdate.append("circle")
         .attr("r", d => Math.log10(d.data.value + 1) + 2)
         .style("fill", d => {
+            if (d._color) { return d._color; }
+            
             ranks = d.id.split("@");
             count = ranks.length - 1;
 
-            if (count === 1){
-                console.log(ranks)
-            }
-
-
             if (count > 1) {    // If taxonomic rank is above domain (ie. Bacteria), color based on branch
                 domain = ranks[2];
-                return colorBranch(domain)
+                d._color =  colorBranch(domain);    // Save color for consistency
+                return colorBranch(domain);
             }
             return colorTaxonomicRank(count);
         })
