@@ -70,9 +70,8 @@ function buildTree(setup, data) {
 function update(source) {
     const { ng } = display,
         { tree, root } = treeData,
-        color = d3.scaleOrdinal(d3.schemeCategory10);
-        updateDuration = 2000,
-        tooltipDuration = 500;
+        tooltipDuration = 500,
+        updateDuration = 2000;
     
     tree(root);
 
@@ -142,8 +141,17 @@ function update(source) {
     nodeUpdate.selectAll("circle").remove();
     nodeUpdate.selectAll("text").remove();
 
+    const color = d3.scaleOrdinal()
+        .domain(d3.range(0, 10))
+        .range(d3.schemeCategory10);
+
     nodeUpdate.append("circle")
         .attr("r", d => Math.log10(d.data.value + 1) + 2)
+        .style("fill", d => {
+            id = d.id;
+            count = (id.match(/@/g) || []).length;
+            return color(count);
+        })
         .style("opacity", 0.7);
 
     nodeUpdate.append("text")
