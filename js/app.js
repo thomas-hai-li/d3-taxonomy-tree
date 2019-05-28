@@ -137,7 +137,7 @@ function update(source) {
     // Update nodes
     let nodeUpdate = node.merge(nodeEnter)
         .attr("transform", d => "translate(" + d.y + "," + d.x + ")")
-        .attr("fill-opacity", 1);
+        .classed("node-collapsed", d => d._children);
 
     nodeUpdate.selectAll("circle").remove();
     nodeUpdate.selectAll("text").remove();
