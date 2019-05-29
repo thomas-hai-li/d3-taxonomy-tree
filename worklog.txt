@@ -90,3 +90,16 @@ Fri May 24 15:17:20 2019
               - differnt charts
 
         - Features: export to SVG
+
+Tue May 28 15:06:21 2019
+
+    DONE TODAY:
+    - added a consistent color spectrum mapped to each kingdom
+
+    WHAT'S LEFT (Project-Guide-v1):
+    - implement slider input to let user choose which phylogenic class to map color to
+    - zoom in/out by clicking graph layer (needs clarification)
+    - dropdown button for switching graph type
+    - export buttons (PNG and SVG)
+
+    *must also apply everything to Radial Tree as well*
