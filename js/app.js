@@ -1,17 +1,17 @@
 // File upload:
-let input = document.querySelector("input");
+const upload = document.querySelector("#Upload");
 
-input.addEventListener("change", (e) => {
-    let file = e.target.files[0];
+upload.addEventListener("change", (e) => {
+    const file = e.target.files[0];
     fileInputHandler(file);
 });
 
 function fileInputHandler(file) {
-    let fileTypeCSV = /csv.*/;
+    const fileTypeCSV = /csv.*/;
 
     if (file.name.match(fileTypeCSV)) {
-        let reader = new FileReader();
-        reader.onload = e => {
+        const reader = new FileReader();
+        reader.onload = () => {
             data = reader.result;                   // string of csv
             parsedData_tree = d3.csvParse(data);    // array of csv entries
             showData(parsedData_tree);
@@ -22,6 +22,27 @@ function fileInputHandler(file) {
     }
 }
 
+// Color Slider (in dev - rework with d3 API):
+const colorSlider = document.querySelector("#ColorSlider"),
+    colorLabel = document.querySelector("#ColorTaxonomicRank");
+
+let colorRank = 2; // Kingdom by default
+colorSlider.addEventListener("input", () => {
+    const ranks = {
+        // Keys based on number of "@" in the id of each data point
+        2: "Kingdom",
+        3: "Phylum",
+        4: "Class",
+        5: "Order",
+        6: "Family",
+        7: "Genus",
+        8: "Species"
+    }
+    colorRank = parseInt(colorSlider.value);
+    colorLabel.textContent = ranks[colorRank];
+    update();
+});
+
 // APP MAIN:
 
 d3.csv("big_sample.csv").then(d => showData(d));
@@ -29,12 +50,11 @@ let display = {},
     treeData = {};
 
 function showData(data) {
-    let config = setup();       // Setup: window dimensions and elements
+    const config = setup();       // Setup: window dimensions and elements
     buildTree(config, data);    // Build Tree: obtain tree and root
-    update(treeData.root);      // Update: draw nodes and links
+    update();      // Update: draw nodes and links
 
     // Utils:
-    enableToolbar();
     enableZoom();
 }
 
@@ -42,20 +62,20 @@ function setup() {
     const width = window.innerWidth - 20,
         height = window.innerHeight - 100;
     
-    let svg = d3.select("#Display")
+    const svg = d3.select("#Display")
         .attr("width", width)
         .attr("height", height)
         .style("background-color", "white")
         .style("border", "1px solid black");
         
-    let ng = svg.append("g").attr("transform", "translate(150,50)");
+    const ng = svg.append("g").attr("transform", "translate(150,50)");
 
-    display = { svg, ng }
+    display = { svg, ng };
     return { width, height };
 }
 
-function buildTree(setup, data) {
-    const { width, height } = setup;
+function buildTree(config, data) {
+    const { width, height } = config;
 
     const tree = d3.tree()
         .size([height - 100, width - 500]);
@@ -69,19 +89,19 @@ function buildTree(setup, data) {
     treeData = { tree, root };
 }
 
-function update(source) {
+function update() {
     const { ng } = display,
         { tree, root } = treeData,
         tooltipDuration = 500,
-        updateDuration = 2000;
+        updateDuration = 300;
     
     tree(root);
 
     // Enter links
-    let link = ng.selectAll(".link")
+    const link = ng.selectAll(".link")
         .data(root.descendants().slice(1));
 
-    let linkEnter = link.enter().append("path")
+    const linkEnter = link.enter().append("path")
         .attr("class", "link")
     
     // Update and exit links
@@ -97,12 +117,12 @@ function update(source) {
     link.exit().remove();
     
     // Enter nodes
-    let node = ng.selectAll("g.node")
+    const node = ng.selectAll("g.node")
         .data(root.descendants());
     
-    let tooltip = d3.select(".tooltip");
+    const tooltip = d3.select(".tooltip");
     
-    let nodeEnter = node.enter().append("g")
+    const nodeEnter = node.enter().append("g")
         .attr("class", "node")
         .on("mouseover", d => {
             tooltip.transition()
@@ -132,7 +152,7 @@ function update(source) {
                 .duration(tooltipDuration)
                 .style("opacity", 0);
 
-            update(d);
+            update();
         });
 
     // Update nodes
@@ -140,7 +160,7 @@ function update(source) {
         .attr("transform", d => "translate(" + d.y + "," + d.x + ")")
         .classed("node-collapsed", d => d._children);
 
-    nodeUpdate.selectAll("circle").remove();
+    nodeUpdate.selectAll("circle").remove();    // prevent duplication
     nodeUpdate.selectAll("text").remove();
 
     const colorTaxonomicRank = d3.scaleOrdinal()
@@ -151,21 +171,23 @@ function update(source) {
         .range(d3.schemePaired);
 
     nodeUpdate.append("circle")
-        .attr("r", d => Math.log10(d.data.value + 1) + 2)
+        .attr("r", d => Math.log10(d.data.value + 1) + 2)   // Node size based on data
         .style("fill", d => {
-            if (d._color) { return d._color; }
+            // if (d._color && d._colorRank === colorRank) { return d._color; }
             
-            ranks = d.id.split("@");
-            count = ranks.length - 1;
+            const ranks = d.id.split("@");
+            const count = ranks.length - 1;   // number of "@" in d.id
 
-            if (count > 1) {    // If taxonomic rank is above domain (ie. Bacteria), color based on branch
-                domain = ranks[2];
-                d._color =  colorBranch(domain);    // Save color for consistency
-                return colorBranch(domain);
+            if (count >= colorRank) {    // Specify rank for color to be based on (colors branches)
+                const rank = ranks[colorRank];
+
+                // Save color and last updated rank level for consistency
+                d._color =  colorBranch(rank);
+                d._colorRank = count;
+                return colorBranch(rank);
             }
             return colorTaxonomicRank(count);
         })
-        .style("opacity", 0.7);
 
     nodeUpdate.append("text")
         .attr("class", "nodeLabel")
@@ -178,24 +200,20 @@ function update(source) {
         .text(d => d.id.substring(d.id.lastIndexOf("@") + 1));
     
     // Exit Notes
-    node.exit()
-        .attr("transform", d => "translate(" + d.parent.y + "," + d.parent.x + ")")
-        .style("fill-opacity", 0)
-        .remove();
+    node.exit().remove();
+
+    enableToolbar() // must be updated
 }
 
 function enableZoom() {
     // Enables zoom + pan, and zoom buttons on the toolbar
-    let { svg, ng } = display;
-    let zoom = d3.zoom()
-        .scaleExtent([0.4, 10])
-        .on("zoom", zoomed);
+    const { svg, ng } = display,
+          zoom = d3.zoom()
+            .scaleExtent([0.4, 10])
+            .on("zoom", zoomed);
 
     function zoomed() {
-        let transform = d3.event.transform;
-
-        // This type of zoom integrates well with the collapse-node feature
-        // ng.attr('transform', transform);
+        const transform = d3.event.transform;
 
         // scale nodes
         ng.selectAll(".node").attr("transform", d => {
@@ -214,7 +232,7 @@ function enableZoom() {
     svg.call(zoom);
     
     // Setup zoom on toolbar:
-    let duration = 2000;
+    const duration = 2000;
     d3.select("#ZoomIn").on("click", () => {
         zoom.scaleBy(svg.transition().duration(duration), 1.3);
     })
