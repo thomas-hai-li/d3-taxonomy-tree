@@ -67,8 +67,9 @@ function setup() {
         .attr("height", height)
         .style("background-color", "white")
         .style("border", "1px solid black");
-        
-    const ng = svg.append("g").attr("transform", "translate(150,50)");
+    
+    if (display.ng) { display.ng.remove(); } // Remove previous graph if it exists
+    const ng = svg.append("g").attr("transform", "translate(150,50)");  // Will contain the tree graph
 
     display = { svg, ng };
     return { width, height };
