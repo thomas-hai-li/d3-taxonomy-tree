@@ -68,8 +68,9 @@ function setup() {
         .style("background-color", "white")
         .style("border", "1px solid black");
     
-    if (display.ng) { display.ng.remove(); } // Remove previous graph if it exists
-    const ng = svg.append("g").attr("transform", "translate(150,50)");  // Will contain the tree graph
+    if (display.ng) { display.ng.remove(); } // Remove previous chart if it exists
+    const ng = svg.append("g").attr("transform", "translate(150,50)")  // Will contain the tree chart
+        .attr("id", "chart");
 
     display = { svg, ng };
     return { width, height };
@@ -278,5 +279,22 @@ function enableToolbar() {
         for (let i = 0; i < labels.length; i++) {
             labels[i].classList.toggle("hideElement");
         }
+    });
+
+    // Export buttons
+    d3.select("#ConvertSVG").on("click", () => {
+        if (!display.ng) {
+            alert("No chart to export!")
+        }
+
+        const svgData = document.querySelector("svg").outerHTML;
+        const svgBlob = new Blob([svgData], {type:"image/svg+xml;charset=utf-8"});
+        const svgUrl = URL.createObjectURL(svgBlob);
+        const downloadLink = document.createElement("a");
+        downloadLink.href = svgUrl;
+        downloadLink.download = "newesttree.svg";
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
     });
 }
