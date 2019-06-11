@@ -55,11 +55,11 @@ let ctrlMain = {
         // Generate tree (function) and root (structure)
         const { width, height } = this.getDim();
         const tree = d3.tree()
-            .size([height - 100, width - 500]);
+            .size([360, 500])
+            .separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
         const stratify = d3.stratify()
             .parentId(d => d.id.substring(0, d.id.lastIndexOf("@")));
-        const root = stratify(data)
-            .sort((a, b) => (a.height - b.height) || a.id.localeCompare(b.id));
+        const root = tree(stratify(data));
 
         model.hierarchical.tree = tree;
         model.hierarchical.root = root;
@@ -162,10 +162,14 @@ let viewTreeChart = {
             .style("border", "1px solid black");
 
         this.ng = this.svg.append("g")
-            .attr("transform", "translate(150,50)")
+            .attr("transform", "translate(" + (width / 2 + 40) + "," + (height / 2) + ")")
             .attr("id", "chart");
         
         this.drawLabels = true;
+    },
+    project: function(x, y) {
+        const angle = (x - 90) / 180 * Math.PI, radius = y;
+        return [radius * Math.cos(angle), radius * Math.sin(angle)];
     },
     render: function() {
         this.ng.selectAll("*").remove(); // reset graph
@@ -183,10 +187,10 @@ let viewTreeChart = {
         // Update and exit links
         link.merge(linkEnter)
             .attr("d", d => {
-                return "M" + d.y + "," + d.x                            // Move to coords (y,x), this is flipped to make the tree horizontal instead of vertical
-                    + "C" + (d.y + d.parent.y) / 2 + "," + d.x          // Draw a cubic Bézier curve
-                    + " " + (d.y + d.parent.y) / 2 + "," + d.parent.x
-                    + " " + d.parent.y + "," + d.parent.x;
+                return "M" + this.project(d.x, d.y)  
+                    + "C" + this.project(d.x, (d.y + d.parent.y) / 2)
+                    + " " + this.project(d.parent.x, (d.y + d.parent.y) / 2)
+                    + " " + this.project(d.parent.x, d.parent.y);
             })
             .attr("stroke-opacity", 0.4);
     
@@ -242,7 +246,7 @@ let viewTreeChart = {
     
         // Update nodes
         let nodeUpdate = node.merge(nodeEnter)
-            .attr("transform", d => "translate(" + d.y + "," + d.x + ")")
+            .attr("transform", d => "translate(" + this.project(d.x, d.y) + ")")
             .classed("node-collapsed", d => d._children);
     
         const colorTaxonomicRank = d3.scaleOrdinal()
@@ -271,9 +275,10 @@ let viewTreeChart = {
         
         nodeUpdate.append("text")
             .attr("class", "nodeLabel")
-            .attr("dy", 4)
-            .attr("x", d => d.depth === 0 ? -105 : 6)
-            .style("text-anchor", "start")
+            .attr("dy", ".31em")
+            .attr("x", d => d.x < 180 === !d.children ? 6 : -6)
+            .attr("transform", d => "rotate(" + (d.x < 180 ? d.x - 90 : d.x + 90) + ")")
+            .style("text-anchor", d => d.x < 180 === !d.children ? "start" : "end")
             .style("font", "sans-serif")
             .style("font-size", 10)
             .style("fill", "black")
@@ -301,15 +306,15 @@ let viewZoom = {
 
             // scale nodes
             ng.selectAll(".node").attr("transform", d => {
-                return "translate(" + transform.applyX(d.y) + "," + transform.applyY(d.x) + ")";
+                return "translate(" + transform.apply(viewTreeChart.project(d.x, d.y)) + ")";
             });
 
             // scale links
             ng.selectAll(".link").attr("d", d => {
-                return "M" + transform.applyX(d.y) + "," + transform.applyY(d.x)
-                    + "C" + (transform.applyX(d.y) + transform.applyX(d.parent.y)) / 2 + "," + transform.applyY(d.x)
-                    + " " + (transform.applyX(d.y) + transform.applyX(d.parent.y)) / 2 + "," + transform.applyY(d.parent.x)
-                    + " " + transform.applyX(d.parent.y) + "," + transform.applyY(d.parent.x);
+                return "M" + transform.apply(viewTreeChart.project(d.x, d.y))
+                    + "C" + transform.apply(viewTreeChart.project(d.x, (d.y + d.parent.y) / 2))
+                    + " " + transform.apply(viewTreeChart.project(d.parent.x, (d.y + d.parent.y) / 2))
+                    + " " + transform.apply(viewTreeChart.project(d.parent.x, d.parent.y));
             });
         }
         this.svg.call(this.zoom);
