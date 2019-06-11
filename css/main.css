@@ -8,13 +8,13 @@ h1 {
     background-color: steelblue;
 }
 
-.mainView {
+.main-view {
     display: flex;
 }
 
 /* TOOLBAR */
 
-#Toolbar {
+#toolbar {
     position: absolute;
     background-color: lightgray;
 }
@@ -38,10 +38,6 @@ input[type=file]{
 }
 
 /* DISPLAY */
-
-.hideElement {
-    display: none;
-}
 
 .link {
     stroke: #6e6e6e;
@@ -78,7 +74,7 @@ input[type=file]{
     position: absolute;
     text-align: center;
     width: auto;
-    height: 15px;
+    height: auto;
     padding: 2px;
     font: 12px sans-serif;
     background: lightsteelblue;
