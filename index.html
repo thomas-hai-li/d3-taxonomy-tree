@@ -12,30 +12,33 @@
     <h1>Interactive Visualization: Tree Chart</h1>
     <div class="main-view">
         <div id="toolbar">
-            <div id="upload-tool">
+            <div class="tool">
                 <h3>Upload</h3>
-                <input type="file" id="file-upload">
+                <button id="load-sample-1">Sample 1</button>
+                <button id="load-sample-2">Sample 2</button>
+                <input type="file" id="file-upload" style="display: none;" />
+                <input type="button" value="Browse..." onclick="document.getElementById('file-upload').click();" />
             </div>
-            <div id="export-tool">
+            <div class="tool">
                 <h3>Export</h3>
                 <button id="convert-svg">SVG</button>
             </div>
-            <div id="toggle-tool">
+            <div class="tool">
                 <h3>Toggle</h3>
                 <button id="toggle-node-labels">Labels</button>
                 <button id="toggle-node-circles">Node Size</button>
             </div>
-            <div id="zoom-tool">
+            <div class="tool">
                 <h3>Zoom</h3>
                 <button id="zoom-in">+</button>
                 <button id="zoom-out">-</button>
             </div>
-            <div id="font-tool">
+            <div class="tool">
                 <h3>Font</h3>
                 <button id="font-up">+</button>
                 <button id="font-down">-</button>
             </div>
-            <div id="color-tool">
+            <div class="tool">
                 <h3>Color</h3>
                 <input type="range" id="color-slider" name="color-slider" value="2" min="2" max="8" step="1" disabled>
                 <label for="color-slider" id="color-rank"></label>
@@ -49,5 +52,6 @@
 <div class="tooltip"></div>
 </body>
 <script src="js/d3.js"></script>
-<script src="js/app.js"></script>
+<script type="text/javascript" src="js/view-tree.js"></script>
+<script type="text/javascript" src="js/main.js"></script>
 </html>

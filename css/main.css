@@ -25,6 +25,10 @@ h3 {
     width: 60px;
 }
 
+.tool {
+    padding-right: 20px
+}
+
 .onView {
     opacity: 0.5;
     
