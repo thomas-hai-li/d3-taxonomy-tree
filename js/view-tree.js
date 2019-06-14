@@ -6,7 +6,8 @@ let viewTreeChart = {
             .attr("width", width)
             .attr("height", height)
             .style("background-color", "white")
-            .style("border", "1px solid black");
+            .style("border", "1px solid black")
+            .on("contextmenu", () => d3.event.preventDefault());
 
         this.ng = this.svg.append("g")
             .attr("transform", "translate(150,50)")
@@ -43,9 +44,67 @@ let viewTreeChart = {
         const node = this.ng.selectAll("g.node")
             .data(root.descendants());
         
-        const tooltip = d3.select(".tooltip"),
+        const tooltip = d3.select(".tooltip"),  // Set up tooltip and context menu
             tooltipDuration = 500;
-        
+
+        const menu = [
+            {
+                title: "View MS Quantities",
+                action: function(elm, d, i) {
+
+                    d3.selectAll(".pop-up").remove();
+                    const popup = d3.selectAll(".pop-up").data([1]) // Rework  by appending in main SVG
+                        .enter()
+                        .append("svg")
+                        .attr("class", "pop-up");
+                    
+                    const chart = popup.append("g")
+                        .attr("transform", "translate(100,100)");
+
+                    let data;
+                    for (key in d.data) {
+                        if (key.match(/;/)) {
+                            data = d.data[key].split(";");
+                            break;
+                        }
+                    }
+
+                    if (!data) {
+                        alert("No additional MS quantities for this dataset");
+                        return;
+                    }
+                    
+                    const color = d3.scaleOrdinal(d3.schemeAccent);
+
+                    // Get the chart generator
+                    const pie = d3.pie()
+                        .value((d) => d.value );
+                    const data_ready = pie(d3.entries(data));
+                    const radius = 50;
+
+                    // Draw chart
+                    chart.selectAll("whatever")
+                        .data(data_ready)
+                        .enter()
+                        .append("path")
+                        .attr("d", d3.arc()
+                            .innerRadius(100)         // This is the size of the donut hole
+                            .outerRadius(radius)
+                        )
+                        .attr("fill", function(d){ return(color(d.data.key)) })
+                        .attr("stroke", "black")
+                        .style("stroke-width", "2px")
+                        .style("opacity", 0.7)
+                    
+                    // Display the pop up window
+                    d3.select(".pop-up")
+                        .style("left", (d3.event.pageX - 2) + "px")
+                        .style("top", (d3.event.pageY - 2) + "px")
+                        .style("display", "block");
+                }
+            }
+        ];
+
         const nodeEnter = node.enter().append("g")
             .classed("node", true)
             .on("mouseover", function(d) {
@@ -85,7 +144,8 @@ let viewTreeChart = {
                     .style("opacity", 0);
                 
                 viewTreeChart.render();
-            });
+            })
+            .on("contextmenu", d3.contextMenu(menu));
     
         // Update nodes
         let nodeUpdate = node.merge(nodeEnter)
