@@ -18,7 +18,7 @@
     <nav class="navbar navbar-dark bg-dark flex-md-nowrap p-0 shadow">
         <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Visualization Dashboard</a>
         <button class="btn btn-dark"><i class="fas fa-info-circle"></i></button>
-        <select class="col-sm-2 custom-select">
+        <select id="chart-selection" class="col-sm-2 custom-select">
             <option selected>Select chart</option>
             <option value="1">Simple Tree</option>
             <option value="2">Radial Tree</option>
@@ -48,8 +48,8 @@
                     </div>
                     <label for="color-slider" id="color-rank" class="my-0">Rank by</label>
                     <input type="range" id="color-slider" class="custom-range" name="color-slider" value="2" min="2" max="8" step="1" disabled>
-                    <div id="mini-chart" class="sidebar-item mt-auto border">
-                        <svg></svg>
+                    <div class="sidebar-item mt-auto border">
+                        <svg id="mini-chart"></svg>
                     </div>
                 </div>
             </div>
@@ -64,8 +64,8 @@
                                 Export
                             </button>
                             <div class="dropdown-menu">
-                                <a href="" class="dropdown-item">PNG</a>
-                                <a href="" id="convert-svg" class="dropdown-item">SVG</a>
+                                <button id="convert-png" class="dropdown-item">PNG</button>
+                                <button id="convert-svg" class="dropdown-item">SVG</button>
                             </div>
                         </div>
                     </div>

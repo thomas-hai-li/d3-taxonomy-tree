@@ -52,15 +52,14 @@ let viewTreeChart = {
             {
                 title: "View MS Quantities",
                 action: function(elm, d, i) {
+                    const svg = d3.select("#mini-chart");
+                    svg.select("g").remove();
 
-                    d3.selectAll(".pop-up").remove();
-                    const popup = d3.selectAll(".pop-up").data([1]) // Rework  by appending in main SVG
-                        .enter()
-                        .append("svg")
-                        .attr("class", "pop-up");
-                    
-                    const chart = popup.append("g")
-                        .attr("transform", "translate(100,100)");
+                    const width = parseFloat(svg.style("width")),
+                          height = parseFloat(svg.style("height"));
+                                        
+                    const chart = d3.select("#mini-chart").append("g")
+                        .attr("transform", `translate(${width / 2}, ${height / 2})`);
 
                     let data;
                     for (key in d.data) {
@@ -81,7 +80,7 @@ let viewTreeChart = {
                     const pie = d3.pie()
                         .value((d) => d.value );
                     const data_ready = pie(d3.entries(data));
-                    const radius = 50;
+                    const radius = (height / 2) - 10;
 
                     // Draw chart
                     chart.selectAll("whatever")
@@ -89,19 +88,13 @@ let viewTreeChart = {
                         .enter()
                         .append("path")
                         .attr("d", d3.arc()
-                            .innerRadius(100)         // This is the size of the donut hole
+                            .innerRadius(radius * 0.75)         // This is the size of the donut hole
                             .outerRadius(radius)
                         )
                         .attr("fill", function(d){ return(color(d.data.key)) })
                         .attr("stroke", "black")
                         .style("stroke-width", "2px")
                         .style("opacity", 0.7)
-                    
-                    // Display the pop up window
-                    d3.select(".pop-up")
-                        .style("left", (d3.event.pageX - 2) + "px")
-                        .style("top", (d3.event.pageY - 2) + "px")
-                        .style("display", "block");
                 }
             }
         ];
