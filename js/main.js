@@ -72,6 +72,7 @@ let ctrlMain = {
         });
     },
     buildChart: function(data) {
+        // Accepts array of csv as data
         this.buildHierarchy(data);
         viewTreeChart.render();
         viewZoom.render();
@@ -113,7 +114,6 @@ let ctrlToolbar = {
                 document.body.removeChild(downloadLink);
             }
         });
-
         // Toggle buttons
         d3.select("#toggle-node-circles").on("click", () => {
             d3.selectAll(".node")
@@ -131,7 +131,6 @@ let ctrlToolbar = {
                 viewTreeChart.drawLabels = true;
             }
         });
-
         // Zoom buttons
         const duration = 2000;
         d3.select("#zoom-in").on("click", () => {
@@ -142,7 +141,6 @@ let ctrlToolbar = {
             viewZoom.zoom
                 .scaleBy(viewZoom.svg.transition().duration(duration), 1 / 1.3);
         });
-
         // Font buttons
         d3.select("#font-up").on("click", () => {
             let labels = d3.selectAll(".nodeLabel"),
@@ -158,7 +156,6 @@ let ctrlToolbar = {
                 labels.style("font-size", --fontSize + "px")
             }
         });
-
         // Color Slider
         const colorSlider = d3.select("#color-slider"),
             colorLabel = d3.select("#color-rank");
