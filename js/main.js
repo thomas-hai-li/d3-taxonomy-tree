@@ -1,6 +1,6 @@
 let model = {
     dim: {
-        width: window.innerWidth - 20,
+        width: window.innerWidth - 150,
         height: window.innerHeight - 100
     },
     hierarchical: {
@@ -87,15 +87,12 @@ let ctrlMain = {
 
 let ctrlToolbar = {
     init: function() {
-        d3.select("#toolbar")
-            .attr("class", "onView");
-
         // Export buttons
         d3.select("#convert-svg").on("click", () => {
             if (!viewTreeChart.ng) {
                 alert("No chart to export!")
             } else {
-                const svgData = document.querySelector("svg").outerHTML,
+                const svgData = document.querySelector("#chart-display").outerHTML,
                     svgBlob = new Blob([svgData], {type:"image/svg+xml;charset=utf-8"}),
                     svgUrl = URL.createObjectURL(svgBlob),
                     downloadLink = document.createElement("a");

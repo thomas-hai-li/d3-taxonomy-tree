@@ -36,7 +36,8 @@ let viewTreeChart = {
                     + " " + (d.y + d.parent.y) / 2 + "," + d.parent.x
                     + " " + d.parent.y + "," + d.parent.x;
             })
-            .attr("stroke-opacity", 0.4);
+            .attr("stroke-opacity", 0.4)
+            .attr("to")
     
         link.exit().remove();
         

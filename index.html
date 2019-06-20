@@ -4,57 +4,85 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Tree Layout</title>
+    <title>Viz Dashboard</title>
+    <!-- 3rd Party -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://kit.fontawesome.com/cacfa2197b.js"></script>
+    <!-- App -->
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/view-tree.css">
     <link rel="stylesheet" href="css/d3-context-menu.css">
 </head>
+
 <body>
-<div class="container">
-    <h1>Interactive Visualization: Tree Chart</h1>
-    <div class="main-view">
-        <div id="toolbar">
-            <div class="tool">
-                <h3>Upload</h3>
-                <button id="load-sample-1">Sample 1</button>
-                <button id="load-sample-2">Sample 2</button>
-                <input type="file" id="file-upload" style="display: none;" />
-                <input type="button" value="Browse..." onclick="document.getElementById('file-upload').click();" />
+    <nav class="navbar navbar-dark bg-dark flex-md-nowrap p-0 shadow">
+        <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Visualization Dashboard</a>
+        <button class="btn btn-dark"><i class="fas fa-info-circle"></i></button>
+        <select class="col-sm-2 custom-select">
+            <option selected>Select chart</option>
+            <option value="1">Simple Tree</option>
+            <option value="2">Radial Tree</option>
+            <option value="3">Treemap</option>
+        </select>
+    </nav>
+    <div class="container-fluid h-100">
+        <div class="row h-100">
+            <div class="col-lg-2 bg-light shadow">
+                <div class="sidebar py-3 d-flex flex-column h-100">
+                    <div class="sidebar-item">
+                        <label for="files" class="text-primary">Datasets</label>
+                        <select id="uploaded-files" class="form-control" size="15">
+                            <option id="load-sample-1">sample1.csv</option>
+                            <option id="load-sample-2">sample2.csv</option>
+                        </select>
+                    </div>
+                    <input type="file" id="file-upload" style="display: none;" multiple/>
+                    <button class="sidebar-item btn btn-sm btn-outline-primary btn-block" onclick="document.getElementById('file-upload').click();">Upload</button>
+                    <div id="toolbar" class="sidebar-item btn-group">
+                        <button class="btn btn-sm btn-outline-dark" id="zoom-in"><i class="fas fa-search-plus"></i></button>
+                        <button class="btn btn-sm btn-outline-dark" id="zoom-out"><i class="fas fa-search-minus"></i></button>
+                        <button class="btn btn-sm btn-outline-dark" id="font-up"><i class="fas fa-font"></i><sup>+</sup></button>
+                        <button class="btn btn-sm btn-outline-dark" id="font-down"><i class="fas fa-font"></i><sup>-</sup></button>
+                        <button class="btn btn-sm btn-outline-dark" id="toggle-node-circles"><i class="fas fa-genderless"></i></button>
+                        <button class="btn btn-sm btn-outline-dark" id="toggle-node-labels"><i class="fas fa-font"></i></button>
+                    </div>
+                    <label for="color-slider" id="color-rank" class="my-0">Rank by</label>
+                    <input type="range" id="color-slider" class="custom-range" name="color-slider" value="2" min="2" max="8" step="1" disabled>
+                    <div id="mini-chart" class="sidebar-item mt-auto border">
+                        <svg></svg>
+                    </div>
+                </div>
             </div>
-            <div class="tool">
-                <h3>Export</h3>
-                <button id="convert-svg">SVG</button>
+            <div class="col-lg-10">
+                <div id="main-view" class="p-2 h-100 d-flex flex-column justify-content-between">
+                    <div class="row chart border flex-fill my-1">
+                        <svg id="chart-display"></svg>
+                    </div>
+                    <div class="row">
+                        <div class="offset-sm-10 dropup btn-block">
+                            <button type="button" class="btn btn-sm btn-outline-success btn-block dropdown-toggle" data-toggle="dropdown">
+                                Export
+                            </button>
+                            <div class="dropdown-menu">
+                                <a href="" class="dropdown-item">PNG</a>
+                                <a href="" id="convert-svg" class="dropdown-item">SVG</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="tool">
-                <h3>Toggle</h3>
-                <button id="toggle-node-labels">Labels</button>
-                <button id="toggle-node-circles">Node Size</button>
-            </div>
-            <div class="tool">
-                <h3>Zoom</h3>
-                <button id="zoom-in">+</button>
-                <button id="zoom-out">-</button>
-            </div>
-            <div class="tool">
-                <h3>Font</h3>
-                <button id="font-up">+</button>
-                <button id="font-down">-</button>
-            </div>
-            <div class="tool">
-                <h3>Color</h3>
-                <input type="range" id="color-slider" name="color-slider" value="2" min="2" max="8" step="1" disabled>
-                <label for="color-slider" id="color-rank"></label>
-            </div>
-        </div>
-        <div>
-            <svg id="chart-display"></svg>
         </div>
     </div>
-</div>
-<div class="tooltip"></div>
+    <div class="tooltip"></div>
+
+    <!-- BS4 -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <!-- D3 App -->
+    <script src="js/d3.js"></script>
+    <script type="text/javascript" src="js/d3-context-menu.js"></script>
+    <script type="text/javascript" src="js/view-tree.js"></script>
+    <script type="text/javascript" src="js/main.js"></script>
 </body>
-<script src="js/d3.js"></script>
-<script type="text/javascript" src="js/d3-context-menu.js"></script>
-<script type="text/javascript" src="js/view-tree.js"></script>
-<script type="text/javascript" src="js/main.js"></script>
 </html>
