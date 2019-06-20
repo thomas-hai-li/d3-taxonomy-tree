@@ -34,39 +34,48 @@ let ctrlMain = {
             upload = document.querySelector("#file-upload");
         
         sample1.addEventListener("click", () => {
-            d3.csv("csv/big_sample.csv").then(d => ctrlMain.fileHandler(d));
+            d3.csv("csv/sample1.csv").then(d => ctrlMain.buildChart(d));
         });
         sample2.addEventListener("click", () => {
-            d3.csv("csv/small_sample.csv").then(d => ctrlMain.fileHandler(d));
+            d3.csv("csv/sample2.csv").then(d => ctrlMain.buildChart(d));
         });
 
         upload.addEventListener("change", (e) => {
-            const file = e.target.files[0];
-            ctrlMain.fileHandler(file);
+            const files = e.target.files,
+                fileTypeCSV = /csv.*/;
+            let hasInvalid = false;
+
+            for(let i = 0; i < files.length; i++) {
+                if (files[i].name.match(fileTypeCSV)) {
+                    // Add to dataset view
+                    const file = files[i];
+                    viewDatasets.addFile(file.name);
+                    // Bind data to element
+                    const elem = document.getElementById(file.name);
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        sessionStorage[file.name] = reader.result;
+                        elem.addEventListener("click", () => {
+                            const data = d3.csvParse(sessionStorage[file.name]);    // array of csv
+                            this.buildChart(data);
+                        });
+                    }
+                    reader.readAsText(file);
+                }
+                else {
+                    hasInvalid = true;
+                }
+            }
+            if (hasInvalid) {
+                // Show modal ("One or more files is not in the correct format (.csv)")
+            }
         });
     },
-    fileHandler: function(file) {
-        fileTypeCSV = /csv.*/;
-
-        if (file.length) {  // for sample data (rework later)
-            this.buildHierarchy(file);
-            viewTreeChart.render();
-            viewZoom.render();
-            ctrlToolbar.init();
-        } else if (!file.name.match(fileTypeCSV)) { // for uploaded files
-            alert("File format not supported!");
-        } else {
-            const reader = new FileReader();
-            reader.readAsText(file);
-            reader.onload = () => {
-                data = reader.result;                   // string of csv
-                let parsedCSV = d3.csvParse(data);      // array of csv entries
-                this.buildHierarchy(parsedCSV);
-                viewTreeChart.render();
-                viewZoom.render();
-                ctrlToolbar.init();
-            }
-        }
+    buildChart: function(data) {
+        this.buildHierarchy(data);
+        viewTreeChart.render();
+        viewZoom.render();
+        ctrlToolbar.init();
     },
     buildHierarchy: function(data) {
         // Generate tree (function) and root (structure)
