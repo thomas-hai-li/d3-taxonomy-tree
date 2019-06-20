@@ -11,11 +11,17 @@ let viewTreeChart = {
 
         this.ng = this.svg.append("g")
             .attr("transform", "translate(150,50)")
+            // .attr("transform", "translate(" + (width / 2 + 40) + "," + (height / 2) + ")")   radial tree
             .attr("id", "chart");
         
         this.drawLabels = true;
     },
-    render: function() {
+    project: function(x, y) {
+        // For radial tree
+        const angle = (x - 90) / 180 * Math.PI, radius = y;
+        return [radius * Math.cos(angle), radius * Math.sin(angle)];
+    },
+    render: function(type) {
         this.ng.selectAll("*").remove(); // reset graph
         const {tree, root, color} = ctrlMain.getHierarchical();
 
@@ -31,13 +37,19 @@ let viewTreeChart = {
         // Update and exit links
         link.merge(linkEnter)
             .attr("d", d => {
-                return "M" + d.y + "," + d.x                            // Move to coords (y,x), this is flipped to make the tree horizontal instead of vertical
-                    + "C" + (d.y + d.parent.y) / 2 + "," + d.x          // Draw a cubic Bézier curve
-                    + " " + (d.y + d.parent.y) / 2 + "," + d.parent.x
-                    + " " + d.parent.y + "," + d.parent.x;
+                if (type === "simple-tree" || type === "default") {
+                    return "M" + d.y + "," + d.x                            // Move to coords (y,x), this is flipped to make the tree horizontal instead of vertical
+                        + "C" + (d.y + d.parent.y) / 2 + "," + d.x          // Draw a cubic Bézier curve
+                        + " " + (d.y + d.parent.y) / 2 + "," + d.parent.x
+                        + " " + d.parent.y + "," + d.parent.x;
+                }
+                // Radial tree
+                return "M" + this.project(d.x, d.y)  
+                + "C" + this.project(d.x, (d.y + d.parent.y) / 2)
+                + " " + this.project(d.parent.x, (d.y + d.parent.y) / 2)
+                + " " + this.project(d.parent.x, d.parent.y);
             })
             .attr("stroke-opacity", 0.4)
-            .attr("to")
     
         link.exit().remove();
         
@@ -143,8 +155,12 @@ let viewTreeChart = {
     
         // Update nodes
         let nodeUpdate = node.merge(nodeEnter)
-            .attr("transform", d => "translate(" + d.y + "," + d.x + ")")
-            .classed("node-collapsed", d => d._children);
+            .classed("node-collapsed", d => d._children)
+        if (type === "simple-tree" || type === "default") {
+            nodeUpdate.attr("transform", d => "translate(" + d.y + "," + d.x + ")")
+        } else {
+            nodeUpdate.attr("transform", d => "translate(" + this.project(d.x, d.y) + ")") // radial tree
+        }
     
         const colorTaxonomicRank = d3.scaleOrdinal()
             .domain(d3.range(0, 10))
@@ -170,17 +186,24 @@ let viewTreeChart = {
                 return colorTaxonomicRank(count);
             });
         
-        nodeUpdate.append("text")
-            .attr("class", "nodeLabel")
-            .attr("dy", 4)
-            .attr("x", d => d.depth === 0 ? -105 : 6)
-            .style("text-anchor", "start")
-            .style("font", "sans-serif")
-            .style("font-size", 10)
-            .style("fill", "black")
-            .style("display", this.drawLabels ? "block" : "none")
-            .text(d => d.id.substring(d.id.lastIndexOf("@") + 1));
+        // nodeUpdate.append("text")
+        //     .attr("class", "nodeLabel")
+        //     .style("font", "sans-serif")
+        //     .style("font-size", 10)
+        //     .style("fill", "black")
+        //     .style("display", this.drawLabels ? "block" : "none")
+        //     .text(d => d.id.substring(d.id.lastIndexOf("@") + 1));
         
+        // if (type === "simple-tree" || type === "default") {
+        //     nodeUpdate.attr("dy", 4)
+        //         .attr("x", d => d.depth === 0 ? -105 : 6)
+        //         .style("text-anchor", "start")
+        // } else {
+        //     nodeUpdate.attr("dy", ".31em")
+        //         .attr("x", d => d.x < 180 === !d.children ? 6 : -6)
+        //         .attr("transform", d => "rotate(" + (d.x < 180 ? d.x - 90 : d.x + 90) + ")")
+        //         .style("text-anchor", d => d.x < 180 === !d.children ? "start" : "end")
+        // }
         // Exit Notes
         node.exit().remove();
     }

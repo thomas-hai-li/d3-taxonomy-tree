@@ -3,6 +3,8 @@ let model = {
         width: window.innerWidth - 150,
         height: window.innerHeight - 100
     },
+    chartType: "default",
+    currentData: null,
     hierarchical: {
         tree: null,
         root: null,
@@ -27,17 +29,20 @@ let ctrlMain = {
         viewTreeChart.init();
         viewZoom.init();
         this.onFileChange();
+        this.onChartTypeChange();
     },
     onFileChange: function() {
-        const sample1 = document.querySelector("#load-sample-1"),
-            sample2 = document.querySelector("#load-sample-2"),
+        const sampleData = document.querySelectorAll(".sample-data"),
             upload = document.querySelector("#file-upload");
         
-        sample1.addEventListener("click", () => {
-            d3.csv("csv/sample1.csv").then(d => ctrlMain.buildChart(d));
-        });
-        sample2.addEventListener("click", () => {
-            d3.csv("csv/sample2.csv").then(d => ctrlMain.buildChart(d));
+        sampleData.forEach((sample) => {
+            sample.addEventListener("click", () => {
+                const fileName = sample.textContent;
+                this.setCurrentData(fileName);
+                d3.csv(`csv/${fileName}`).then(d => {
+                    sessionStorage[fileName] = d;       // store as string, not array
+                    ctrlMain.buildChart(d)});
+            });
         });
 
         upload.addEventListener("change", (e) => {
@@ -56,7 +61,8 @@ let ctrlMain = {
                     reader.onload = () => {
                         sessionStorage[file.name] = reader.result;
                         elem.addEventListener("click", () => {
-                            const data = d3.csvParse(sessionStorage[file.name]);    // array of csv
+                            this.setCurrentData(file.name);
+                            const data = d3.csvParse(sessionStorage[file.name]);    // array of objects
                             this.buildChart(data);
                         });
                     }
@@ -71,18 +77,34 @@ let ctrlMain = {
             }
         });
     },
+    onChartTypeChange: function() {
+        const chartSelection = document.getElementById("chart-selection");
+        chartSelection.addEventListener("change", () => {
+            const type = chartSelection.value;
+            const currentData = this.getCurrentData();
+            this.setChartType(type);
+            if (currentData) {
+                const data = d3.csvParse(sessionStorage[currentData]);
+                this.buildChart(data);
+            }
+        });
+    },
     buildChart: function(data) {
-        // Accepts array of csv as data
-        this.buildHierarchy(data);
-        viewTreeChart.render();
-        viewZoom.render();
-        ctrlToolbar.init();
+        // Accepts array of objects (csv) as data
+        const type = this.getChartType();
+        if (type === "default" || type === "simple-tree" || type === "radial-tree") {
+            this.buildHierarchy(data);
+            viewTreeChart.render(type);
+            viewZoom.render(type);
+            ctrlToolbar.init();
+        }
     },
     buildHierarchy: function(data) {
         // Generate tree (function) and root (structure)
         const { width, height } = this.getDim();
         const tree = d3.tree()
-            .size([height - 100, width - 500]);
+            .size([height - 100, width - 500])
+            .separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
         const stratify = d3.stratify()
             .parentId(d => d.id.substring(0, d.id.lastIndexOf("@")));
         const root = stratify(data)
@@ -91,6 +113,10 @@ let ctrlMain = {
         model.hierarchical.tree = tree;
         model.hierarchical.root = root;
     },
+    setCurrentData: (data) => model.currentData = data,
+    getCurrentData: () => model.currentData,
+    setChartType: (type) => model.chartType = type,
+    getChartType: () => model.chartType,
     getDim: () => model.dim,
     getHierarchical: () => model.hierarchical
 }
@@ -166,7 +192,7 @@ let ctrlToolbar = {
             
             color.currentRank = parseInt(colorSlider.valueOf()._groups[0][0].value);
             colorLabel.text(color.ranks[color.currentRank]);
-            viewTreeChart.render();
+            viewTreeChart.render(ctrlMain.getChartType());
         });
     }
 }
@@ -176,7 +202,7 @@ let viewZoom = {
         this.svg = d3.select("#chart-display");
         this.ng = d3.select("#chart");
     },
-    render: function() {
+    render: function(type) {
         this.zoom = d3.zoom()
                 .scaleExtent([0.4, 10])
                 .on("zoom", zoomed),
@@ -187,11 +213,19 @@ let viewZoom = {
 
             // scale nodes
             ng.selectAll(".node").attr("transform", d => {
+                if (type === "radial-tree") {
+                    return "translate(" + transform.apply(viewTreeChart.project(d.x, d.y)) + ")";
+                }
                 return "translate(" + transform.applyX(d.y) + "," + transform.applyY(d.x) + ")";
             });
-
             // scale links
             ng.selectAll(".link").attr("d", d => {
+                if (type === "radial-tree") {
+                    return "M" + transform.apply(viewTreeChart.project(d.x, d.y))
+                    + "C" + transform.apply(viewTreeChart.project(d.x, (d.y + d.parent.y) / 2))
+                    + " " + transform.apply(viewTreeChart.project(d.parent.x, (d.y + d.parent.y) / 2))
+                    + " " + transform.apply(viewTreeChart.project(d.parent.x, d.parent.y));
+                }
                 return "M" + transform.applyX(d.y) + "," + transform.applyY(d.x)
                     + "C" + (transform.applyX(d.y) + transform.applyX(d.parent.y)) / 2 + "," + transform.applyY(d.x)
                     + " " + (transform.applyX(d.y) + transform.applyX(d.parent.y)) / 2 + "," + transform.applyY(d.parent.x)

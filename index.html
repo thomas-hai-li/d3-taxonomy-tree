@@ -19,7 +19,7 @@
         <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Visualization Dashboard</a>
         <button class="btn btn-dark"><i class="fas fa-info-circle"></i></button>
         <select id="chart-selection" class="col-sm-2 custom-select">
-            <option value="not-selected">Select chart</option>
+            <option value="default">Select chart</option>
             <option value="simple-tree">Simple Tree</option>
             <option value="radial-tree">Radial Tree</option>
             <option value="treemap">Treemap</option>
@@ -32,8 +32,8 @@
                     <div class="sidebar-item">
                         <label for="files" class="text-primary">Datasets</label>
                         <select id="uploaded-files" class="form-control" size="15">
-                            <option id="load-sample-1">sample1.csv</option>
-                            <option id="load-sample-2">sample2.csv</option>
+                            <option class="sample-data"">sample1.csv</option>
+                            <option class="sample-data"">sample2.csv</option>
                         </select>
                     </div>
                     <input type="file" id="file-upload" style="display: none;" multiple/>
