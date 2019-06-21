@@ -103,7 +103,7 @@ let ctrlMain = {
         // Generate tree (function) and root (structure)
         const { width, height } = this.getDim();
         const tree = d3.tree()
-            .size([height - 100, width - 500])
+            .size([360, 500])
             .separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
         const stratify = d3.stratify()
             .parentId(d => d.id.substring(0, d.id.lastIndexOf("@")));
@@ -128,8 +128,19 @@ let ctrlToolbar = {
             if (!viewTreeChart.ng) {
                 alert("No chart to export!")
             } else {
-                const svgData = document.querySelector("#chart-display").outerHTML,
-                    svgBlob = new Blob([svgData], {type:"image/svg+xml;charset=utf-8"}),
+                // Really hacky, pls rework
+                let svgData = document.querySelector("#chart-display").outerHTML.replace("</svg>", "<style>"),
+                    sheets = document.styleSheets,
+                    style;
+                for (let i = 0; i < sheets.length; i++) {
+                    if (sheets[i].href.match("charts.css")) {style = sheets[i].cssRules || sheet[i].rules;}
+                }
+                for (let i = 0; i < style.length; i++) {
+                    svgData += style[i].cssText;
+                }
+                svgData += "</style></svg>";
+                
+                let svgBlob = new Blob([svgData], {type:"image/svg+xml;charset=utf-8"}),
                     svgUrl = URL.createObjectURL(svgBlob),
                     downloadLink = document.createElement("a");
         

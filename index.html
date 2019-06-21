@@ -10,7 +10,7 @@
     <script src="https://kit.fontawesome.com/cacfa2197b.js"></script>
     <!-- App -->
     <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/view-tree.css">
+    <link rel="stylesheet" href="css/charts.css">
     <link rel="stylesheet" href="css/d3-context-menu.css">
 </head>
 
@@ -49,14 +49,14 @@
                     <label for="color-slider" id="color-rank" class="my-0">Rank by</label>
                     <input type="range" id="color-slider" class="custom-range" name="color-slider" value="2" min="2" max="8" step="1" disabled>
                     <div class="sidebar-item mt-auto border">
-                        <svg id="mini-chart"></svg>
+                        <svg id="mini-chart" xmlns="http://www.w3.org/2000/svg"></svg>
                     </div>
                 </div>
             </div>
             <div class="col-lg-10">
                 <div id="main-view" class="p-2 h-100 d-flex flex-column justify-content-between">
                     <div class="row chart border flex-fill my-1">
-                        <svg id="chart-display"></svg>
+                        <svg id="chart-display" xmlns="http://www.w3.org/2000/svg"></svg>
                     </div>
                     <div class="row">
                         <div class="offset-sm-10 dropup btn-block">

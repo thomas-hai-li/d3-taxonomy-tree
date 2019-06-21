@@ -37,17 +37,17 @@ let viewTreeChart = {
         // Update and exit links
         link.merge(linkEnter)
             .attr("d", d => {
-                if (type === "simple-tree" || type === "default") {
-                    return "M" + d.y + "," + d.x                            // Move to coords (y,x), this is flipped to make the tree horizontal instead of vertical
-                        + "C" + (d.y + d.parent.y) / 2 + "," + d.x          // Draw a cubic Bézier curve
-                        + " " + (d.y + d.parent.y) / 2 + "," + d.parent.x
-                        + " " + d.parent.y + "," + d.parent.x;
+                if (type === "radial-tree") {
+                    return "M" + this.project(d.x, d.y)  
+                    + "C" + this.project(d.x, (d.y + d.parent.y) / 2)
+                    + " " + this.project(d.parent.x, (d.y + d.parent.y) / 2)
+                    + " " + this.project(d.parent.x, d.parent.y);
                 }
-                // Radial tree
-                return "M" + this.project(d.x, d.y)  
-                + "C" + this.project(d.x, (d.y + d.parent.y) / 2)
-                + " " + this.project(d.parent.x, (d.y + d.parent.y) / 2)
-                + " " + this.project(d.parent.x, d.parent.y);
+                // Simple-tree:
+                return "M" + d.y + "," + d.x                            // Move to coords (y,x), this is flipped to make the tree horizontal instead of vertical
+                    + "C" + (d.y + d.parent.y) / 2 + "," + d.x
+                    + " " + (d.y + d.parent.y) / 2 + "," + d.parent.x
+                    + " " + d.parent.y + "," + d.parent.x;
             })
             .attr("stroke-opacity", 0.4)
     
@@ -149,17 +149,17 @@ let viewTreeChart = {
                     .duration(tooltipDuration)
                     .style("opacity", 0);
                 
-                viewTreeChart.render();
+                viewTreeChart.render(ctrlMain.getChartType());
             })
             .on("contextmenu", d3.contextMenu(menu));
     
         // Update nodes
         let nodeUpdate = node.merge(nodeEnter)
             .classed("node-collapsed", d => d._children)
-        if (type === "simple-tree" || type === "default") {
-            nodeUpdate.attr("transform", d => "translate(" + d.y + "," + d.x + ")")
+        if (type === "radial-tree") {
+            nodeUpdate.attr("transform", d => "translate(" + this.project(d.x, d.y) + ")")
         } else {
-            nodeUpdate.attr("transform", d => "translate(" + this.project(d.x, d.y) + ")") // radial tree
+            nodeUpdate.attr("transform", d => "translate(" + d.y + "," + d.x + ")") // simple tree
         }
     
         const colorTaxonomicRank = d3.scaleOrdinal()
@@ -186,24 +186,26 @@ let viewTreeChart = {
                 return colorTaxonomicRank(count);
             });
         
-        // nodeUpdate.append("text")
-        //     .attr("class", "nodeLabel")
-        //     .style("font", "sans-serif")
-        //     .style("font-size", 10)
-        //     .style("fill", "black")
-        //     .style("display", this.drawLabels ? "block" : "none")
-        //     .text(d => d.id.substring(d.id.lastIndexOf("@") + 1));
+        nodeUpdate.append("text")
+            .attr("class", "nodeLabel")
+            .style("font", "sans-serif")
+            .style("font-size", 10)
+            .style("fill", "black")
+            .style("display", this.drawLabels ? "block" : "none")
+            .text(d => d.id.substring(d.id.lastIndexOf("@") + 1));
         
-        // if (type === "simple-tree" || type === "default") {
-        //     nodeUpdate.attr("dy", 4)
-        //         .attr("x", d => d.depth === 0 ? -105 : 6)
-        //         .style("text-anchor", "start")
-        // } else {
-        //     nodeUpdate.attr("dy", ".31em")
-        //         .attr("x", d => d.x < 180 === !d.children ? 6 : -6)
-        //         .attr("transform", d => "rotate(" + (d.x < 180 ? d.x - 90 : d.x + 90) + ")")
-        //         .style("text-anchor", d => d.x < 180 === !d.children ? "start" : "end")
-        // }
+        if (type === "radial-tree") {
+            nodeUpdate.selectAll("text")
+                .attr("dy", ".31em")
+                .attr("x", d => d.x < 180 === !d.children ? 6 : -6)
+                .attr("transform", d => "rotate(" + (d.x < 180 ? d.x - 90 : d.x + 90) + ")")
+                .style("text-anchor", d => d.x < 180 === !d.children ? "start" : "end");
+        } else {
+            nodeUpdate.selectAll("text")
+                .attr("dy", 4)
+                .attr("x", d => d.depth === 0 ? -90 : 6)
+                .style("text-anchor", "start");
+        }
         // Exit Notes
         node.exit().remove();
     }
