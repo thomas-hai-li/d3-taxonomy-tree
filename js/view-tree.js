@@ -1,29 +1,31 @@
 let viewTreeChart = {
     init: function() {
-        const {width, height} = ctrlMain.getDim();
-
         this.svg = d3.select("#chart-display")
-            .attr("width", width)
-            .attr("height", height)
             .style("background-color", "white")
             .style("border", "1px solid black")
             .on("contextmenu", () => d3.event.preventDefault());
 
         this.ng = this.svg.append("g")
-            .attr("transform", "translate(150,50)")
-            // .attr("transform", "translate(" + (width / 2 + 40) + "," + (height / 2) + ")")   radial tree
             .attr("id", "chart");
         
         this.drawLabels = true;
     },
     project: function(x, y) {
-        // For radial tree
+        // calculate node and link position For radial tree
         const angle = (x - 90) / 180 * Math.PI, radius = y;
         return [radius * Math.cos(angle), radius * Math.sin(angle)];
     },
     render: function(type) {
         this.ng.selectAll("*").remove(); // reset graph
-        const {tree, root, color} = ctrlMain.getHierarchical();
+        const {tree, root, color} = ctrlMain.getHierarchical(),
+              {width, height} = ctrlMain.getDim();
+
+        if (type === "radial-tree") {
+            this.ng.attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ")");
+        } else {
+            this.ng.attr("transform", "translate(150,50)");
+            tree.size([height - 100, width - 500]);
+        }
 
         tree(root);
 

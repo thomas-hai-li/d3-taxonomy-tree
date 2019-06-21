@@ -1,7 +1,7 @@
 let model = {
     dim: {
-        width: window.innerWidth - 150,
-        height: window.innerHeight - 100
+        width: parseInt(d3.select("#chart-display").style("width")),
+        height: parseInt(d3.select("#chart-display").style("height"))
     },
     chartType: "default",
     currentData: null,
