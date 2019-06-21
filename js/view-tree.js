@@ -23,8 +23,8 @@ let viewTreeChart = {
         if (type === "radial-tree") {
             this.ng.attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ")");
         } else {
-            this.ng.attr("transform", "translate(150,50)");
-            tree.size([height - 100, width - 500]);
+            this.ng.attr("transform", `translate(${ width * 0.08 }, ${ height * 0.05 })`);
+            tree.size([height * 0.9, width * 0.8]);
         }
 
         tree(root);
