@@ -66,49 +66,61 @@ let viewTreeChart = {
             {
                 title: "View MS Quantities",
                 action: function(elm, d, i) {
-                    const svg = d3.select("#mini-chart");
-                    svg.select("g").remove();
-
-                    const width = parseFloat(svg.style("width")),
-                          height = parseFloat(svg.style("height"));
-                                        
-                    const chart = d3.select("#mini-chart").append("g")
-                        .attr("transform", `translate(${width / 2}, ${height / 2})`);
-
+                    // Search for intensity column
                     let data;
                     for (key in d.data) {
                         if (key.match(/;/)) {
                             data = d.data[key].split(";");
+                            data = data.map((e) => parseFloat(e));
                             break;
                         }
                     }
-
                     if (!data) {
                         alert("No additional MS quantities for this dataset");
                         return;
                     }
                     
-                    const color = d3.scaleOrdinal(d3.schemeAccent);
+                    // Reset chart:
+                    const svg = d3.select("#mini-chart");
+                    svg.selectAll("*").remove();
+                    const width = parseFloat(svg.style("width")),
+                          height = parseFloat(svg.style("height"));
+                    const margin = {
+                        x: width * 0.1,
+                        y: height * 0.1
+                    }
+                    const chart = d3.select("#mini-chart").append("g")
+                        .style("transform", `translate(${margin.x}px, ${margin.y}px)`);
 
-                    // Get the chart generator
-                    const pie = d3.pie()
-                        .value((d) => d.value );
-                    const data_ready = pie(d3.entries(data));
-                    const radius = (height / 2) - 10;
+                    // Set up scales
+                    const maxVal = d3.max(data);
+                    const xScale = d3.scaleLinear()
+                        .domain([0, maxVal])
+                        .range([0, width - 2 * margin.x]);
+                    const yScale = d3.scaleBand()
+                        .domain(data.map( (d,i) => i ))
+                        .range([0, height - 2 * margin.y])
+                        .padding(0.5);
+                    let xAxis = d3.axisBottom(xScale)
+                        .ticks(5);
+                    let yAxis = d3.axisLeft(yScale);
 
-                    // Draw chart
-                    chart.selectAll("whatever")
-                        .data(data_ready)
-                        .enter()
-                        .append("path")
-                        .attr("d", d3.arc()
-                            .innerRadius(radius * 0.75)         // This is the size of the donut hole
-                            .outerRadius(radius)
-                        )
-                        .attr("fill", function(d){ return(color(d.data.key)) })
-                        .attr("stroke", "black")
-                        .style("stroke-width", "2px")
-                        .style("opacity", 0.7)
+                    // Draw bar chart
+                    const bars = chart.selectAll(".bar").data(data);
+                    bars.enter().append("rect")
+                        .attr("class", "bar")
+                        .attr("height", yScale.bandwidth())
+                        .attr("y", (d,i) => yScale(i))
+                        .attr("width", (d) => xScale(d))
+                        .attr("fill", "#2a5599");
+                    
+                    // Draw axes
+                    svg.append("g")
+                        .style("transform", `translate(${margin.x}px,${height - margin.y}px)`)
+                        .call(xAxis);
+                    svg.append("g")
+                        .style("transform", `translate(${margin.x}px, ${margin.y}px)`)
+                        .call(yAxis);
                 }
             }
         ];
