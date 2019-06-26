@@ -64,7 +64,7 @@ let viewTreeChart = {
 
         const menu = [
             {
-                title: "View MS Quantities",
+                title: "View MS intensities",
                 action: function(elm, d, i) {
                     // Search for intensity column
                     let data;

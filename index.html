@@ -15,9 +15,10 @@
 </head>
 
 <body>
+    <!-- Top Navigation Bar -->
     <nav class="navbar navbar-dark bg-dark flex-md-nowrap p-0 shadow">
         <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Visualization Dashboard</a>
-        <button class="btn btn-dark"><i class="fas fa-info-circle"></i></button>
+        <button class="btn btn-dark" data-toggle="modal" data-target="#info-modal"><i class="fas fa-info-circle"></i></button>
         <select id="chart-selection" class="col-sm-2 custom-select">
             <option value="default">Select chart</option>
             <option value="simple-tree">Simple Tree</option>
@@ -25,8 +26,11 @@
             <option value="treemap">Treemap</option>
         </select>
     </nav>
+
+    <!-- Main view -->
     <div class="container-fluid h-100">
         <div class="row h-100">
+            <!-- Sidebar -->
             <div class="col-lg-2 bg-light shadow">
                 <div class="sidebar py-3 d-flex flex-column h-100">
                     <div class="sidebar-item">
@@ -43,8 +47,9 @@
                         <button class="btn btn-sm btn-outline-dark" id="zoom-out"><i class="fas fa-search-minus"></i></button>
                         <button class="btn btn-sm btn-outline-dark" id="font-up"><i class="fas fa-font"></i><sup>+</sup></button>
                         <button class="btn btn-sm btn-outline-dark" id="font-down"><i class="fas fa-font"></i><sup>-</sup></button>
-                        <button class="btn btn-sm btn-outline-dark" id="toggle-node-circles"><i class="fas fa-genderless"></i></button>
                         <button class="btn btn-sm btn-outline-dark" id="toggle-node-labels"><i class="fas fa-font"></i></button>
+                        <button class="btn btn-sm btn-outline-dark" id="toggle-node-circles"><i class="fas fa-genderless"></i></button>
+                        <button class="btn btn-sm btn-outline-primary" id="toggle-node-labels" data-toggle="modal" data-target="#tools-modal"><i class="fas fa-question"></i></button>
                     </div>
                     <label for="color-slider" id="color-rank" class="my-0">Rank by</label>
                     <input type="range" id="color-slider" class="custom-range" name="color-slider" value="2" min="2" max="8" step="1" disabled>
@@ -53,6 +58,7 @@
                     </div>
                 </div>
             </div>
+            <!-- Visualization window -->
             <div class="col-lg-10">
                 <div id="main-view" class="p-2 h-100 d-flex flex-column justify-content-between">
                     <div class="row chart border flex-fill my-1">
@@ -74,6 +80,85 @@
         </div>
     </div>
     <div class="tooltip"></div>
+
+    <!-- Info Modal -->
+    <div class="modal fade" id="info-modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tips</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h6 class="text-primary">File format</h6>
+                    <p>Files should be of type csv (comma separated values) and obtained from iMetaLab's data processing module.</p>
+                    <h6 class="text-primary">Uploading Datasets</h6>
+                    <p>To quickly skim through datasets, you can select as many files as you'd like after
+                        pressing the upload button To visualize a dataset, simply select an item from the list.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tools Modal -->
+    <div class="modal fade" id="tools-modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tools</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>While visualizing a dataset, you may find some tools to be helpful for <span class="text-success">focusing</span> and
+                        <span class="text-primary">filtering</span> particular data points...
+                    </p>
+
+                    <h6 class="text-success mt-4">Focusing</h6>
+                    <p><i class="fas fa-genderless text-success"></i> View the average MS intensity for a data point by hovering.</p>
+                    <p><i class="fas fa-genderless text-success"></i> View individual MS intensities for a particular node by
+                        right-clicking on a data point. A chart will display on the bottom left.</p>
+
+                    <h6 class="text-primary">Filtering</h6>
+                    <p><i class="fas fa-genderless text-primary"></i> Collapse children nodes by clicking on a data point.</p>
+                    <p><i class="fas fa-genderless text-primary"></i> Toggle node size by using the toolbar.</p>
+                    
+                    <h6 class="text-dark mt-4">Utilities</h6>
+                    <p><i class="fas fa-search text-dark"></i> Zoom by scrolling on the graphics or by using the toolbar.</p>
+                    <p><i class="fas fa-font text-dark"></i> Toggle and resize labels by using the toolbar.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Warning Modal -->
+    <div class="modal fade" id="warning-modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Warning</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>One or more files did not match the correct format (.csv) and were not added to the list.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- BS4 -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

@@ -73,7 +73,7 @@ let ctrlMain = {
                 }
             }
             if (hasInvalid) {
-                // Show modal ("One or more files is not in the correct format (.csv)")
+                $("#warning-modal").modal()
             }
         });
     },
