@@ -41,6 +41,7 @@ let ctrlMain = {
                 this.setCurrentData(fileName);
                 d3.csv(`csv/${fileName}`).then(d => {
                     sessionStorage[fileName] = d;       // store as string, not array
+                    console.log(d);
                     ctrlMain.buildChart(d)});
             });
         });
@@ -92,11 +93,14 @@ let ctrlMain = {
     buildChart: function(data) {
         // Accepts array of objects (csv) as data
         const type = this.getChartType();
-        if (type === "default" || type === "simple-tree" || type === "radial-tree") {
-            this.buildHierarchy(data);
-            viewTreeChart.render(type);
-            viewZoom.render(type);
-            ctrlToolbar.init();
+        switch (type) {
+            case "default":
+            case "simple-tree":
+            case "radial-tree":
+                this.buildHierarchy(data);
+                viewTreeChart.render(type);
+                viewZoom.render(type);
+                ctrlToolbar.init();
         }
     },
     buildHierarchy: function(data) {

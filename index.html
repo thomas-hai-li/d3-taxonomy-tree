@@ -18,12 +18,13 @@
     <!-- Top Navigation Bar -->
     <nav class="navbar navbar-dark bg-dark flex-md-nowrap p-0 shadow">
         <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Visualization Dashboard</a>
-        <button class="btn btn-dark" data-toggle="modal" data-target="#info-modal"><i class="fas fa-info-circle"></i></button>
+        <a class="text-light" href="#" data-toggle="modal" data-target="#about-modal">About</a>
+        <a class="text-light" href="#" data-toggle="modal" data-target="#feedback-modal">Submit Feedback</a>
         <select id="chart-selection" class="col-sm-2 custom-select">
             <option value="default">Select chart</option>
             <option value="simple-tree">Simple Tree</option>
             <option value="radial-tree">Radial Tree</option>
-            <option value="treemap">Treemap</option>
+            <option value="treemap">Treemap (in development)</option>
         </select>
     </nav>
 
@@ -35,6 +36,7 @@
                 <div class="sidebar py-3 d-flex flex-column h-100">
                     <div class="sidebar-item">
                         <label for="files" class="text-primary">Datasets</label>
+                        <button class="btn btn-sm btn-light" data-toggle="modal" data-target="#datasets-modal"><i class="fas fa-info-circle"></i></button>
                         <select id="uploaded-files" class="form-control" size="15">
                             <option class="sample-data"">sample1.csv</option>
                             <option class="sample-data"">sample2.csv</option>
@@ -51,7 +53,7 @@
                         <button class="btn btn-sm btn-outline-dark" id="toggle-node-circles"><i class="fas fa-genderless"></i></button>
                         <button class="btn btn-sm btn-outline-primary" id="toggle-node-labels" data-toggle="modal" data-target="#tools-modal"><i class="fas fa-question"></i></button>
                     </div>
-                    <label for="color-slider" id="color-rank" class="my-0">Rank by</label>
+                    <label for="color-slider" id="color-rank" class="my-0">Color by</label>
                     <input type="range" id="color-slider" class="custom-range" name="color-slider" value="2" min="2" max="8" step="1" disabled>
                     <div class="sidebar-item mt-auto border">
                         <svg id="mini-chart" xmlns="http://www.w3.org/2000/svg"></svg>
@@ -70,7 +72,7 @@
                                 Export
                             </button>
                             <div class="dropdown-menu">
-                                <button id="convert-png" class="dropdown-item">PNG</button>
+                                <button id="convert-png" class="dropdown-item">PNG (coming soon)</button>
                                 <button id="convert-svg" class="dropdown-item">SVG</button>
                             </div>
                         </div>
@@ -81,8 +83,59 @@
     </div>
     <div class="tooltip"></div>
 
-    <!-- Info Modal -->
-    <div class="modal fade" id="info-modal" tabindex="-1">
+    <!-- About Modal -->
+    <div class="modal fade" id="about-modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">About</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>A suite of metaproteomics data visualization tools.</p>
+                    <p>This project was started this summer in 2019 and is currently under development. Features and bug fixes will be pushed out every week.</p>
+                    <footer class="blockquote-footer">Thomas Hai Li</footer>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submit Feedback Modal -->
+    <div class="modal fade" id="feedback-modal" tabindex="-1">
+        <form method="POST" action="/feedback">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Feedback</h5>
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="feedback-name">Name</label>
+                            <input type="name" class="form-control" id="feedback-name" placeholder="Leave blank for anonymous">
+                        </div>
+                        <div class="form-group">
+                            <label for="feedback-comments">Comments</label>
+                            <textarea class="form-control" id="feedback-comments" rows="5"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-success" data-dismiss="modal">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Datasets Modal -->
+    <div class="modal fade" id="datasets-modal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -93,10 +146,10 @@
                 </div>
                 <div class="modal-body">
                     <h6 class="text-primary">File format</h6>
-                    <p>Files should be of type csv (comma separated values) and obtained from iMetaLab's data processing module.</p>
+                    <p>Files should be of type <strong>csv</strong> and obtained from iMetaLab's data processing module.</p>
                     <h6 class="text-primary">Uploading Datasets</h6>
                     <p>To quickly skim through datasets, you can select as many files as you'd like after
-                        pressing the upload button To visualize a dataset, simply select an item from the list.</p>
+                        pressing the upload button. To visualize a dataset, simply select an item from the list.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
@@ -105,35 +158,113 @@
         </div>
     </div>
 
-    <!-- Tools Modal -->
+    <!-- Tools Modals (5) -->
     <div class="modal fade" id="tools-modal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Tools</h5>
+                    <h5 class="modal-title">Tips</h5>
                     <button type="button" class="close" data-dismiss="modal">
                         <span>&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>While visualizing a dataset, you may find some tools to be helpful for <span class="text-success">focusing</span> and
-                        <span class="text-primary">filtering</span> particular data points...
-                    </p>
-
-                    <h6 class="text-success mt-4">Focusing</h6>
-                    <p><i class="fas fa-genderless text-success"></i> View the average MS intensity for a data point by hovering.</p>
-                    <p><i class="fas fa-genderless text-success"></i> View individual MS intensities for a particular node by
-                        right-clicking on a data point. A chart will display on the bottom left.</p>
-
-                    <h6 class="text-primary">Filtering</h6>
-                    <p><i class="fas fa-genderless text-primary"></i> Collapse children nodes by clicking on a data point.</p>
-                    <p><i class="fas fa-genderless text-primary"></i> Toggle node size by using the toolbar.</p>
-                    
-                    <h6 class="text-dark mt-4">Utilities</h6>
-                    <p><i class="fas fa-search text-dark"></i> Zoom by scrolling on the graphics or by using the toolbar.</p>
-                    <p><i class="fas fa-font text-dark"></i> Toggle and resize labels by using the toolbar.</p>
+                    <p>While visualizing a dataset, you may find some tools to be helpful for filtering and focusing on particular data points...</p>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" data-toggle="modal" data-target="#filtering-tools-modal"><i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="filtering-tools-modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tips</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h6 class="text-success">Filtering</h6>
+                    <p><i class="fas fa-genderless text-success"></i> Collapse children nodes by clicking on a data point. This may also yield performance boosts.</p>
+                    <p><i class="fas fa-sliders-h text-success"></i> Use the slider to color nodes based on different taxonomy levels.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" data-toggle="modal" data-target="#tools-modal"><i class="fas fa-arrow-left"></i></button>
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" data-toggle="modal" data-target="#focusing-tools-modal"><i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="focusing-tools-modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tips</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">                    
+                    <h6 class="text-primary">Focusing</h6>
+                    <p><i class="fas fa-genderless text-primary"></i> View the average MS intensity for a data point by hovering over a single node.</p>
+                    <p><i class="fas fa-genderless text-primary"></i> View individual MS intensities for a data point by
+                        right-clicking on the node. The data will be displayed in the mini chart on the bottom left corner.</p>
+                </div>
+                <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" data-toggle="modal" data-target="#filtering-tools-modal"><i class="fas fa-arrow-left"></i></button>
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" data-toggle="modal" data-target="#charts-tools-modal"><i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="charts-tools-modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tips</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">                    
+                    <h6 class="text-success">Charts</h6>
+                    <p>Different charts provide different insights. Select a chart from the top-right dropdown menu.</p>
+                    <p><span class="text-success">Simple trees</span> are great for displaying relationships between MS-identified species.</p>
+                    <p><span class="text-success">Radial trees</span> not only display how different taxa are related, but intuitively show the proportion of taxa with the help of color and their circular nature.</p>
+                    <p><span class="text-success">Treemaps</span> use nested rectangles to display hierarchical data. Each rectangle represents a single taxon and its area is proportional to its averaged MS intensity.</p>
+                </div>
+                <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" data-toggle="modal" data-target="#focusing-tools-modal"><i class="fas fa-arrow-left"></i></button>
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" data-toggle="modal" data-target="#utilities-tools-modal"><i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="utilities-tools-modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tips</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">                  
+                    <h6 class="text-dark">Utilities</h6>
+                    <p><i class="fas fa-search text-dark"></i> Zoom by scrolling on the graphics or by using the toolbar.</p>
+                    <p><i class="fas fa-arrows-alt"></i> Pan the view by dragging on the graphics.</p>
+                    <p><i class="fas fa-font text-dark"></i> Toggle and resize labels by using the toolbar.</p>
+                    <p><i class="fas fa-genderless text-dark"></i> Node sizes are based off the average MS intensity. Normalize all node sizes by using the toolbar.</p>
+                </div>
+                <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" data-toggle="modal" data-target="#charts-tools-modal"><i class="fas fa-arrow-left"></i></button>
                     <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
