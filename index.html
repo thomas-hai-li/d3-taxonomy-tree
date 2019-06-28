@@ -24,7 +24,7 @@
             <option value="default">Select chart</option>
             <option value="simple-tree">Simple Tree</option>
             <option value="radial-tree">Radial Tree</option>
-            <option value="treemap">Treemap (in development)</option>
+            <option value="treemap">Treemap (coming soon)</option>
         </select>
     </nav>
 
@@ -95,7 +95,7 @@
                 </div>
                 <div class="modal-body">
                     <p>A suite of metaproteomics data visualization tools.</p>
-                    <p>This project was started this summer in 2019 and is currently under development. Features and bug fixes will be pushed out every week.</p>
+                    <p>This project was started this summer in 2019 and is currently under development. Features and bug fixes are being pushed out every week.</p>
                     <footer class="blockquote-footer">Thomas Hai Li</footer>
                 </div>
                 <div class="modal-footer">
@@ -234,10 +234,21 @@
                 </div>
                 <div class="modal-body">                    
                     <h6 class="text-success">Charts</h6>
-                    <p>Different charts provide different insights. Select a chart from the top-right dropdown menu.</p>
-                    <p><span class="text-success">Simple trees</span> are great for displaying relationships between MS-identified species.</p>
-                    <p><span class="text-success">Radial trees</span> not only display how different taxa are related, but intuitively show the proportion of taxa with the help of color and their circular nature.</p>
-                    <p><span class="text-success">Treemaps</span> use nested rectangles to display hierarchical data. Each rectangle represents a single taxon and its area is proportional to its averaged MS intensity.</p>
+                    <p>Different charts communicate different insights. Select a chart from the top-right dropdown menu.</p>
+                    <p>
+                        <span class="text-success"><i class="fas fa-chart-bar"></i> Simple trees</span>
+                        are great for displaying relationships between MS-identified species.
+                        Nodes are sorted by their average MS intensity in ascending order, from the top to the bottom of the chart. 
+                    </p>
+                    <p><span class="text-success"><i class="fas fa-chart-bar"></i> Radial trees</span>
+                        not only display how different taxa are related, but intuitively show the proportion
+                        of taxa with the help of color and their circular nature.
+                        Nodes are sorted by their average MS intensity in ascending order.
+                    </p>
+                    <p><span class="text-success"><i class="fas fa-chart-bar"></i> Treemaps</span>
+                        use nested rectangles to display hierarchical data.
+                        Each rectangle represents a single taxon and its area is proportional to its averaged MS intensity.
+                    </p>
                 </div>
                 <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" data-toggle="modal" data-target="#focusing-tools-modal"><i class="fas fa-arrow-left"></i></button>

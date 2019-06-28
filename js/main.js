@@ -112,7 +112,8 @@ let ctrlMain = {
         const stratify = d3.stratify()
             .parentId(d => d.id.substring(0, d.id.lastIndexOf("@")));
         const root = stratify(data)
-            .sort((a, b) => (a.height - b.height) || a.id.localeCompare(b.id));
+            .sort((a, b) => a.data.value - b.data.value)
+            // .sort((a, b) => (a.height - b.height) || a.id.localeCompare(b.id));
 
         model.hierarchical.tree = tree;
         model.hierarchical.root = root;

@@ -178,10 +178,10 @@ let viewTreeChart = {
     
         const colorTaxonomicRank = d3.scaleOrdinal()
             .domain(d3.range(0, 10))
-            .range(d3.schemeCategory10);
+            .range(d3.schemeAccent);
         
         const colorBranch = d3.scaleOrdinal()
-            .range(d3.schemePaired);
+            .range(d3.schemeSet3);
     
         nodeUpdate.append("circle")
             .attr("r", d => Math.log10(d.data.value + 1) + 2)
