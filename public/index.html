@@ -19,7 +19,7 @@
     <nav class="navbar navbar-dark bg-dark flex-md-nowrap p-0 shadow">
         <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Visualization Dashboard</a>
         <a class="text-light" href="#" data-toggle="modal" data-target="#about-modal">About</a>
-        <!-- <a class="text-light" href="#" data-toggle="modal" data-target="#feedback-modal">Submit Feedback</a> -->
+        <a class="text-light" href="#" data-toggle="modal" data-target="#feedback-modal">Submit Feedback</a>
         <select id="chart-selection" class="col-sm-2 custom-select">
             <option value="default">Select chart</option>
             <option value="simple-tree">Simple Tree</option>
@@ -107,31 +107,33 @@
 
     <!-- Submit Feedback Modal -->
     <div class="modal fade" id="feedback-modal" tabindex="-1">
-        <form method="POST" action="/feedback">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Feedback</h5>
-                        <button type="button" class="close" data-dismiss="modal">
-                            <span>&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Feedback</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="/feedback">
                         <div class="form-group">
                             <label for="feedback-name">Name</label>
-                            <input type="name" class="form-control" id="feedback-name" placeholder="Leave blank for anonymous">
+                            <input name="name" autocomplete="off" type="name" class="form-control" id="feedback-name" placeholder="Optional">
+                        </div>
+                        <div class="form-group">
+                            <label for="feedback-organization">Organization</label>
+                            <input name="organization" autocomplete="off" type="info" class="form-control" id="feedback-name">
                         </div>
                         <div class="form-group">
                             <label for="feedback-comments">Comments</label>
-                            <textarea class="form-control" id="feedback-comments" rows="5"></textarea>
+                            <textarea name="comments" required autocomplete="off" class="form-control" id="feedback-comments" rows="5"></textarea>
                         </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-success" data-dismiss="modal">Submit</button>
-                    </div>
+                        <button type="submit" class="btn btn-outline-success">Submit</button>
+                    </form>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 
     <!-- Datasets Modal -->

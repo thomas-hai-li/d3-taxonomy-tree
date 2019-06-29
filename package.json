@@ -1,0 +1,26 @@
+{
+  "name": "metaproteomics-data-visualization",
+  "version": "1.0.0",
+  "description": "Summer 2019 project at uOttawa Faculty of Medicine",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thomas-hai-li/d3-taxonomy-tree.git"
+  },
+  "author": "Thomas Hai Li",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/thomas-hai-li/d3-taxonomy-tree/issues"
+  },
+  "homepage": "https://github.com/thomas-hai-li/d3-taxonomy-tree#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "dotenv": "^8.0.0",
+    "express": "^4.17.1",
+    "express-handlebars": "^3.1.0",
+    "nodemailer": "^6.2.1"
+  }
+}
