@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thomas-hai-li/d3-taxonomy-tree.git"
+    "url": "git+https://github.com/thomas-hai-li/metaproteomics-data-visualization"
   },
   "author": "Thomas Hai Li",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/thomas-hai-li/d3-taxonomy-tree/issues"
+    "url": "https://github.com/thomas-hai-li/metaproteomics-data-visualization/issues"
   },
-  "homepage": "https://github.com/thomas-hai-li/d3-taxonomy-tree#readme",
+  "homepage": "https://github.com/thomas-hai-li/metaproteomics-data-visualization#readme",
   "dependencies": {
     "body-parser": "^1.19.0",
     "dotenv": "^8.0.0",
