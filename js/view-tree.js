@@ -16,6 +16,7 @@ let viewTreeChart = {
         return [radius * Math.cos(angle), radius * Math.sin(angle)];
     },
     render: function(type) {
+        // Draws either simple or radial tree
         this.ng.selectAll("*").remove(); // reset graph
         const {tree, root, color} = ctrlMain.getHierarchical(),
               {width, height} = ctrlMain.getDim();
@@ -76,51 +77,33 @@ let viewTreeChart = {
                         }
                     }
                     if (!data) {
-                        alert("No additional MS quantities for this dataset");
+                        alert("No additional MS quantities for this dataset");  // change to modal
                         return;
                     }
-                    
-                    // Reset chart:
-                    const svg = d3.select("#mini-chart");
-                    svg.selectAll("*").remove();
-                    const width = parseFloat(svg.style("width")),
-                          height = parseFloat(svg.style("height"));
-                    const margin = {
-                        x: width * 0.1,
-                        y: height * 0.1
+                    viewMiniChart.render(data);
+                }
+            },
+            {
+                title: "Collapse all other nodes",
+                action: function(elm, d, i) {
+                    let clickEvent = new MouseEvent("click", {
+                        "view": window,
+                        "bubbles": true,
+                        "cancelable": false
+                    });
+                    // Make selected node visible
+                    if (elm.classList.contains("node-collapsed")) {
+                        elm.dispatchEvent(clickEvent);
                     }
-                    const chart = d3.select("#mini-chart").append("g")
-                        .style("transform", `translate(${margin.x}px, ${margin.y}px)`);
-
-                    // Set up scales
-                    const maxVal = d3.max(data);
-                    const xScale = d3.scaleLinear()
-                        .domain([0, maxVal])
-                        .range([0, width - 2 * margin.x]);
-                    const yScale = d3.scaleBand()
-                        .domain(data.map( (d,i) => i ))
-                        .range([0, height - 2 * margin.y])
-                        .padding(0.5);
-                    let xAxis = d3.axisBottom(xScale)
-                        .ticks(5);
-                    let yAxis = d3.axisLeft(yScale);
-
-                    // Draw bar chart
-                    const bars = chart.selectAll(".bar").data(data);
-                    bars.enter().append("rect")
-                        .attr("class", "bar")
-                        .attr("height", yScale.bandwidth())
-                        .attr("y", (d,i) => yScale(i))
-                        .attr("width", (d) => xScale(d))
-                        .attr("fill", "#2a5599");
-                    
-                    // Draw axes
-                    svg.append("g")
-                        .style("transform", `translate(${margin.x}px,${height - margin.y}px)`)
-                        .call(xAxis);
-                    svg.append("g")
-                        .style("transform", `translate(${margin.x}px, ${margin.y}px)`)
-                        .call(yAxis);
+                    // Collapse all other nodes
+                    let depth = d.depth;
+                    let id = d.id;
+                    let otherNodes = d3.selectAll(".node").filter(d => d.depth === depth && d.id !== id);
+                    otherNodes.nodes().forEach(node => {
+                        if (! node.classList.contains("node-collapsed")) {
+                            node.dispatchEvent(clickEvent);
+                        }
+                    });
                 }
             }
         ];
