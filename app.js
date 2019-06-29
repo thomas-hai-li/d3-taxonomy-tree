@@ -44,6 +44,7 @@ app.post("/feedback", (req, res) => {
         from: '"Polar Foo 🐼" <superpolarfoo@gmail.com>',
         to: "limera2nn@gmail.com",
         subject: "New Feedback!",
+        text: "blah",
         html: toSend
     }
 
