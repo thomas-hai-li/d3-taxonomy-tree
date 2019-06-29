@@ -4,7 +4,7 @@ const express = require("express"),
     exphbs = require("express-handlebars"),
     nodemailer = require("nodemailer");
 const app = express();
-const port = 1337;
+const PORT = process.env.PORT || 1337;
 
 // Static folder
 app.use(express.static('public'));
@@ -58,4 +58,4 @@ app.post("/feedback", (req, res) => {
     });
 });
 
-// app.listen(port, () => console.log(`App served on localhost:${port}`));
+app.listen(PORT, () => console.log(`Listening on ${ PORT }`));
