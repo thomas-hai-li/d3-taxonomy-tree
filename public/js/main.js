@@ -19,7 +19,13 @@ let model = {
                 6: "Family",
                 7: "Genus",
                 8: "Species"
-            }
+            },
+            // Color schemes for nodes:
+            taxonLevelColor: d3.scaleOrdinal()
+                .domain(d3.range(0, 10))
+                .range(d3.schemeAccent),
+            branchColor: d3.scaleOrdinal()
+                .range(d3.schemeSet3)
         }
     },
 }
@@ -207,11 +213,12 @@ let ctrlToolbar = {
         
         colorSlider.attr("disabled", null);
         colorSlider.on("input", () => {
-            const {color} = ctrlMain.getHierarchical();
-            
+            const { color } = ctrlMain.getHierarchical();
+            const { taxonLevelColor, branchColor } = color;
             color.currentRank = parseInt(colorSlider.valueOf()._groups[0][0].value);
             colorLabel.text(color.ranks[color.currentRank]);
-            viewTreeChart.render(ctrlMain.getChartType());
+            d3.selectAll(".node circle")
+                .style("fill", (d) => viewTreeChart.colorNode(d, taxonLevelColor, branchColor))
         });
     }
 }

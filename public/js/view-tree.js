@@ -18,8 +18,8 @@ let viewTreeChart = {
     render: function(type) {
         // Draws either simple or radial tree
         this.ng.selectAll("*").remove(); // reset graph
-        const {tree, root, color} = ctrlMain.getHierarchical(),
-              {width, height} = ctrlMain.getDim();
+        const { tree, root, color } = ctrlMain.getHierarchical(),
+              { width, height } = ctrlMain.getDim();
 
         if (type === "radial-tree") {
             this.ng.attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ")");
@@ -160,30 +160,11 @@ let viewTreeChart = {
         } else {
             nodeUpdate.attr("transform", d => "translate(" + d.y + "," + d.x + ")") // simple tree
         }
-    
-        const colorTaxonomicRank = d3.scaleOrdinal()
-            .domain(d3.range(0, 10))
-            .range(d3.schemeAccent);
-        
-        const colorBranch = d3.scaleOrdinal()
-            .range(d3.schemeSet3);
-    
+
+        const { taxonLevelColor, branchColor } = color;
         nodeUpdate.append("circle")
             .attr("r", d => Math.log10(d.data.value + 1) + 2)
-            .style("fill", d => {
-                const ranks = d.id.split("@");
-                const count = ranks.length - 1;   // number of "@" in d.id
-    
-                if (count >= color.currentRank) {    // Specify rank for color to be based on (colors branches)
-                    const rank = ranks[color.currentRank];
-    
-                    // Save color and last updated rank level for consistency
-                    d._color =  colorBranch(rank);
-                    d._currentRank = count;
-                    return colorBranch(rank);
-                }
-                return colorTaxonomicRank(count);
-            });
+            .style("fill", d => this.colorNode(d, taxonLevelColor, branchColor));
         
         nodeUpdate.append("text")
             .attr("class", "nodeLabel")
@@ -207,5 +188,20 @@ let viewTreeChart = {
         }
         // Exit Notes
         node.exit().remove();
+    },
+    colorNode: function(d, taxonLevelColor, branchColor) {
+        const {color} = ctrlMain.getHierarchical();
+        const ranks = d.id.split("@");
+        const count = ranks.length - 1;   // number of "@" in d.id
+
+        if (count >= color.currentRank) {    // Specify rank for color to be based on (colors branches)
+            const rank = ranks[color.currentRank];
+
+            // Save color and last updated rank level for consistency
+            d._color = branchColor(rank);
+            d._currentRank = count;
+            return branchColor(rank);
+        }
+        return taxonLevelColor(count);
     }
 }
