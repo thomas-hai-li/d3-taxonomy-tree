@@ -103,6 +103,7 @@ let ctrlMain = {
                 viewZoom.render(type);
                 // viewBrush.render();
                 ctrlToolbar.init();
+                viewMiniChart.init(data);
         }
     },
     buildHierarchy: function(data) {

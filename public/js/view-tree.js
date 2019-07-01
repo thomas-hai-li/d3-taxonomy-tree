@@ -80,7 +80,9 @@ let viewTreeChart = {
                         alert("No additional MS quantities for this dataset");  // change to modal
                         return;
                     }
-                    viewMiniChart.render(data);
+                    ids = d.id.split("@");
+                    name = ids[ids.length - 1];
+                    viewMiniChart.render(name, data);
                 }
             },
             {
