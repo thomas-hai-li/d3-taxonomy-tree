@@ -32,6 +32,7 @@ let model = {
 
 let ctrlMain = {
     init: function() {
+        viewDatasets.init();
         viewTreeChart.init();
         viewZoom.init();
         // viewBrush.init();
@@ -100,6 +101,8 @@ let ctrlMain = {
     buildChart: function(data) {
         // Accepts array of objects (csv) as data
         const type = this.getChartType();
+        document.querySelector("#chart-display").style.display = "block";
+        document.querySelector("#csv-display").style.display = "none";
         switch (type) {
             case "default":
             case "simple-tree":

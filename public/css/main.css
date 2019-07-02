@@ -19,3 +19,10 @@ svg {
     width: 100%;
     height: 100%;
 }
+
+#csv-display {
+    display: none;
+    height: 800px;
+    width: 100%;
+    overflow: auto;
+}

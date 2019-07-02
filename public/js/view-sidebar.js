@@ -1,12 +1,84 @@
 let viewDatasets = {
+    init: function() {
+        // Attach contextmenu to all SAMPLE data
+        this.menu = [
+            {
+                title: "View CSV Table",
+                action: function (elm, d, i) {
+                    const fileName = elm.textContent;
+                    d3.csv(`csv/${fileName}`).then(d => viewDatasets.drawTable(d));
+                }
+            },            
+            {
+                title: "Remove",
+                action: function (elm, d, i) {
+                    let fileName = elm.textContent;
+                    sessionStorage.removeItem(fileName);
+                    if (ctrlMain.getCurrentData() === fileName) {
+                        d3.select("#chart-display #chart")
+                            .selectAll("*")
+                            .remove()
+                    }
+                    elm.remove();                    
+                }
+            },
+        ];
+        d3.selectAll(".sample-data")
+            .on("contextmenu", d3.contextMenu(this.menu));
+    },
     addFile: function(fileName) {
+        // Add file to datasets and attach contextmenu
         let newFileListing = document.createElement("option"),
-            newFileName = document.createTextNode(fileName),
+            newFileText = document.createTextNode(fileName),
             datasets = document.querySelector("#uploaded-files");
         
         newFileListing.id = fileName;
-        newFileListing.appendChild(newFileName);
+        newFileListing.appendChild(newFileText);
         datasets.appendChild(newFileListing);
+        d3.select(newFileListing).on("contextmenu", d3.contextMenu(this.menu)); 
+    },
+    drawTable: function (data) {
+        d3.select("#csv-display").style("display", "block");
+        d3.select("#chart-display").style("display", "none");
+        // Reset and generate the top row (col names)
+        let cols = data.columns,
+            topRow = document.createElement("tr"),
+            tableHead = document.querySelector(".csv-data thead");
+        while (tableHead.firstChild) {
+            tableHead.removeChild(tableHead.firstChild);
+        }
+        let numCol = document.createElement("th"),
+            numColText = document.createTextNode("#");
+        numCol.appendChild(numColText);
+        topRow.appendChild(numCol);
+        cols.forEach((colName) => {
+            let newCol = document.createElement("th"),
+                newColText = document.createTextNode(colName);
+            newCol.appendChild(newColText);
+            newCol.scope = "col";
+            topRow.appendChild(newCol);
+        });
+        tableHead.appendChild(topRow);
+        
+        // Reset and generate remaining rows (actual data)
+        let tableBody = document.querySelector(".csv-data tbody");
+        while (tableBody.firstChild) {
+            tableBody.removeChild(tableBody.firstChild);
+        }
+        data.forEach((d, i) => {
+            let newRow = document.createElement("tr");
+            let numRow = document.createElement("th"),
+                numRowText = document.createTextNode(i + 1);
+            numRow.appendChild(numRowText);
+            newRow.appendChild(numRow);
+            cols.forEach((col) => {
+                let newCell = document.createElement("td"),
+                    newCellText = document.createTextNode(d[col]);
+                newCell.appendChild(newCellText);
+                newRow.appendChild(newCell);
+            });
+            tableBody.appendChild(newRow);
+        });
     }
 }
 
