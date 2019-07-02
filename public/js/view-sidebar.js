@@ -58,7 +58,7 @@ let viewMiniChart = {
     render: function(name, data) {
         const {svg, chart, margin, xScale, yScale} = this,
             tooltip = d3.select(".tooltip"),
-            tooltipDuration = 500;
+            duration = 200;
         // Draw title
         svg.select(".mini-chart-title").remove()
         svg.append("text")
@@ -76,19 +76,22 @@ let viewMiniChart = {
             .attr("class", "bar")
             .on("mouseover", function(d) {
                 d3.select(this).transition()
-                    .duration(150)
+                    .duration(duration)
                     .style("opacity", 0.5);
-                console.log(d3.event)
-                tooltip.style("opacity", 0.9)
-                    .html("Value: " + d)
+                tooltip.transition()
+                    .duration(duration)
+                    .style("opacity", 0.9);
+                tooltip.html("Intensity: " + d)
                     .style("left", (d3.event.pageX) + "px")
                     .style("top", (d3.event.pageY - 20) + "px");
             })
             .on("mouseout", function() {
                 d3.select(this).transition()
-                    .duration(150)
+                    .duration(duration)
                     .style("opacity", 1);
-                tooltip.style("opacity", 0);
+                tooltip.transition()
+                    .duration(duration)
+                    .style("opacity", 0);
             });
 
         bar.merge(barsEnter).transition().duration(750)

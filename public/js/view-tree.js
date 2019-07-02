@@ -2,7 +2,6 @@ let viewTreeChart = {
     init: function() {
         this.svg = d3.select("#chart-display")
             .style("background-color", "white")
-            .style("border", "1px solid black")
             .on("contextmenu", () => d3.event.preventDefault());
 
         this.ng = this.svg.append("g")
@@ -61,7 +60,7 @@ let viewTreeChart = {
             .data(root.descendants());
         
         const tooltip = d3.select(".tooltip"),  // Set up tooltip and context menu
-            tooltipDuration = 500;
+            tooltipDuration = 200;
 
         const menu = [
             {
