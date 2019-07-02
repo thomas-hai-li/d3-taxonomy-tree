@@ -3,7 +3,7 @@ let viewDatasets = {
         // Attach contextmenu to all SAMPLE data
         this.menu = [
             {
-                title: "View CSV Table",
+                title: "View in Table",
                 action: function (elm, d, i) {
                     const fileName = elm.textContent;
                     d3.csv(`csv/${fileName}`).then(d => viewDatasets.drawTable(d));
