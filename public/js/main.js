@@ -186,7 +186,7 @@ let ctrlToolbar = {
             }
         });
         // Zoom buttons
-        const duration = 2000;
+        const duration = 500;
         d3.select("#zoom-in").on("click", () => {
             viewZoom.zoom
                 .scaleBy(viewZoom.svg.transition().duration(duration), 1.3);

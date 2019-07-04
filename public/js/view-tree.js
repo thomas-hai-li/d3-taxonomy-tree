@@ -15,10 +15,17 @@ let viewTreeChart = {
         return [radius * Math.cos(angle), radius * Math.sin(angle)];
     },
     render: function(type) {
-        // Draws either simple or radial tree
-        this.ng.selectAll("*").remove(); // reset graph
+        // Renders either simple or radial tree
         const { tree, root, color } = ctrlMain.getHierarchical(),
               { width, height } = ctrlMain.getDim();
+        const tooltip = d3.select(".tooltip"),
+              tooltipDuration = 200;
+            
+        // Reset graph and previous tooltips
+        this.ng.selectAll("*").remove();
+        tooltip.transition()
+            .duration(tooltipDuration)
+            .style("opacity", 0);
 
         if (type === "radial-tree") {
             this.ng.attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ")");
@@ -58,9 +65,6 @@ let viewTreeChart = {
         // Enter nodes
         const node = this.ng.selectAll("g.node")
             .data(root.descendants());
-        
-        const tooltip = d3.select(".tooltip"),  // Set up tooltip and context menu
-            tooltipDuration = 200;
 
         const menu = [
             {
@@ -87,24 +91,21 @@ let viewTreeChart = {
             {
                 title: "Collapse all other nodes",
                 action: function(elm, d, i) {
-                    let clickEvent = new MouseEvent("click", {
-                        "view": window,
-                        "bubbles": true,
-                        "cancelable": false
-                    });
                     // Make selected node visible
                     if (elm.classList.contains("node-collapsed")) {
-                        elm.dispatchEvent(clickEvent);
+                        viewTreeChart.collapseNode(d, elm);
                     }
                     // Collapse all other nodes
                     let depth = d.depth;
                     let id = d.id;
                     let otherNodes = d3.selectAll(".node").filter(d => d.depth === depth && d.id !== id);
+
                     otherNodes.nodes().forEach(node => {
                         if (! node.classList.contains("node-collapsed")) {
-                            node.dispatchEvent(clickEvent);
+                            viewTreeChart.collapseNode(node.__data__, node);
                         }
                     });
+                    viewTreeChart.render(ctrlMain.getChartType());
                 }
             }
         ];
@@ -134,19 +135,7 @@ let viewTreeChart = {
                     .style("opacity", 0);
             })
             .on("click", function(d) {
-                if (d.children) {
-                    d._children = d.children;
-                    d.children = null;
-                    this.classList.add("node-collapsed");
-                } else {
-                    d.children = d._children;
-                    d._children = null;
-                    this.classList.remove("node-collapsed");
-                }
-                tooltip.transition()
-                    .duration(tooltipDuration)
-                    .style("opacity", 0);
-                
+                viewTreeChart.collapseNode(d, this);  // pass in data and this elem                
                 viewTreeChart.render(ctrlMain.getChartType());
             })
             .on("contextmenu", d3.contextMenu(menu));
@@ -187,6 +176,23 @@ let viewTreeChart = {
         }
         // Exit Notes
         node.exit().remove();
+
+        // Resets to last position instead of default position if user has zoomed, by translating by a tiny bit
+        if (viewZoom.zoom) {
+            viewZoom.zoom.translateBy(viewZoom.svg, 1e-9, 1e-9);
+        }
+    },
+    collapseNode: function(d, nodeElem) {
+        if (d.children) {
+            d._children = d.children;
+            d.children = null;
+            nodeElem.classList.add("node-collapsed");
+        }
+        else {
+            d.children = d._children;
+            d._children = null;
+            nodeElem.classList.remove("node-collapsed");
+        }
     },
     colorNode: function(d, taxonLevelColor, branchColor) {
         const {color} = ctrlMain.getHierarchical();
