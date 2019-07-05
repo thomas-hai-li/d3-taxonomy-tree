@@ -89,30 +89,31 @@ let viewMiniChart = {
         const width = parseFloat(this.svg.style("width")),
             height = parseFloat(this.svg.style("height"));
         this.margin = {
-            x: width * 0.1,
+            x: width * 0.15,
             y: height * 0.1
         }
         const {svg, margin} = this;
         this.chart = d3.select("#mini-chart").append("g")
             .style("transform", `translate(${margin.x}px, ${margin.y}px)`);
 
-        // Find max value of MS intensities
+        // Find max value of MS intensities and determine sample names (intensities)
         let col = data.columns.find((ele) => ele.match(/;/)),
             stringVals = "";
         if (!col) { return }
         data.forEach(ele => stringVals += ele[col] + ";");
         const vals = stringVals.split(";").map((ele) => Number(ele)),
             maxVal = d3.max(vals);
+            
+        this.intensities =  col.split(";").map((ele) => {
+            return ele.replace("Intensity", "").trim();
+        });
         
         // Set up scales
         this.xScale = d3.scaleLinear()
             .domain([0, maxVal])
             .range([0, width - 2 * margin.x]);
-        let valsPerDatum = data[0][col].split(";").length,
-            samples = [];
-        for (let i = 0; i < valsPerDatum; i++) { samples.push("s" + i); }
         this.yScale = d3.scaleBand()
-            .domain(samples)
+            .domain(this.intensities)
             .range([0, height - 2 * margin.y])
             .padding(0.5);
         const xAxis = d3.axisBottom(this.xScale)
@@ -165,11 +166,11 @@ let viewMiniChart = {
                     .duration(duration)
                     .style("opacity", 0);
             });
-
+    
         bar.merge(barsEnter).transition().duration(750)
             .attr("width", (d) => xScale(d))
             .attr("height", yScale.bandwidth())
-            .attr("y", (d, i) => yScale("s" + i))
-            .attr("fill", "#2a5599")
+            .attr("y", (d, i) => yScale(this.intensities[i]))
+            .attr("fill", "#2a5599");
     }
 }
