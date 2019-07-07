@@ -3,9 +3,6 @@ let viewTreeChart = {
         this.svg = d3.select("#chart-display")
             .style("background-color", "white")
             .on("contextmenu", () => d3.event.preventDefault());
-
-        this.ng = this.svg.append("g")
-            .attr("id", "chart");
         
         this.drawLabels = true;
     },
@@ -16,28 +13,34 @@ let viewTreeChart = {
     },
     render: function(type) {
         // Renders either simple or radial tree
-        const { tree, root, color } = ctrlMain.getHierarchical(),
+        const { tree, color } = ctrlMain.getHierarchical(),
               { width, height } = ctrlMain.getDim();
         const tooltip = d3.select(".tooltip"),
               tooltipDuration = 200;
+        let { root } = ctrlMain.getHierarchical();
+        root.sort((a, b) => a.data.value - b.data.value);
+            // .sort((a, b) => (a.height - b.height) || a.id.localeCompare(b.id)); // by alphabetical
             
-        // Reset graph and previous tooltips
-        this.ng.selectAll("*").remove();
+        // Reset chart display and previous tooltips
+        this.svg.selectAll("*").remove();
         tooltip.transition()
             .duration(tooltipDuration)
             .style("opacity", 0);
+        
+        const chart = this.svg.append("g")
+            .attr("id", "chart");
 
         if (type === "radial-tree") {
-            this.ng.attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ")");
+            chart.attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ")");
         } else {
-            this.ng.attr("transform", `translate(${ width * 0.08 }, ${ height * 0.05 })`);
+            chart.attr("transform", `translate(${ width * 0.08 }, ${ height * 0.05 })`);
             tree.size([height * 0.9, width * 0.8]);
         }
 
         tree(root);
 
         // Enter links
-        const link = this.ng.selectAll(".link")
+        const link = chart.selectAll(".link")
             .data(root.descendants().slice(1));
     
         const linkEnter = link.enter().append("path")
@@ -63,7 +66,7 @@ let viewTreeChart = {
         link.exit().remove();
         
         // Enter nodes
-        const node = this.ng.selectAll("g.node")
+        const node = chart.selectAll("g.node")
             .data(root.descendants());
 
         const menu = [
@@ -154,7 +157,7 @@ let viewTreeChart = {
             .attr("r", d => Math.log10(d.data.value + 1) + 2)
             .style("fill", d => this.colorNode(d, taxonLevelColor, branchColor));
         
-        nodeUpdate.append("text")
+        const nodeLabels = nodeUpdate.append("text")
             .attr("class", "nodeLabel")
             .style("font", "sans-serif")
             .style("font-size", 10)
@@ -163,13 +166,19 @@ let viewTreeChart = {
             .text(d => d.id.substring(d.id.lastIndexOf("@") + 1));
         
         if (type === "radial-tree") {
-            nodeUpdate.selectAll("text")
+            nodeLabels
                 .attr("dy", ".31em")
                 .attr("x", d => d.x < 180 === !d.children ? 6 : -6)
-                .attr("transform", d => "rotate(" + (d.x < 180 ? d.x - 90 : d.x + 90) + ")")
                 .style("text-anchor", d => d.x < 180 === !d.children ? "start" : "end");
-        } else {
-            nodeUpdate.selectAll("text")
+            if (nodeUpdate.size() < 100) {
+                nodeLabels.attr("transform", d => "rotate(0)"); // no rotation if not too cluttered 
+            }
+            else {
+                nodeLabels.attr("transform", d => "rotate(" + (d.x < 180 ? d.x - 90 : d.x + 90) + ")");
+            }
+        }
+        else {
+            nodeLabels
                 .attr("dy", 4)
                 .attr("x", d => d.depth === 0 ? -90 : 6)
                 .style("text-anchor", "start");
@@ -177,6 +186,7 @@ let viewTreeChart = {
         // Exit Notes
         node.exit().remove();
 
+        viewZoom.render(ctrlMain.getChartType());
         // Resets to last position instead of default position if user has zoomed, by translating by a tiny bit
         if (viewZoom.zoom) {
             viewZoom.zoom.translateBy(viewZoom.svg, 1e-9, 1e-9);

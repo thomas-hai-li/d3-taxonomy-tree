@@ -42,3 +42,10 @@
     border-radius: 8px;
     pointer-events: none;
 }
+
+/* Hierarchical Bar Chart */
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+}

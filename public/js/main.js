@@ -31,9 +31,11 @@ let model = {
 }
 
 let ctrlMain = {
+    // Responsible for file handling, building charts, and getting data from model
     init: function() {
         viewDatasets.init();
         viewTreeChart.init();
+        viewHierarchicalBarChart.init();
         viewZoom.init();
         // viewBrush.init();
         this.onFileChange();
@@ -43,6 +45,7 @@ let ctrlMain = {
         const sampleData = document.querySelectorAll(".sample-data"),
             upload = document.querySelector("#file-upload");
         
+        // For immediately loading data
         sampleData.forEach((sample) => {
             sample.addEventListener("click", () => {
                 const fileName = sample.textContent;
@@ -54,6 +57,7 @@ let ctrlMain = {
             });
         });
 
+        // For uploading
         upload.addEventListener("change", (e) => {
             const files = e.target.files,
                 fileTypeCSV = /csv.*/;
@@ -107,28 +111,38 @@ let ctrlMain = {
             case "default":
             case "simple-tree":
             case "radial-tree":
-                this.buildHierarchy(data);
+                this.buildRoot(data);
+                this.buildTree();
                 viewTreeChart.render(type);
-                viewZoom.render(type);
+                // viewZoom.render(type);
                 // viewBrush.render();
                 ctrlToolbar.init();
                 viewMiniChart.init(data);
+                break;
+            case "hierarchical-bars":
+                this.buildRoot(data);
+                viewHierarchicalBarChart.render();
+                // render barchart
+                // disable toolbar
+                // disable mini chart?
         }
     },
-    buildHierarchy: function(data) {
-        // Generate tree (function) and root (structure)
-        const { width, height } = this.getDim();
+    buildRoot: function(data) {
+        // Generate the root data structure
+        let stratify = d3.stratify()
+            .parentId(d => d.id.substring(0, d.id.lastIndexOf("@")));
+        let root = stratify(data);
+
+        model.hierarchical.root = root;
+    },
+    buildTree: function() {
+        // Generate the tree layout function
+        // const { width, height } = this.getDim();
         const tree = d3.tree()
             .size([360, 500])
             .separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
-        const stratify = d3.stratify()
-            .parentId(d => d.id.substring(0, d.id.lastIndexOf("@")));
-        const root = stratify(data)
-            .sort((a, b) => a.data.value - b.data.value)
-            // .sort((a, b) => (a.height - b.height) || a.id.localeCompare(b.id));
 
         model.hierarchical.tree = tree;
-        model.hierarchical.root = root;
     },
     setCurrentData: (data) => model.currentData = data,
     getCurrentData: () => model.currentData,

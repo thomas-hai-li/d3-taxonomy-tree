@@ -1,26 +1,25 @@
 let viewZoom = {
     init: function() {
         this.svg = d3.select("#chart-display");
-        this.ng = d3.select("#chart");
     },
     render: function(type) {
         this.zoom = d3.zoom()
                 .scaleExtent([0.4, 10])
-                .on("zoom", zoomed),
-            ng = this.ng;
+                .on("zoom", zoomed);
+        const chart = d3.select("#chart");
     
         function zoomed() {
             const transform = d3.event.transform;
 
             // scale nodes
-            ng.selectAll(".node").attr("transform", d => {
+            chart.selectAll(".node").attr("transform", d => {
                 if (type === "radial-tree") {
                     return "translate(" + transform.apply(viewTreeChart.project(d.x, d.y)) + ")";
                 }
                 return "translate(" + transform.applyX(d.y) + "," + transform.applyY(d.x) + ")";
             });
             // scale links
-            ng.selectAll(".link").attr("d", d => {
+            chart.selectAll(".link").attr("d", d => {
                 if (type === "radial-tree") {
                     return "M" + transform.apply(viewTreeChart.project(d.x, d.y))
                     + "C" + transform.apply(viewTreeChart.project(d.x, (d.y + d.parent.y) / 2))
