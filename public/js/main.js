@@ -149,7 +149,27 @@ let ctrlMain = {
     setChartType: (type) => model.chartType = type,
     getChartType: () => model.chartType,
     getDim: () => model.dim,
-    getHierarchical: () => model.hierarchical
+    getHierarchical: () => model.hierarchical,
+    submitFeedback: () => {
+        let messageToUser = document.querySelector("#feedback-result"),
+            name = document.querySelector("#feedback-name").value,
+            organization = document.querySelector("#feedback-organization").value,
+            comments = document.querySelector("#feedback-comments").value;
+
+        if (comments === "") {
+            messageToUser.textContent = "Form cannot be blank.";
+        }
+        else {
+            let http = new XMLHttpRequest();
+            http.open("POST", "/feedback", true);
+            http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+            let params = `name=${name}&` +
+            `organization=${organization}&` + 
+            `comments=${comments}`;
+            http.send(params);
+            messageToUser.textContent = "Submitted, thanks!";
+        }
+    }
 }
 
 let ctrlToolbar = {

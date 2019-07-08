@@ -125,21 +125,20 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form method="POST" action="/feedback">
-                        <div class="form-group">
-                            <label for="feedback-name">Name</label>
-                            <input name="name" autocomplete="off" type="name" class="form-control" id="feedback-name" placeholder="Optional">
-                        </div>
-                        <div class="form-group">
-                            <label for="feedback-organization">Organization</label>
-                            <input name="organization" autocomplete="off" type="info" class="form-control" id="feedback-name">
-                        </div>
-                        <div class="form-group">
-                            <label for="feedback-comments">Comments</label>
-                            <textarea name="comments" required autocomplete="off" class="form-control" id="feedback-comments" rows="5"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-outline-success">Submit</button>
-                    </form>
+                    <div class="form-group">
+                        <label for="feedback-name">Name</label>
+                        <input name="name" autocomplete="off" type="name" class="form-control" id="feedback-name" placeholder="Optional">
+                    </div>
+                    <div class="form-group">
+                        <label for="feedback-organization">Organization</label>
+                        <input name="organization" autocomplete="off" type="info" class="form-control" id="feedback-organization">
+                    </div>
+                    <div class="form-group">
+                        <label for="feedback-comments">Comments</label>
+                        <textarea name="comments" required autocomplete="off" class="form-control" id="feedback-comments" rows="5"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-outline-success" onclick="ctrlMain.submitFeedback();">Submit</button>
+                    <span id="feedback-result" class="ml-2"></span>
                 </div>
             </div>
         </div>
