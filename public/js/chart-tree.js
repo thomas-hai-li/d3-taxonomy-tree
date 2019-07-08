@@ -160,7 +160,7 @@ let viewTreeChart = {
         const nodeLabels = nodeUpdate.append("text")
             .attr("class", "nodeLabel")
             .style("font", "sans-serif")
-            .style("font-size", 10)
+            .style("font-size", "10px")
             .style("fill", "black")
             .style("display", this.drawLabels ? "block" : "none")
             .text(d => d.id.substring(d.id.lastIndexOf("@") + 1));

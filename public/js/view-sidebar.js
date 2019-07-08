@@ -138,7 +138,7 @@ let viewMiniChart = {
             .attr("class", "mini-chart-title")
             .text(name)
             .style("font", "sans-serif")
-            .style("font-size", 14)
+            .style("font-size", "14px")
             .attr("text-anchor", "middle")
             .attr("x", "50%")
             .attr("y", margin.y - 10);

@@ -52,7 +52,7 @@ viewHierarchicalBarChart = {
         chart.append("text")
             .attr("class", "rank-info")
             .style("font", "sans-serif")
-            .style("font-size", 20)
+            .style("font-size", "20px")
             .style("fill", "black")
             .style("opacity", 0.5)
 
@@ -253,7 +253,7 @@ viewHierarchicalBarChart = {
                 .style("transform", `translate(0px, ${margin.top}px)`)
                 .style("text-anchor", "end")
                 .style("font", "sans-serif")
-                .style("font-size", 10)
+                .style("font-size", "10px")
                 .style("fill", "black")
                 .text(function(d) {
                     let names = d.id.split("@"),
