@@ -97,7 +97,7 @@ let viewMiniChart = {
             .style("transform", `translate(${margin.x}px, ${margin.y}px)`);
 
         // Find max value of MS intensities and determine sample names (intensities)
-        let col = data.columns.find((ele) => ele.match(/;/)),
+        let col = Object.keys(data[0]).find((ele) => ele.match(/;/)),
             stringVals = "";
         if (!col) { return }
         data.forEach(ele => stringVals += ele[col] + ";");
