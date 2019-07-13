@@ -97,10 +97,10 @@ let ctrlMain = {
         sampleNames.forEach((sample) => {
             viewSamples.addSample(sample);
         });
-        // On click of a sample, display the correct information in chart
-        d3.selectAll(".sample-option")
-            .on("click", function() {
-                let sample = this.textContent,
+        // On sample selection, display the correct information in chart
+        d3.select("#samples")
+            .on("change", function() {
+                let sample = this.value,
                     index = sampleNames.indexOf(sample),
                     data = ctrlMain.getCurrentData();
                 ctrlMain.setCurrentSample(sample);
