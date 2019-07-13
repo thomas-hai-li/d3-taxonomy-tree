@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/charts.css">
     <link rel="stylesheet" href="css/d3-context-menu.css">
+    <!-- User's Data -->
+    <script src="data/tree.js"></script>
 </head>
 
 <body>
@@ -21,7 +23,6 @@
         <a class="text-light" href="#" data-toggle="modal" data-target="#about-modal">About</a>
         <a class="text-light" href="#" data-toggle="modal" data-target="#feedback-modal">Submit Feedback</a>
         <select id="chart-selection" class="col-sm-2 custom-select">
-            <option value="default">Select chart</option>
             <option value="simple-tree">Simple Tree</option>
             <option value="radial-tree">Radial Tree</option>
             <option value="hierarchical-bars">Hierarchical Bar Chart</option>
@@ -36,15 +37,13 @@
             <div class="col-lg-2 bg-light shadow">
                 <div class="sidebar py-3 d-flex flex-column h-100">
                     <div class="sidebar-item">
-                        <label for="files" class="text-primary">Datasets</label>
+                        <label for="samples" class="text-primary">Samples</label>
                         <button class="btn btn-sm btn-light" data-toggle="modal" data-target="#datasets-modal"><i class="fas fa-info-circle"></i></button>
-                        <select id="uploaded-files" class="form-control" size="15">
-                            <option class="sample-data">sample1.csv</option>
-                            <option class="sample-data">sample2.csv</option>
+                        <select id="samples" class="form-control" size="15">
                         </select>
                     </div>
-                    <input type="file" id="file-upload" style="display: none;" multiple/>
-                    <button class="sidebar-item btn btn-sm btn-outline-primary btn-block" onclick="document.getElementById('file-upload').click();">Upload</button>
+                    <input type="file" id="file-upload" style="display: none;"/>
+                    <button class="sidebar-item btn btn-sm btn-outline-primary btn-block" onclick="document.getElementById('file-upload').click();">Change File</button>
                     <div id="toolbar" class="sidebar-item btn-group">
                         <button class="btn btn-sm btn-outline-dark" id="zoom-in"><i class="fas fa-search-plus"></i></button>
                         <button class="btn btn-sm btn-outline-dark" id="zoom-out"><i class="fas fa-search-minus"></i></button>
@@ -64,7 +63,7 @@
             <!-- Visualization window -->
             <div class="col-lg-10">
                 <div id="main-view" class="p-2 h-100 d-flex flex-column justify-content-between">
-                    <div class="row chart border flex-fill my-1">
+                    <div class="row border flex-fill my-1">
                         <svg id="chart-display" xmlns="http://www.w3.org/2000/svg"></svg>
                         <div id="csv-display">
                             <table class="csv-data table table-striped">
@@ -155,14 +154,11 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <h6 class="text-primary">File format</h6>
-                    <p>Files should be of type <strong>csv</strong> and obtained from iMetaLab's data processing module.</p>
-                    <h6 class="text-primary">Uploading and Removing Datasets</h6>
-                    <p>To quickly skim through datasets, you can select as many files as you'd like after
-                        pressing the upload button. To visualize a dataset, simply select an item from the list.
-                        To delete it from the list, right-click and select Remove.</p>
-                    <h6 class="text-primary">Viewing Raw Data</h6>
-                    <p>You can view datasets in a table by right-clicking and selecting View in Table.</p>
+                    <h6 class="text-primary">Browsing Different Samples</h6>
+                    <p>All of your samples have been loaded in the list below. Clicking on a seleection will display their corresponding MS
+                        intensities.</p>
+                    <h6 class="text-primary">Changing Files</h6>
+                    <p>You may upload another file if you'd like. They should be of type <strong>csv</strong> and obtained from iMetaLab's data processing module.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
@@ -306,7 +302,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>One or more files did not match the correct format (.csv) and were not added to the list.</p>
+                    <p>The file did not match the correct format and was not loaded.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>

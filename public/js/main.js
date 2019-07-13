@@ -3,8 +3,9 @@ let model = {
         width: parseInt(d3.select("#chart-display").style("width")),
         height: parseInt(d3.select("#chart-display").style("height"))
     },
-    chartType: "default",
-    currentData: null,
+    chartType: "simple-tree",
+    currentData: null,  // Array of objects, loaded from csv
+    currentSample: null,  // String, determined from user selection
     hierarchical: {
         tree: null,
         root: null,
@@ -31,61 +32,47 @@ let model = {
 }
 
 let ctrlMain = {
-    // Responsible for file handling, building charts, and getting data from model
+    // Responsible for file handling, building charts, and getting/setting data from model
     init: function() {
-        viewDatasets.init();
+        viewSamples.init();
         viewTreeChart.init();
         viewHierarchicalBarChart.init();
         viewZoom.init();
         // viewBrush.init();
         this.onFileChange();
         this.onChartTypeChange();
+        // Load data from global variable and save each node's value if it changes
+        let dataParsed = JSON.parse(data);
+        dataParsed = dataParsed.map((e) => {
+            e._value = e.value;
+            return e;
+        });
+        this.setCurrentData(dataParsed);
+        this.parseSamples(this.getCurrentData());
+        // Load the data immediately:
+        this.buildChart(this.getCurrentData());
     },
     onFileChange: function() {
-        const sampleData = document.querySelectorAll(".sample-data"),
-            upload = document.querySelector("#file-upload");
-        
-        // For immediately loading data
-        sampleData.forEach((sample) => {
-            sample.addEventListener("click", () => {
-                const fileName = sample.textContent;
-                this.setCurrentData(fileName);
-                d3.csv(`csv/${fileName}`).then(d => {
-                    sessionStorage[fileName] = d;       // store as string, not array
-                    console.log(d);
-                    ctrlMain.buildChart(d)});
-            });
-        });
+        const upload = document.querySelector("#file-upload");
 
-        // For uploading
         upload.addEventListener("change", (e) => {
-            const files = e.target.files,
+            const file = e.target.files[0],
                 fileTypeCSV = /csv.*/;
-            let hasInvalid = false;
 
-            for(let i = 0; i < files.length; i++) {
-                if (files[i].name.match(fileTypeCSV)) {
-                    // Add to dataset view
-                    const file = files[i];
-                    viewDatasets.addFile(file.name);
-                    // Bind data to element
-                    const elem = document.getElementById(file.name);
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        sessionStorage[file.name] = reader.result;
-                        elem.addEventListener("click", () => {
-                            this.setCurrentData(file.name);
-                            const data = d3.csvParse(sessionStorage[file.name]);    // array of objects
-                            this.buildChart(data);
-                        });
-                    }
-                    reader.readAsText(file);
+            if (file.name.match(fileTypeCSV)) {
+                // parse the csv and set as current data
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const data = d3.csvParse(reader.result);    // array of objects
+                    this.setCurrentData(data);
+                    // Setup samples in the list
+                    this.parseSamples(data);
+                    // build the chart
+                    this.buildChart(this.getCurrentData());
                 }
-                else {
-                    hasInvalid = true;
-                }
+                reader.readAsText(file);
             }
-            if (hasInvalid) {
+            else {
                 $("#warning-modal").modal()
             }
         });
@@ -93,28 +80,50 @@ let ctrlMain = {
     onChartTypeChange: function() {
         const chartSelection = document.getElementById("chart-selection");
         chartSelection.addEventListener("change", () => {
-            const type = chartSelection.value;
-            const currentData = this.getCurrentData();
+            const type = chartSelection.value,
+                data = this.getCurrentData();
             this.setChartType(type);
-            if (currentData) {
-                const data = d3.csvParse(sessionStorage[currentData]);
+            if (data) {
                 this.buildChart(data);
             }
         });
+    },
+    parseSamples: function(data) {
+        // Accepts array of objects as data, pareses for the individual samples and calls the view to render them.
+        // In the csv, the column is usually formatted as such: "Intensity s1; Intensity s2; Intensity s3; ..."
+        const col = Object.keys(data[0]).find((ele) => ele.match(/;/)),
+            sampleNames = col.split(";");
+        viewSamples.clearPrevious();
+        sampleNames.forEach((sample) => {
+            viewSamples.addSample(sample);
+        });
+        // On click of a sample, display the correct information in chart
+        d3.selectAll(".sample-option")
+            .on("click", function() {
+                let sample = this.textContent,
+                    index = sampleNames.indexOf(sample),
+                    data = ctrlMain.getCurrentData();
+                ctrlMain.setCurrentSample(sample);
+                data.map((e) => {
+                    let intensities = e[col].split(";").map((e) => Number(e));
+                    e.value = intensities[index];
+                    return e;
+                });
+                ctrlMain.buildChart(data);
+            });
     },
     buildChart: function(data) {
         // Accepts array of objects (csv) as data
         const type = this.getChartType();
         document.querySelector("#chart-display").style.display = "block";
         document.querySelector("#csv-display").style.display = "none";
+
         switch (type) {
-            case "default":
             case "simple-tree":
             case "radial-tree":
                 this.buildRoot(data);
                 this.buildTree();
                 viewTreeChart.render(type);
-                // viewZoom.render(type);
                 // viewBrush.render();
                 ctrlToolbar.init();
                 viewMiniChart.init(data);
@@ -145,7 +154,9 @@ let ctrlMain = {
         model.hierarchical.tree = tree;
     },
     setCurrentData: (data) => model.currentData = data,
+    setCurrentSample: (sample) => model.currentSample = sample,
     getCurrentData: () => model.currentData,
+    getCurrentSample: () => model.currentSample,
     setChartType: (type) => model.chartType = type,
     getChartType: () => model.chartType,
     getDim: () => model.dim,

@@ -1,41 +1,28 @@
-let viewDatasets = {
+let viewSamples = {
     init: function() {
-        // Attach contextmenu to all SAMPLE data
-        this.menu = [
-            {
-                title: "View in Table",
-                action: function (elm, d, i) {
-                    const fileName = elm.textContent;
-                    d3.csv(`csv/${fileName}`).then(d => viewDatasets.drawTable(d));
-                }
-            },            
+        this.menu = [    
             {
                 title: "Remove",
-                action: function (elm, d, i) {
-                    let fileName = elm.textContent;
-                    sessionStorage.removeItem(fileName);
-                    if (ctrlMain.getCurrentData() === fileName) {
-                        d3.select("#chart-display #chart")
-                            .selectAll("*")
-                            .remove()
-                    }
-                    elm.remove();                    
+                action: function (ele, d, i) {
+                    ele.remove();                    
                 }
-            },
+            }
         ];
-        d3.selectAll(".sample-data")
-            .on("contextmenu", d3.contextMenu(this.menu));
     },
-    addFile: function(fileName) {
+    clearPrevious: function() {
+        d3.select("#samples").selectAll("*").remove();
+    },
+    addSample: function(sampleName) {
         // Add file to datasets and attach contextmenu
-        let newFileListing = document.createElement("option"),
-            newFileText = document.createTextNode(fileName),
-            datasets = document.querySelector("#uploaded-files");
-        
-        newFileListing.id = fileName;
-        newFileListing.appendChild(newFileText);
-        datasets.appendChild(newFileListing);
-        d3.select(newFileListing).on("contextmenu", d3.contextMenu(this.menu)); 
+        let newSampleOption = document.createElement("option"),
+            newSampleText = document.createTextNode(sampleName),
+            sampleList = document.querySelector("#samples");
+
+        newSampleOption.id = sampleName;
+        newSampleOption.classList.add("sample-option");
+        newSampleOption.appendChild(newSampleText);
+        sampleList.appendChild(newSampleOption);
+        d3.select(newSampleOption).on("contextmenu", d3.contextMenu(this.menu));
     },
     drawTable: function (data) {
         d3.select("#csv-display").style("display", "block");

@@ -29,8 +29,20 @@ viewHierarchicalBarChart = {
             { root } = ctrlMain.getHierarchical();
         root.each((node) => node.value = Number(node.data.value))
             .sort((a, b) => b.value - a.value);
+
+        // Display name of sample viewed
+        let sample = ctrlMain.getCurrentSample();
+        this.svg.append("text")
+            .attr("class", "current-sample")
+            .attr("y", 20)
+            .attr("x", margin.right)
+            .style("font", "sans-serif")
+            .style("font-size", "20px")
+            .style("fill", "black")
+            .style("opacity", 0.50)
+            .text("Sample: " + (sample || "Averaged Values"));
         
-        chart.style("transform", `translate(${margin.right}px, ${margin.top}px)`);  // is this okay?
+        chart.style("transform", `translate(${margin.right}px, ${margin.top + 20}px)`);
 
         chart.append("rect")
             .attr("class", "background")
@@ -54,7 +66,7 @@ viewHierarchicalBarChart = {
             .style("font", "sans-serif")
             .style("font-size", "20px")
             .style("fill", "black")
-            .style("opacity", 0.5)
+            .style("opacity", 0.75)
 
         const ranks = { // key represents depth of each node under root
                 0: "All ",
@@ -158,7 +170,6 @@ viewHierarchicalBarChart = {
             var end = duration + d.children.length * delay;
 
             // Update the rank information
-            console.log(d.parent)
             let rank,
                 taxa = d.parent.id.split("@"),
                 taxon = taxa.pop();

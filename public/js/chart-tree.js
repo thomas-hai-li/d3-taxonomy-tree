@@ -26,6 +26,18 @@ let viewTreeChart = {
         tooltip.transition()
             .duration(tooltipDuration)
             .style("opacity", 0);
+
+        // Display name of sample viewed
+        let sample = ctrlMain.getCurrentSample();
+        this.svg.append("text")
+            .attr("class", "current-sample")
+            .attr("y", 20)
+            .attr("x", 5)
+            .style("font", "sans-serif")
+            .style("font-size", "20px")
+            .style("fill", "black")
+            .style("opacity", 0.5)
+            .text("Sample: " + (sample || "Averaged Values"));
         
         const chart = this.svg.append("g")
             .attr("id", "chart");
