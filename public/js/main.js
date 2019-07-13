@@ -187,7 +187,7 @@ let ctrlToolbar = {
     init: function() {
         // Export buttons
         d3.select("#convert-svg").on("click", () => {
-            if (!viewTreeChart.ng) {
+            if (! document.querySelector("#chart-display g")) {
                 alert("No chart to export!")
             } else {
                 // Really hacky, pls rework
@@ -195,7 +195,7 @@ let ctrlToolbar = {
                     sheets = document.styleSheets,
                     style;
                 for (let i = 0; i < sheets.length; i++) {
-                    if (sheets[i].href.match("charts.css")) {style = sheets[i].cssRules || sheet[i].rules;}
+                    if (sheets[i].href && sheets[i].href.match("charts.css")) {style = sheets[i].cssRules || sheet[i].rules;}
                 }
                 for (let i = 0; i < style.length; i++) {
                     svgData += style[i].cssText;
