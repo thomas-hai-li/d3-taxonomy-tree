@@ -13,11 +13,10 @@ let viewTreeChart = {
     },
     render: function(type) {
         // Renders either simple or radial tree
-        const { tree, color } = ctrlMain.getHierarchical(),
+        const { root, tree, color } = ctrlMain.getHierarchical(),
               { width, height } = ctrlMain.getDim();
         const tooltip = d3.select(".tooltip"),
               tooltipDuration = 200;
-        let { root } = ctrlMain.getHierarchical();
         root.sort((a, b) => a.data.value - b.data.value);
             // .sort((a, b) => (a.height - b.height) || a.id.localeCompare(b.id)); // by alphabetical
             

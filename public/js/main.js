@@ -3,12 +3,13 @@ let model = {
         width: parseInt(d3.select("#chart-display").style("width")),
         height: parseInt(d3.select("#chart-display").style("height"))
     },
-    chartType: "simple-tree",
+    chartType: document.getElementById("chart-selection").value,
     currentData: null,  // Array of objects, loaded from csv
     currentSample: null,  // String, determined from user selection
     hierarchical: {
-        tree: null,
         root: null,
+        tree: null,
+        treemap: null,
         color: {
             currentRank: 2,
             ranks: {
@@ -37,6 +38,7 @@ let ctrlMain = {
         viewSamples.init();
         viewTreeChart.init();
         viewHierarchicalBarChart.init();
+        viewStaticTreemapChart.init();
         viewZoom.init();
         // viewBrush.init();
         this.onFileChange();
@@ -125,7 +127,7 @@ let ctrlMain = {
                 this.buildTree();
                 viewTreeChart.render(type);
                 // viewBrush.render();
-                ctrlToolbar.init();
+                ctrlToolbar.initTreeChart();
                 viewMiniChart.init(data);
                 break;
             case "hierarchical-bars":
@@ -134,7 +136,15 @@ let ctrlMain = {
                 // render barchart
                 // disable toolbar
                 // disable mini chart?
+                break;
+            case "static-treemap":
+                this.buildRoot(data);
+                this.buildTreemap();
+                viewStaticTreemapChart.render();
+                ctrlToolbar.initTreemapChart();
+                break;
         }
+        ctrlExportChart.init();
     },
     buildRoot: function(data) {
         // Generate the root data structure
@@ -152,6 +162,14 @@ let ctrlMain = {
             .separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
 
         model.hierarchical.tree = tree;
+    },
+    buildTreemap: function() {
+        const { width, height } = this.getDim();
+        const treemap = d3.treemap()
+            .size([width*0.95, height*0.95])
+            .padding(2)
+        
+        model.hierarchical.treemap = treemap;
     },
     setCurrentData: (data) => model.currentData = data,
     setCurrentSample: (sample) => model.currentSample = sample,
@@ -184,6 +202,92 @@ let ctrlMain = {
 }
 
 let ctrlToolbar = {
+    initTreeChart: function() {
+        d3.selectAll(".toolbar-button")
+            .attr("disabled", null);
+        // 🔍 Magnifying buttons control zoom (+/-)
+        const duration = 500;
+        d3.select("#zoom-in").on("click", () => {
+            viewZoom.zoom
+                .scaleBy(viewZoom.svg.transition().duration(duration), 1.3);
+        });
+        d3.select("#zoom-out").on("click", () => {
+            viewZoom.zoom
+                .scaleBy(viewZoom.svg.transition().duration(duration), 1 / 1.3);
+        });
+        // 🅰 A+ A- buttons control fontsize
+        d3.select("#font-up").on("click", () => {
+            let labels = d3.selectAll(".nodeLabel"),
+                fontSize = parseInt(labels.style("font-size")),
+                maxFontSize = 20;
+            if (fontSize < maxFontSize) {
+                labels.style("font-size", ++fontSize + "px")
+            }
+        });
+        d3.select("#font-down").on("click", () => {
+            let labels = d3.selectAll(".nodeLabel"),
+                fontSize = parseInt(labels.style("font-size")),
+                minFontSize = 9;
+            if (fontSize > minFontSize) {
+                labels.style("font-size", --fontSize + "px")
+            }
+        });
+        // ⭕ 🅰 buttons toggle nodes and node-labels respectively
+        d3.select("#toggle-node-circles").on("click", () => {
+            d3.selectAll(".node")
+                .classed("node-normalized", d3.selectAll(".node").classed("node-normalized") ? false : true);
+        });
+        d3.select("#toggle-node-labels").on("click", () => {
+            let labels = d3.selectAll(".nodeLabel"),
+                display = labels.style("display");
+            
+            if (display === "block") {
+                labels.style("display", "none");
+                viewTreeChart.drawLabels = false;
+            } else {
+                labels.style("display", "block");
+                viewTreeChart.drawLabels = true;
+            }
+        });
+        // Slider controls color based on taxonomic rank (kingdom, phylum, etc ...)
+        const slider = d3.select("#slider"),
+            colorLabel = d3.select("#color-rank");
+        
+        slider.attr("disabled", null);
+        slider.on("input", () => {
+            const { color } = ctrlMain.getHierarchical();
+            const { taxonLevelColor, branchColor } = color;
+            color.currentRank = parseInt(slider.valueOf()._groups[0][0].value);
+            colorLabel.text(color.ranks[color.currentRank]);
+            d3.selectAll(".node circle")
+                .style("fill", (d) => viewTreeChart.colorNode(d, taxonLevelColor, branchColor))
+        });
+    },
+    initTreemapChart: function () {
+        // Disable font and toggle buttons
+        d3.selectAll(".font-button, .toggle-button")
+            .attr("disabled", true);
+        d3.selectAll(".zoom-button")
+            .attr("disabled", null);
+
+        // 🔍 Magnifying buttons control depth of depth of nodes/rectangles
+        d3.select("#zoom-in").on("click", () => {
+            if (viewStaticTreemapChart.drawDepth < 8) {
+                viewStaticTreemapChart.drawDepth++;
+                viewStaticTreemapChart.render();
+            }
+        });
+        d3.select("#zoom-out").on("click", () => {
+            if (viewStaticTreemapChart.drawDepth > 0) {
+              viewStaticTreemapChart.drawDepth--;
+              viewStaticTreemapChart.render();
+            }
+        });
+
+    }
+}
+
+let ctrlExportChart = {
     init: function() {
         // Export buttons
         d3.select("#convert-svg").on("click", () => {
@@ -212,61 +316,6 @@ let ctrlToolbar = {
                 downloadLink.click();
                 document.body.removeChild(downloadLink);
             }
-        });
-        // Toggle buttons
-        d3.select("#toggle-node-circles").on("click", () => {
-            d3.selectAll(".node")
-                .classed("node-normalized", d3.selectAll(".node").classed("node-normalized") ? false : true);
-        });
-        d3.select("#toggle-node-labels").on("click", () => {
-            let labels = d3.selectAll(".nodeLabel"),
-                display = labels.style("display");
-            
-            if (display === "block") {
-                labels.style("display", "none");
-                viewTreeChart.drawLabels = false;
-            } else {
-                labels.style("display", "block");
-                viewTreeChart.drawLabels = true;
-            }
-        });
-        // Zoom buttons
-        const duration = 500;
-        d3.select("#zoom-in").on("click", () => {
-            viewZoom.zoom
-                .scaleBy(viewZoom.svg.transition().duration(duration), 1.3);
-        });
-        d3.select("#zoom-out").on("click", () => {
-            viewZoom.zoom
-                .scaleBy(viewZoom.svg.transition().duration(duration), 1 / 1.3);
-        });
-        // Font buttons
-        d3.select("#font-up").on("click", () => {
-            let labels = d3.selectAll(".nodeLabel"),
-                fontSize = parseInt(labels.style("font-size"));
-            if (fontSize < 20) {
-                labels.style("font-size", ++fontSize + "px")
-            }
-        });
-        d3.select("#font-down").on("click", () => {
-            let labels = d3.selectAll(".nodeLabel"),
-                fontSize = parseInt(labels.style("font-size"));
-            if (fontSize > 9) {
-                labels.style("font-size", --fontSize + "px")
-            }
-        });
-        // Color Slider
-        const colorSlider = d3.select("#color-slider"),
-            colorLabel = d3.select("#color-rank");
-        
-        colorSlider.attr("disabled", null);
-        colorSlider.on("input", () => {
-            const { color } = ctrlMain.getHierarchical();
-            const { taxonLevelColor, branchColor } = color;
-            color.currentRank = parseInt(colorSlider.valueOf()._groups[0][0].value);
-            colorLabel.text(color.ranks[color.currentRank]);
-            d3.selectAll(".node circle")
-                .style("fill", (d) => viewTreeChart.colorNode(d, taxonLevelColor, branchColor))
         });
     }
 }

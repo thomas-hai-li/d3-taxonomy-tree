@@ -23,10 +23,10 @@
         <a class="text-light" href="#" data-toggle="modal" data-target="#about-modal">About</a>
         <a class="text-light" href="#" data-toggle="modal" data-target="#feedback-modal">Submit Feedback</a>
         <select id="chart-selection" class="col-sm-2 custom-select">
+            <option value="static-treemap">Treemap</option>
             <option value="simple-tree">Simple Tree</option>
             <option value="radial-tree">Radial Tree</option>
             <option value="hierarchical-bars">Hierarchical Bar Chart</option>
-            <option value="treemap">Treemap (coming soon)</option>
         </select>
     </nav>
 
@@ -45,16 +45,16 @@
                     <input type="file" id="file-upload" style="display: none;"/>
                     <button class="sidebar-item btn btn-sm btn-outline-primary btn-block" onclick="document.getElementById('file-upload').click();">Change File</button>
                     <div id="toolbar" class="sidebar-item btn-group">
-                        <button class="btn btn-sm btn-outline-dark" id="zoom-in"><i class="fas fa-search-plus"></i></button>
-                        <button class="btn btn-sm btn-outline-dark" id="zoom-out"><i class="fas fa-search-minus"></i></button>
-                        <button class="btn btn-sm btn-outline-dark" id="font-up"><i class="fas fa-font"></i><sup>+</sup></button>
-                        <button class="btn btn-sm btn-outline-dark" id="font-down"><i class="fas fa-font"></i><sup>-</sup></button>
-                        <button class="btn btn-sm btn-outline-dark" id="toggle-node-labels"><i class="fas fa-font"></i></button>
-                        <button class="btn btn-sm btn-outline-dark" id="toggle-node-circles"><i class="fas fa-genderless"></i></button>
-                        <button class="btn btn-sm btn-outline-primary" id="toggle-node-labels" data-toggle="modal" data-target="#tools-modal"><i class="fas fa-question"></i></button>
+                        <button class="btn btn-sm btn-outline-dark toolbar-button zoom-button" id="zoom-in"><i class="fas fa-search-plus"></i></button>
+                        <button class="btn btn-sm btn-outline-dark toolbar-button zoom-button" id="zoom-out"><i class="fas fa-search-minus"></i></button>
+                        <button class="btn btn-sm btn-outline-dark toolbar-button font-button" id="font-up"><i class="fas fa-font"></i><sup>+</sup></button>
+                        <button class="btn btn-sm btn-outline-dark toolbar-button font-button" id="font-down"><i class="fas fa-font"></i><sup>-</sup></button>
+                        <button class="btn btn-sm btn-outline-dark toolbar-button toggle-button" id="toggle-node-labels"><i class="fas fa-font"></i></button>
+                        <button class="btn btn-sm btn-outline-dark toolbar-button toggle-button" id="toggle-node-circles"><i class="fas fa-genderless"></i></button>
+                        <button class="btn btn-sm btn-outline-primary toolbar-button" id="toolbar-help" data-toggle="modal" data-target="#tools-modal"><i class="fas fa-question"></i></button>
                     </div>
-                    <label for="color-slider" id="color-rank" class="my-0">Color by</label>
-                    <input type="range" id="color-slider" class="custom-range" name="color-slider" value="2" min="2" max="8" step="1" disabled>
+                    <label for="slider" id="color-rank" class="my-0">Color by</label>
+                    <input type="range" id="slider" class="custom-range" name="slider" value="2" min="2" max="8" step="1" disabled>
                     <div class="sidebar-item mt-auto border">
                         <svg id="mini-chart" xmlns="http://www.w3.org/2000/svg"></svg>
                     </div>
@@ -320,6 +320,7 @@
     <script type="text/javascript" src="js/d3-context-menu.js"></script>
     <script type="text/javascript" src="js/chart-tree.js"></script>
     <script type="text/javascript" src="js/chart-hierarchical-bars.js"></script>
+    <script type="text/javascript" src="js/chart-static-treemap.js"></script>
     <script type="text/javascript" src="js/view-sidebar.js"></script>
     <script type="text/javascript" src="js/view-utils.js"></script>
     <script type="text/javascript" src="js/main.js"></script>
