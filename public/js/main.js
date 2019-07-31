@@ -46,13 +46,24 @@ let ctrlMain = {
         // Load data from global variable and save each node's value if it changes
         let dataParsed = JSON.parse(data);
         dataParsed = dataParsed.map((e) => {
-            e._value = e.value;
+            e.value = +e.value;
+            e.avgIntensity = e.value;   // saved
+            
+            const col = Object.keys(e).find((ele) => ele.match(/;/)),
+                sampleNames = col.split(";"),
+                sampleIntensies = e[col].split(";").map(val => +val);
+            delete e[col];
+            e.samples = new Object();
+            sampleNames.forEach((sample, i) => {
+                e.samples[sample] = sampleIntensies[i];
+            });
             return e;
         });
+
+        console.log(dataParsed)
         this.setCurrentData(dataParsed);
         this.parseSamples(this.getCurrentData());
-        // Load the data immediately:
-        this.buildChart(this.getCurrentData());
+        this.buildChart(this.getCurrentData());     // load the data immediately
     },
     onFileChange: function() {
         const upload = document.querySelector("#file-upload");
@@ -91,10 +102,9 @@ let ctrlMain = {
         });
     },
     parseSamples: function(data) {
-        // Accepts array of objects as data, pareses for the individual samples and calls the view to render them.
+        // Accepts array of objects as data, parses for the individual samples and calls the view to render them.
         // In the csv, the column is usually formatted as such: "Intensity s1; Intensity s2; Intensity s3; ..."
-        const col = Object.keys(data[0]).find((ele) => ele.match(/;/)),
-            sampleNames = col.split(";");
+        const sampleNames = Object.keys(data[0].samples);
         viewSamples.clearPrevious();
         sampleNames.forEach((sample) => {
             viewSamples.addSample(sample);
@@ -102,13 +112,10 @@ let ctrlMain = {
         // On sample selection, display the correct information in chart
         d3.select("#samples")
             .on("change", function() {
-                let sample = this.value,
-                    index = sampleNames.indexOf(sample),
-                    data = ctrlMain.getCurrentData();
+                let sample = this.value;
                 ctrlMain.setCurrentSample(sample);
                 data.map((e) => {
-                    let intensities = e[col].split(";").map((e) => Number(e));
-                    e.value = intensities[index];
+                    e.value = e.samples[sample];
                     return e;
                 });
                 ctrlMain.buildChart(data);
@@ -116,10 +123,10 @@ let ctrlMain = {
     },
     buildChart: function(data) {
         // Accepts array of objects (csv) as data
+        // document.querySelector("#chart-display").style.display = "block";    // for removing tabular csv view
+        // document.querySelector("#csv-display").style.display = "none";
+        
         const type = this.getChartType();
-        document.querySelector("#chart-display").style.display = "block";
-        document.querySelector("#csv-display").style.display = "none";
-
         switch (type) {
             case "simple-tree":
             case "radial-tree":
@@ -142,6 +149,7 @@ let ctrlMain = {
                 this.buildTreemap();
                 viewStaticTreemapChart.render();
                 ctrlToolbar.initTreemapChart();
+                viewMiniChart.init(data);
                 break;
         }
         ctrlExportChart.init();
@@ -166,16 +174,15 @@ let ctrlMain = {
     buildTreemap: function() {
         const { width, height } = this.getDim();
         const treemap = d3.treemap()
-            .size([width*0.95, height*0.95])
-            .padding(2)
+            .size([width*0.95, height*0.95]);
         
         model.hierarchical.treemap = treemap;
     },
     setCurrentData: (data) => model.currentData = data,
     setCurrentSample: (sample) => model.currentSample = sample,
+    setChartType: (type) => model.chartType = type,
     getCurrentData: () => model.currentData,
     getCurrentSample: () => model.currentSample,
-    setChartType: (type) => model.chartType = type,
     getChartType: () => model.chartType,
     getDim: () => model.dim,
     getHierarchical: () => model.hierarchical,
@@ -265,14 +272,14 @@ let ctrlToolbar = {
     },
     initTreemapChart: function () {
         // Disable font and toggle buttons
-        d3.selectAll(".font-button, .toggle-button")
+        d3.selectAll("#toggle-node-circles")
             .attr("disabled", true);
-        d3.selectAll(".zoom-button")
+        d3.selectAll(".zoom-button, .font-button, #toggle-node-labels")
             .attr("disabled", null);
 
         // 🔍 Magnifying buttons control depth of depth of nodes/rectangles
         d3.select("#zoom-in").on("click", () => {
-            if (viewStaticTreemapChart.drawDepth < 8) {
+            if (viewStaticTreemapChart.drawDepth < 7) {
                 viewStaticTreemapChart.drawDepth++;
                 viewStaticTreemapChart.render();
             }
@@ -283,7 +290,49 @@ let ctrlToolbar = {
               viewStaticTreemapChart.render();
             }
         });
-
+        // 🅰 A+ A- buttons control fontsize
+        d3.select("#font-up").on("click", () => {
+            let labels = d3.selectAll(".nodeLabel"),
+                fontSize = parseInt(labels.style("font-size")),
+                maxFontSize = 20;
+            if (fontSize < maxFontSize) {
+                labels.style("font-size", ++fontSize + "px")
+            }
+        });
+        d3.select("#font-down").on("click", () => {
+            let labels = d3.selectAll(".nodeLabel"),
+                fontSize = parseInt(labels.style("font-size")),
+                minFontSize = 9;
+            if (fontSize > minFontSize) {
+                labels.style("font-size", --fontSize + "px")
+            }
+        });
+        // 🅰 Toggle node labels
+        d3.select("#toggle-node-labels").on("click", () => {
+            let labels = d3.selectAll(".nodeLabel"),
+                display = labels.style("display");
+            
+            if (display === "block") {
+                labels.style("display", "none");
+                viewTreeChart.drawLabels = false;
+            } else {
+                labels.style("display", "block");
+                viewTreeChart.drawLabels = true;
+            }
+        });
+        // Slider controls color based on taxonomic rank (kingdom, phylum, etc ...)
+        const slider = d3.select("#slider"),
+            colorLabel = d3.select("#color-rank");
+        
+        slider.attr("disabled", null);
+        slider.on("input", () => {
+            const { color } = ctrlMain.getHierarchical();
+            const { taxonLevelColor, branchColor } = color;
+            color.currentRank = parseInt(slider.valueOf()._groups[0][0].value);
+            colorLabel.text(color.ranks[color.currentRank]);
+            d3.selectAll("rect")
+                .style("fill", (d) => viewStaticTreemapChart.colorNode(d, taxonLevelColor, branchColor))
+        });
     }
 }
 

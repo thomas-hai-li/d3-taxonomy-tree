@@ -1,4 +1,4 @@
-viewHierarchicalBarChart = {
+const viewHierarchicalBarChart = {
     init: function() {
         this.svg = d3.select("#chart-display");
 

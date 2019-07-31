@@ -1,10 +1,44 @@
-let viewTreeChart = {
+const viewTreeChart = {
     init: function() {
         this.svg = d3.select("#chart-display")
             .style("background-color", "white")
             .on("contextmenu", () => d3.event.preventDefault());
-        
         this.drawLabels = true;
+        this.menu = [
+            {
+                title: "View MS intensities",
+                action: function(elm, d, i) {
+                    let sampleIntensities = Object.values(d.data.samples);
+                    if (!sampleIntensities) {
+                        alert("No additional MS quantities for this dataset");  // change to modal
+                        return;
+                    }
+                    const ids = d.id.split("@"),
+                        name = ids[ids.length - 1];
+                    viewMiniChart.render(name, sampleIntensities);
+                }
+            },
+            {
+                title: "Collapse all other nodes",
+                action: function(elm, d, i) {
+                    // Make selected node visible
+                    if (elm.classList.contains("node-collapsed")) {
+                        viewTreeChart.collapseNode(d, elm);
+                    }
+                    // Collapse all other nodes
+                    let depth = d.depth;
+                    let id = d.id;
+                    let otherNodes = d3.selectAll(".node").filter(d => d.depth === depth && d.id !== id);
+
+                    otherNodes.nodes().forEach(node => {
+                        if (! node.classList.contains("node-collapsed")) {
+                            viewTreeChart.collapseNode(node.__data__, node);
+                        }
+                    });
+                    viewTreeChart.render(ctrlMain.getChartType());
+                }
+            }
+        ];
     },
     project: function(x, y) {
         // calculate node and link position For radial tree
@@ -80,50 +114,6 @@ let viewTreeChart = {
         const node = chart.selectAll("g.node")
             .data(root.descendants());
 
-        const menu = [
-            {
-                title: "View MS intensities",
-                action: function(elm, d, i) {
-                    // Search for intensity column
-                    let data;
-                    for (key in d.data) {
-                        if (key.match(/;/)) {
-                            data = d.data[key].split(";");
-                            data = data.map((e) => parseFloat(e));
-                            break;
-                        }
-                    }
-                    if (!data) {
-                        alert("No additional MS quantities for this dataset");  // change to modal
-                        return;
-                    }
-                    ids = d.id.split("@");
-                    name = ids[ids.length - 1];
-                    viewMiniChart.render(name, data);
-                }
-            },
-            {
-                title: "Collapse all other nodes",
-                action: function(elm, d, i) {
-                    // Make selected node visible
-                    if (elm.classList.contains("node-collapsed")) {
-                        viewTreeChart.collapseNode(d, elm);
-                    }
-                    // Collapse all other nodes
-                    let depth = d.depth;
-                    let id = d.id;
-                    let otherNodes = d3.selectAll(".node").filter(d => d.depth === depth && d.id !== id);
-
-                    otherNodes.nodes().forEach(node => {
-                        if (! node.classList.contains("node-collapsed")) {
-                            viewTreeChart.collapseNode(node.__data__, node);
-                        }
-                    });
-                    viewTreeChart.render(ctrlMain.getChartType());
-                }
-            }
-        ];
-
         const nodeEnter = node.enter().append("g")
             .classed("node", true)
             .on("mouseover", function(d) {
@@ -152,7 +142,7 @@ let viewTreeChart = {
                 viewTreeChart.collapseNode(d, this);  // pass in data and this elem                
                 viewTreeChart.render(ctrlMain.getChartType());
             })
-            .on("contextmenu", d3.contextMenu(menu));
+            .on("contextmenu", d3.contextMenu(this.menu));
     
         // Update nodes
         let nodeUpdate = node.merge(nodeEnter)

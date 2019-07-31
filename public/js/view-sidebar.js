@@ -13,7 +13,7 @@ let viewSamples = {
         d3.select("#samples").selectAll("*").remove();
     },
     addSample: function(sampleName) {
-        // Add file to datasets and attach contextmenu
+        // Add to list and attach contextmenu
         let newSampleOption = document.createElement("option"),
             newSampleText = document.createTextNode(sampleName),
             sampleList = document.querySelector("#samples");
@@ -83,15 +83,15 @@ let viewMiniChart = {
         this.chart = d3.select("#mini-chart").append("g")
             .style("transform", `translate(${margin.x}px, ${margin.y}px)`);
 
-        // Find max value of MS intensities and determine sample names (intensities)
-        let col = Object.keys(data[0]).find((ele) => ele.match(/;/)),
-            stringVals = "";
-        if (!col) { return }
-        data.forEach(ele => stringVals += ele[col] + ";");
-        const vals = stringVals.split(";").map((ele) => Number(ele)),
-            maxVal = d3.max(vals);
+        let areSamples = data[0].samples;
+        if (!areSamples) { return }
             
-        this.intensities =  col.split(";").map((ele) => {
+        // Find max value of MS intensities
+        let values = [];
+        data.forEach(ele => { values = values.concat(Object.values(ele.samples)); });
+        const maxVal = d3.max(values);
+        
+        this.intensities =  Object.keys(data[0].samples).map((ele) => {
             return ele.replace("Intensity", "").trim();
         });
         
