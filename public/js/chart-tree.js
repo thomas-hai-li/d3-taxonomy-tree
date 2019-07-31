@@ -121,14 +121,14 @@ const viewTreeChart = {
                     .duration(tooltipDuration)
                     .style("opacity", .9);
                 if (viewTreeChart.drawLabels) {
-                    tooltip.html("Value: " + d.data.value)
+                    tooltip.html("Intensity: " + d.data.value)
                         .style("left", (d3.event.pageX) + "px")
                         .style("top", (d3.event.pageY - 20) + "px");
                 } else {
                     let names = d.data.id.split("@"),
                         name = names[names.length - 1];
 
-                    tooltip.html(name + "<br>" + "Value: " + d.data.value)
+                    tooltip.html(name + "<br>" + "Intensity: " + d.data.value)
                         .style("left", (d3.event.pageX) + "px")
                         .style("top", (d3.event.pageY - 20) + "px");
                 }
@@ -158,8 +158,8 @@ const viewTreeChart = {
             .attr("r", d => Math.log10(d.data.value + 1) + 2)
             .style("fill", d => this.colorNode(d, taxonLevelColor, branchColor));
         
-        const nodeLabels = nodeUpdate.append("text")
-            .attr("class", "nodeLabel")
+        const nodeLabel = nodeUpdate.append("text")
+            .attr("class", "node-label")
             .style("font", "sans-serif")
             .style("font-size", "10px")
             .style("fill", "black")
@@ -167,19 +167,19 @@ const viewTreeChart = {
             .text(d => d.id.substring(d.id.lastIndexOf("@") + 1));
         
         if (type === "radial-tree") {
-            nodeLabels
+            nodeLabel
                 .attr("dy", ".31em")
                 .attr("x", d => d.x < 180 === !d.children ? 6 : -6)
                 .style("text-anchor", d => d.x < 180 === !d.children ? "start" : "end");
             if (nodeUpdate.size() < 100) {
-                nodeLabels.attr("transform", d => "rotate(0)"); // no rotation if not too cluttered 
+                nodeLabel.attr("transform", d => "rotate(0)"); // no rotation if not too cluttered 
             }
             else {
-                nodeLabels.attr("transform", d => "rotate(" + (d.x < 180 ? d.x - 90 : d.x + 90) + ")");
+                nodeLabel.attr("transform", d => "rotate(" + (d.x < 180 ? d.x - 90 : d.x + 90) + ")");
             }
         }
         else {
-            nodeLabels
+            nodeLabel
                 .attr("dy", 4)
                 .attr("x", d => d.depth === 0 ? -90 : 6)
                 .style("text-anchor", "start");

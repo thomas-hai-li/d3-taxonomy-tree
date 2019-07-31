@@ -156,6 +156,7 @@ let ctrlMain = {
                 this.buildRoot(data);
                 this.buildPack();
                 viewCirclePacking.render();
+                viewMiniChart.init(data);
         }
         ctrlExportChart.init();
     },
@@ -186,6 +187,7 @@ let ctrlMain = {
     buildPack: function() {
         const { width, height } = this.getDim();
         const pack = d3.pack()
+            .size([width, height]);
         
         model.hierarchical.pack = pack;
     },
@@ -235,7 +237,7 @@ let ctrlToolbar = {
         });
         // 🅰 A+ A- buttons control fontsize
         d3.select("#font-up").on("click", () => {
-            let labels = d3.selectAll(".nodeLabel"),
+            let labels = d3.selectAll(".node-label"),
                 fontSize = parseInt(labels.style("font-size")),
                 maxFontSize = 20;
             if (fontSize < maxFontSize) {
@@ -243,7 +245,7 @@ let ctrlToolbar = {
             }
         });
         d3.select("#font-down").on("click", () => {
-            let labels = d3.selectAll(".nodeLabel"),
+            let labels = d3.selectAll(".node-label"),
                 fontSize = parseInt(labels.style("font-size")),
                 minFontSize = 9;
             if (fontSize > minFontSize) {
@@ -256,7 +258,7 @@ let ctrlToolbar = {
                 .classed("node-normalized", d3.selectAll(".node").classed("node-normalized") ? false : true);
         });
         d3.select("#toggle-node-labels").on("click", () => {
-            let labels = d3.selectAll(".nodeLabel"),
+            let labels = d3.selectAll(".node-label"),
                 display = labels.style("display");
             
             if (display === "block") {
@@ -303,7 +305,7 @@ let ctrlToolbar = {
         });
         // 🅰 A+ A- buttons control fontsize
         d3.select("#font-up").on("click", () => {
-            let labels = d3.selectAll(".nodeLabel"),
+            let labels = d3.selectAll(".node-label"),
                 fontSize = parseInt(labels.style("font-size")),
                 maxFontSize = 20;
             if (fontSize < maxFontSize) {
@@ -311,7 +313,7 @@ let ctrlToolbar = {
             }
         });
         d3.select("#font-down").on("click", () => {
-            let labels = d3.selectAll(".nodeLabel"),
+            let labels = d3.selectAll(".node-label"),
                 fontSize = parseInt(labels.style("font-size")),
                 minFontSize = 9;
             if (fontSize > minFontSize) {
@@ -320,7 +322,7 @@ let ctrlToolbar = {
         });
         // 🅰 Toggle node labels
         d3.select("#toggle-node-labels").on("click", () => {
-            let labels = d3.selectAll(".nodeLabel"),
+            let labels = d3.selectAll(".node-label"),
                 display = labels.style("display");
             
             if (display === "block") {

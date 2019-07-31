@@ -76,7 +76,7 @@ const viewStaticTreemapChart = {
 
         node.append("text")
                 .attr("clip-path", d => "url(#clip-" + d.data.id + ")")
-                .attr("class", "nodeLabel")
+                .attr("class", "node-label")
                 .style("display", d => this.drawLabels && d.depth === 0 ? "block" : "none")
             .selectAll("tspan")
                 .data(d => d.id.substring(d.id.lastIndexOf("@") + 1).split().concat((d.value)))
