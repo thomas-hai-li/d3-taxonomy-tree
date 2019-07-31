@@ -39,6 +39,7 @@ let ctrlMain = {
         viewTreeChart.init();
         viewHierarchicalBarChart.init();
         viewStaticTreemapChart.init();
+        viewCirclePacking.init();
         viewZoom.init();
         // viewBrush.init();
         this.onFileChange();
@@ -151,6 +152,10 @@ let ctrlMain = {
                 ctrlToolbar.initTreemapChart();
                 viewMiniChart.init(data);
                 break;
+            case "circle-packing":
+                this.buildRoot(data);
+                this.buildPack();
+                viewCirclePacking.render();
         }
         ctrlExportChart.init();
     },
@@ -177,6 +182,12 @@ let ctrlMain = {
             .size([width*0.95, height*0.95]);
         
         model.hierarchical.treemap = treemap;
+    },
+    buildPack: function() {
+        const { width, height } = this.getDim();
+        const pack = d3.pack()
+        
+        model.hierarchical.pack = pack;
     },
     setCurrentData: (data) => model.currentData = data,
     setCurrentSample: (sample) => model.currentSample = sample,

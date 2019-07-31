@@ -53,15 +53,15 @@ const viewStaticTreemapChart = {
         console.log(data);
         console.log("TCL: maxValue", maxValue);
 
-        const nodes = chart.selectAll("g")
+        const node = chart.selectAll("g")
             .data(data)
             .join("g")
             .attr("transform", d => `translate(${d.x0},${d.y0})`);
 
-        nodes.append("title")
+        node.append("title")
             .text(d => `${d.ancestors().reverse().map(d => d.id.substring(d.id.lastIndexOf("@") + 1)).join("/")}\nSubtaxa Identified: ${format(d.value)}\nAverage MS Intensity: ${d.data.avgIntensity}`);
 
-        nodes.append("rect")
+        node.append("rect")
             .attr("width", d => d.x1 - d.x0)
             .attr("height", d =>  d.y1 - d.y0)
             .style("stroke", "black")
@@ -69,12 +69,12 @@ const viewStaticTreemapChart = {
             .style("opacity", d => opacity(+d.data.value))
             .on("contextmenu", d3.contextMenu(this.menu));
 
-        nodes.append("clipPath")
+        node.append("clipPath")
                 .attr("id", d => "clip-" + d.data.id)
             .append("use")
                 .attr("xlink:href", d => "#" + d.data.id);
 
-        nodes.append("text")
+        node.append("text")
                 .attr("clip-path", d => "url(#clip-" + d.data.id + ")")
                 .attr("class", "nodeLabel")
                 .style("display", d => this.drawLabels && d.depth === 0 ? "block" : "none")
@@ -82,8 +82,8 @@ const viewStaticTreemapChart = {
                 .data(d => d.id.substring(d.id.lastIndexOf("@") + 1).split().concat((d.value)))
             .join("tspan")
                 .attr("x", 3)
-                .attr("y", (d, i, nodes) => `${(i === nodes.length - 1) * 0.3 + 1.1 + i * 0.9}em`)
-                .attr("fill-opacity", (d, i, nodes) => i === nodes.length - 1 ? 0.7 : null)
+                .attr("y", (d, i, node) => `${(i === node.length - 1) * 0.3 + 1.1 + i * 0.9}em`)
+                .attr("fill-opacity", (d, i, node) => i === node.length - 1 ? 0.7 : null)
                 .text(d => d);
     },
     colorNode: function(d, taxonLevelColor, branchColor) {
