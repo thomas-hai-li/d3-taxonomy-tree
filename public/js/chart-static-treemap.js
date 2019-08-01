@@ -1,7 +1,7 @@
 const viewStaticTreemapChart = {
     init: function() {
         this.svg = d3.select("#chart-display");
-        this.margin = {top: 10, right: 10, bottom: 10, left: 10};
+        this.margin = {top: 30, right: 10, bottom: 10, left: 5};
         this.drawLabels = true;
         this.drawDepth = 0;
         this.menu = [
@@ -28,7 +28,8 @@ const viewStaticTreemapChart = {
     },
     render: function() {
         this.svg.selectAll("*").remove();
-        
+
+        // Setup:
         const { root, treemap, /* color */ } = ctrlMain.getHierarchical(),
             margin = this.margin,
             drawDepth = this.drawDepth,
@@ -40,6 +41,19 @@ const viewStaticTreemapChart = {
                 .domain(["Bacteria","Archaea","Eukaryota"])
                 .range(d3.schemeSet3);
 
+        // Display name of sample viewed
+        let sample = ctrlMain.getCurrentSample();
+        this.svg.append("text")
+            .attr("class", "current-sample")
+            .attr("y", 20)
+            .attr("x", 5)
+            .style("font", "sans-serif")
+            .style("font-size", "20px")
+            .style("fill", "black")
+            .style("opacity", 0.5)
+            .text("Sample: " + (sample || "Averaged Values"));
+
+        // Generate layout
         root.sum(d => d.children ? 0 : 1)
             .each(d => --d.value)
             .sort((a, b) => b.value - a.value);

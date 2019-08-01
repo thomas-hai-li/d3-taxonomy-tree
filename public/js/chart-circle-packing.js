@@ -58,7 +58,7 @@ const viewCirclePacking = {
             .join("circle")
                 .attr("fill", d => color(d.height))
                 .attr("opacity", d => d.depth * 0.6)
-                .attr("box-shawdow", "8px 8px 0px #aaa")
+                .attr("cursor", "pointer")
                 .attr("pointer-events", d => !d.children ? "none" : null)
                 .on("mouseover", function(d) {
                     tooltip.transition()
