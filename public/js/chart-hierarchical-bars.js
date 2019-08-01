@@ -7,11 +7,9 @@ const viewHierarchicalBarChart = {
             height = 500 - margin.top - margin.bottom,
             barHeight= 20;
 
-        const xScale = d3.scaleLinear()
-                .range([0, width]),
-            xAxis = d3.axisTop(xScale),
-            color = d3.scaleOrdinal()
-                .range(["steelblue", "#ccc"]),
+        const xScale = d3.scaleLinear().range([0, width]),
+            xAxis = d3.axisTop(xScale).tickFormat(d3.format(".3")),
+            color = d3.scaleOrdinal().range(["steelblue", "#ccc"]),
             duration = 750,
             delay = 25
 
@@ -22,15 +20,16 @@ const viewHierarchicalBarChart = {
         this.svg.selectAll("*").remove();
 
         const chart = this.svg
-            .append("g")
-            .attr("class", "chart"),
+                .append("g")
+                .attr("class", "chart"),
             { margin, width, height, barHeight } = this.dim,
             { xScale, xAxis, color, duration, delay } = this.util,
-            { root } = ctrlMain.getHierarchical();
-        root.each((node) => node.value = Number(node.data.value))
+            { root } = ctrlMain.getHierarchical(),
+            format = d3.format(".3");
+        root.each((node) => node.value = node.data.value)
             .sort((a, b) => b.value - a.value);
 
-        // Display name of sample viewed
+        // For displaying name of sample viewed
         let sample = ctrlMain.getCurrentSample();
         this.svg.append("text")
             .attr("class", "current-sample")
@@ -41,6 +40,26 @@ const viewHierarchicalBarChart = {
             .style("fill", "black")
             .style("opacity", 0.50)
             .text("Sample: " + (sample || "Averaged Values"));
+
+        // For displaying rank and taxon
+        chart.append("text")
+            .attr("class", "rank-info")
+            .attr("y", -5)
+            .style("font", "sans-serif")
+            .style("font-size", "20px")
+            .style("fill", "black")
+            .style("opacity", 0.75)
+
+        // y-axis
+        chart.append("text")
+            .attr("class", "y-axis")
+            .attr("text-anchor", "middle")
+            .attr("y", -5)
+            .attr("x", width / 2)
+            .style("font", "sans-serif")
+            .style("font-size", "10px")
+            .style("fill", "black")
+            .text("MS Intensity")
         
         chart.style("transform", `translate(${margin.right}px, ${margin.top + 20}px)`);
 
@@ -60,13 +79,6 @@ const viewHierarchicalBarChart = {
             .append("line")
             .attr("y1", "100%")
             .style("transform", `translate(0px, ${margin.top}px)`);
-
-        chart.append("text")
-            .attr("class", "rank-info")
-            .style("font", "sans-serif")
-            .style("font-size", "20px")
-            .style("fill", "black")
-            .style("opacity", 0.75)
 
         const ranks = { // key represents depth of each node under root
                 0: "All ",
@@ -88,20 +100,11 @@ const viewHierarchicalBarChart = {
             var end = duration + d.children.length * delay;
 
             // Update the rank information
-            let rank,
-                taxa = d.id.split("@"),
-                taxon = taxa.pop();
+            const rank = d.data.rank,
+                taxon = d.data.taxon;
 
-            if ((taxa[1] === "Bacteria" || taxa[1] === "Archaea") && d.depth > 1) {
-                rank = ranks[d.depth + 1];
-            }
-            else {
-                rank = ranks[d.depth];
-            }
-
-            chart.select(".rank-info").transition()
-                .duration(duration)
-                .text(rank + taxon);
+            chart.select(".rank-info")
+                .text(taxon === "cellular organisms" ? rank : `${rank}: ${taxon}`);
 
             // Mark any currently-displayed bars as exiting.
             var exit = chart.selectAll(".enter")
@@ -170,20 +173,11 @@ const viewHierarchicalBarChart = {
             var end = duration + d.children.length * delay;
 
             // Update the rank information
-            let rank,
-                taxa = d.parent.id.split("@"),
-                taxon = taxa.pop();
+            const rank = d.parent.data.rank,
+                taxon = d.parent.data.taxon;
 
-            if ((taxa[1] === "Bacteria" || taxa[1] === "Archaea") && d.parent.depth > 1) {
-                rank = ranks[d.parent.depth + 1];
-            }
-            else {
-                rank = ranks[d.parent.depth];
-            }
-
-            chart.select(".rank-info").transition()
-                .duration(duration)
-                .text(rank + taxon);
+            chart.select(".rank-info")
+                .text(taxon === "cellular organisms" ? rank : `${rank}: ${taxon}`);
 
             // Mark any currently-displayed bars as exiting.
             var exit = chart.selectAll(".enter")

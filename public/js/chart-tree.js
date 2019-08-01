@@ -13,9 +13,7 @@ const viewTreeChart = {
                         alert("No additional MS quantities for this dataset");  // change to modal
                         return;
                     }
-                    const ids = d.id.split("@"),
-                        name = ids[ids.length - 1];
-                    viewMiniChart.render(name, sampleIntensities);
+                    viewMiniChart.render(d.data.taxon, sampleIntensities);
                 }
             },
             {
@@ -51,6 +49,7 @@ const viewTreeChart = {
               { width, height } = ctrlMain.getDim();
         const tooltip = d3.select(".tooltip"),
               tooltipDuration = 200;
+        const format = d3.format(".3");
         root.sort((a, b) => a.data.value - b.data.value);
             // .sort((a, b) => (a.height - b.height) || a.id.localeCompare(b.id)); // by alphabetical
             
@@ -120,18 +119,13 @@ const viewTreeChart = {
                 tooltip.transition()
                     .duration(tooltipDuration)
                     .style("opacity", .9);
-                if (viewTreeChart.drawLabels) {
-                    tooltip.html("Intensity: " + d.data.value)
-                        .style("left", (d3.event.pageX) + "px")
-                        .style("top", (d3.event.pageY - 20) + "px");
-                } else {
-                    let names = d.data.id.split("@"),
-                        name = names[names.length - 1];
-
-                    tooltip.html(name + "<br>" + "Intensity: " + d.data.value)
-                        .style("left", (d3.event.pageX) + "px")
-                        .style("top", (d3.event.pageY - 20) + "px");
-                }
+            })
+            .on("mousemove", function(d) {
+                let height = tooltip.node().clientHeight;
+                let width = tooltip.node().clientWidth;
+                tooltip.html(`Taxon: ${d.data.taxon}<br>Rank: ${d.data.rank}<br>Intensity: ${format(d.data.value)}`)
+                    .style("left", (d3.event.pageX - width) + "px")
+                    .style("top", (d3.event.pageY - height) + "px");
             })
             .on("mouseout", () => {
                 tooltip.transition()
@@ -164,7 +158,7 @@ const viewTreeChart = {
             .style("font-size", "10px")
             .style("fill", "black")
             .style("display", this.drawLabels ? "block" : "none")
-            .text(d => d.id.substring(d.id.lastIndexOf("@") + 1));
+            .text(d => d.data.taxon);
         
         if (type === "radial-tree") {
             nodeLabel

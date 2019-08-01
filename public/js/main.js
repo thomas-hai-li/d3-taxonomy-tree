@@ -7,21 +7,26 @@ let model = {
     currentData: null,  // Array of objects, loaded from csv
     currentSample: null,  // String, determined from user selection
     hierarchical: {
+        // d3 hierarchy layours:
         root: null,
         tree: null,
         treemap: null,
+        pack: null,
+        // Rank keys based on the number of "@" in the id of each data point
+        taxonRanks: {
+            0: "All cellular organisms",
+            1: "Superkingdom",
+            2: "Kingdom",   // bacteria and archaea skip kingdom
+            3: "Phylum",
+            4: "Class",
+            5: "Order",
+            6: "Family",
+            7: "Genus",
+            8: "Species"
+        },
         color: {
+            // Based on number of "@"
             currentRank: 2,
-            ranks: {
-                // Keys based on number of "@" in the id of each data point
-                2: "Kingdom",
-                3: "Phylum",
-                4: "Class",
-                5: "Order",
-                6: "Family",
-                7: "Genus",
-                8: "Species"
-            },
             // Color schemes for nodes:
             taxonLevelColor: d3.scaleOrdinal()
                 .domain(d3.range(0, 10))
@@ -48,6 +53,7 @@ let ctrlMain = {
         let dataParsed = JSON.parse(data);
         console.log(dataParsed)
         
+        this.parseTaxonRank(dataParsed);
         this.parseSamples(dataParsed);
         this.setCurrentData(dataParsed);
         this.callSamples(this.getCurrentData());
@@ -65,6 +71,7 @@ let ctrlMain = {
                 const reader = new FileReader();
                 reader.onload = () => {
                     const data = d3.csvParse(reader.result);    // array of objects
+                    this.parseTaxonRank(dataParsed);
                     this.parseSamples(data);
                     this.setCurrentData(data);
                     // Setup samples in the list
@@ -90,10 +97,28 @@ let ctrlMain = {
             }
         });
     },
+    parseTaxonRank: function(data) {
+        // Accepts array of objects as data, parses for each individual taxon classification and its rank
+        data = data.map(e => {
+            let taxa = e.id.split("@"),
+                taxon = taxa[taxa.length - 1];
+            e.taxon = taxon;
+            
+            const { taxonRanks } = ctrlMain.getHierarchical();
+            let countTaxa = taxa.length;
+            let countSymbol = countTaxa - 1;  // count "@"
+            if (countTaxa > 2 && (taxa.indexOf("Bacteria") !== -1 || taxa.indexOf("Archaea") !== -1)) { // skip the kingdom rank
+                e.rank = taxonRanks[ countSymbol + 1 ];
+            }
+            else {
+                e.rank = taxonRanks[ countSymbol ];
+            }
+        });
+    },
     parseSamples: function(data) {
         // Accepts array of objects as data, parses for the individual samples and saves as a sub-object
         // In the csv, the column is usually formatted as such: "Intensity s1; Intensity s2; Intensity s3; ..."
-        data = data.map((e) => {
+        data = data.map(e => {
             e.value = +e.value;
             e.avgIntensity = e.value;   // the "value" column in the originial csv is the average MS intensity
             
@@ -105,7 +130,6 @@ let ctrlMain = {
             sampleNames.forEach((sample, i) => {
                 e.samples[sample] = sampleIntensies[i];
             });
-            return e;
         });
     },
     callSamples: function(data) {
@@ -281,10 +305,10 @@ let ctrlToolbar = {
         
         slider.attr("disabled", null);
         slider.on("input", () => {
-            const { color } = ctrlMain.getHierarchical();
+            const { color, taxonRanks } = ctrlMain.getHierarchical();
             const { taxonLevelColor, branchColor } = color;
             color.currentRank = parseInt(slider.valueOf()._groups[0][0].value);
-            colorLabel.text(color.ranks[color.currentRank]);
+            colorLabel.text(taxonRanks[color.currentRank]);
             d3.selectAll(".node circle")
                 .style("fill", (d) => viewTreeChart.colorNode(d, taxonLevelColor, branchColor))
         });
@@ -345,10 +369,10 @@ let ctrlToolbar = {
         
         slider.attr("disabled", null);
         slider.on("input", () => {
-            const { color } = ctrlMain.getHierarchical();
+            const { color, taxonRanks } = ctrlMain.getHierarchical();
             const { taxonLevelColor, branchColor } = color;
             color.currentRank = parseInt(slider.valueOf()._groups[0][0].value);
-            colorLabel.text(color.ranks[color.currentRank]);
+            colorLabel.text(taxonRanks[color.currentRank]);
             d3.selectAll("rect")
                 .style("fill", (d) => viewStaticTreemapChart.colorNode(d, taxonLevelColor, branchColor))
         });

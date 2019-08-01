@@ -13,9 +13,7 @@ const viewStaticTreemapChart = {
                         alert("No additional MS quantities for this dataset");  // change to modal
                         return;
                     }
-                    const ids = d.id.split("@"),
-                        name = ids[ids.length - 1];
-                    viewMiniChart.render(name, sampleIntensities);
+                    viewMiniChart.render(d.data.taxon, sampleIntensities);
                 }
             },
             {
@@ -36,7 +34,7 @@ const viewStaticTreemapChart = {
             chart = this.svg.append("g")
                 .attr("class", "chart")
                 .attr("transform", `translate(${margin.left}, ${margin.top})`),
-            format = d3.format(",d"),
+            format = d3.format(".3"),
             color = d3.scaleOrdinal()   // based on superkingdom
                 .domain(["Bacteria","Archaea","Eukaryota"])
                 .range(d3.schemeSet3);
@@ -64,8 +62,6 @@ const viewStaticTreemapChart = {
             opacity = d3.scaleLinear()
                 .domain([0,maxValue])
                 .range([0, 0.5]);
-        console.log(data);
-        console.log("TCL: maxValue", maxValue);
 
         const node = chart.selectAll("g")
             .data(data)
@@ -73,7 +69,7 @@ const viewStaticTreemapChart = {
             .attr("transform", d => `translate(${d.x0},${d.y0})`);
 
         node.append("title")
-            .text(d => `${d.ancestors().reverse().map(d => d.id.substring(d.id.lastIndexOf("@") + 1)).join("/")}\nSubtaxa Identified: ${format(d.value)}\nAverage MS Intensity: ${d.data.avgIntensity}`);
+            .text(d => `${d.id.replace(/@/g,"/")}\nSubtaxa Identified: ${d.value}\nAverage MS Intensity: ${format(d.data.avgIntensity)}`);
 
         node.append("rect")
             .attr("width", d => d.x1 - d.x0)
@@ -93,7 +89,7 @@ const viewStaticTreemapChart = {
                 .attr("class", "node-label")
                 .style("display", d => this.drawLabels && d.depth === 0 ? "block" : "none")
             .selectAll("tspan")
-                .data(d => d.id.substring(d.id.lastIndexOf("@") + 1).split().concat((d.value)))
+                .data(d => d.data.taxon.split().concat((d.value)))
             .join("tspan")
                 .attr("x", 3)
                 .attr("y", (d, i, node) => `${(i === node.length - 1) * 0.3 + 1.1 + i * 0.9}em`)

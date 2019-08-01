@@ -32,7 +32,7 @@
 
 .tooltip {
     position: absolute;
-    text-align: center;
+    /* text-align: inherit; */
     width: auto;
     height: auto;
     padding: 2px;

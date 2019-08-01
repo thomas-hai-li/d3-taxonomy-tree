@@ -22,7 +22,7 @@ const viewCirclePacking = {
         this.svg.selectAll("*").remove();
         
         // Setup:
-        const { root, pack } = ctrlMain.getHierarchical(),
+        const { root, pack, taxonRanks } = ctrlMain.getHierarchical(),
             { width, height } = ctrlMain.getDim();
 
         const chart = this.svg.append("g")
@@ -31,8 +31,8 @@ const viewCirclePacking = {
             tooltip = d3.select(".tooltip"),
             tooltipDuration = 200;
             
-        const format = d3.format(",d"),
-            color = d3.scaleSequential([0, 8], d3.interpolatePuBu);
+        const format = d3.format(".3"),
+            colorNode = d3.scaleSequential([0, 8], d3.interpolatePuBu);
         let focus = root;
 
         // Display name of sample viewed
@@ -56,22 +56,22 @@ const viewCirclePacking = {
         const node = chart.selectAll("circle")
             .data(root.descendants().slice(1).filter(d => d.value))
             .join("circle")
-                .attr("fill", d => color(d.height))
+                .attr("fill", d => colorNode(d.height))
                 .attr("opacity", d => d.depth * 0.6)
                 .attr("cursor", "pointer")
                 .attr("pointer-events", d => !d.children ? "none" : null)
-                .on("mouseover", function(d) {
+                .on("mouseover", function() {
                     tooltip.transition()
                         .duration(tooltipDuration)
                         .style("opacity", .9);
                     d3.select(this).attr("stroke", "#000");
                 })
                 .on("mousemove", function(d) {
-                    let names = d.data.id.split("@"),
-                        name = names[names.length - 1];
-                    tooltip.html(name + "<br>" + "Intensity: " + d.data.value)
-                        .style("left", (d3.event.pageX - 45) + "px")
-                        .style("top", (d3.event.pageY - 35) + "px");
+                    let height = tooltip.node().clientHeight;
+                    let width = tooltip.node().clientWidth;
+                    tooltip.html(`Taxon: ${d.data.taxon}<br>Rank: ${d.data.rank}<br>Intensity: ${format(d.data.value)}`)
+                        .style("left", (d3.event.pageX - width) + "px")
+                        .style("top", (d3.event.pageY - height) + "px");
                 })
                 .on("mouseout", function() {
                     tooltip.transition()
