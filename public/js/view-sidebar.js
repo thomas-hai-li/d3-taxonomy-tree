@@ -104,8 +104,20 @@ let viewMiniChart = {
             .range([0, height - 2 * margin.y])
             .padding(0.5);
         const xAxis = d3.axisBottom(this.xScale)
+            .tickFormat(d3.format(".3"))
             .ticks(5);
         const yAxis = d3.axisLeft(this.yScale);
+
+        // x-axis label
+        svg.append("text")
+            .attr("class", "x-axis-label")
+            .attr("text-anchor", "middle")
+            .attr("y", height - 5)
+            .attr("x", width / 2)
+            .style("font", "sans-serif")
+            .style("font-size", "10px")
+            .style("fill", "black")
+            .text("MS Intensity")
 
         // Draw axes
         svg.append("g")
@@ -117,6 +129,7 @@ let viewMiniChart = {
     },
     render: function(name, data) {
         const {svg, chart, margin, xScale, yScale} = this,
+            format = d3.format(".3"),
             tooltip = d3.select(".tooltip"),
             duration = 200;
         // Draw title
@@ -135,15 +148,17 @@ let viewMiniChart = {
         const barsEnter = bar.enter().append("rect")
             .attr("class", "bar")
             .on("mouseover", function(d) {
+                let height = tooltip.node().clientHeight;
+                let width = tooltip.node().clientWidth;
                 d3.select(this).transition()
                     .duration(duration)
                     .style("opacity", 0.5);
                 tooltip.transition()
                     .duration(duration)
                     .style("opacity", 0.9);
-                tooltip.html("Intensity: " + d)
+                tooltip.html(`Sample: ${d[0]}<br>MS Intensity: ${format(d[1])}`)
                     .style("left", (d3.event.pageX) + "px")
-                    .style("top", (d3.event.pageY - 20) + "px");
+                    .style("top", (d3.event.pageY - height) + "px");
             })
             .on("mouseout", function() {
                 d3.select(this).transition()
@@ -155,7 +170,7 @@ let viewMiniChart = {
             });
     
         bar.merge(barsEnter).transition().duration(750)
-            .attr("width", (d) => xScale(d))
+            .attr("width", (d) => xScale(d[1]))
             .attr("height", yScale.bandwidth())
             .attr("y", (d, i) => yScale(this.intensities[i]))
             .attr("fill", "#2a5599");

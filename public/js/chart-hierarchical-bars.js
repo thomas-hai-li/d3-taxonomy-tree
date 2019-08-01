@@ -15,6 +15,20 @@ const viewHierarchicalBarChart = {
 
         this.dim = { margin, width, height, barHeight };
         this.util = { xScale, xAxis, color, duration, delay };
+
+        this.menu = [
+            {
+                title: "View MS intensities",
+                action: function(elm, d, i) {
+                    if (!d.data.samples) {
+                        alert("No additional MS quantities for this dataset");  // change to modal
+                        return;
+                    }
+                    const name = d.data.taxon;
+                    viewMiniChart.render(name, Object.entries(d.data.samples));
+                }
+            }
+        ];
     },
     render: function() {
         this.svg.selectAll("*").remove();
@@ -22,10 +36,10 @@ const viewHierarchicalBarChart = {
         const chart = this.svg
                 .append("g")
                 .attr("class", "chart"),
+            { menu } = this.menu,
             { margin, width, height, barHeight } = this.dim,
             { xScale, xAxis, color, duration, delay } = this.util,
-            { root } = ctrlMain.getHierarchical(),
-            format = d3.format(".3");
+            { root } = ctrlMain.getHierarchical();
         root.each((node) => node.value = node.data.value)
             .sort((a, b) => b.value - a.value);
 
@@ -50,9 +64,9 @@ const viewHierarchicalBarChart = {
             .style("fill", "black")
             .style("opacity", 0.75)
 
-        // y-axis
+        // x-axis label
         chart.append("text")
-            .attr("class", "y-axis")
+            .attr("class", "x-axis-label")
             .attr("text-anchor", "middle")
             .attr("y", -5)
             .attr("x", width / 2)
@@ -79,18 +93,6 @@ const viewHierarchicalBarChart = {
             .append("line")
             .attr("y1", "100%")
             .style("transform", `translate(0px, ${margin.top}px)`);
-
-        const ranks = { // key represents depth of each node under root
-                0: "All ",
-                1: "Superkingdom: ",
-                2: "Kingdom: ",
-                3: "Phylum: ",
-                4: "Class: ",
-                5: "Order: ",
-                6: "Family: ",
-                7: "Genus: ",
-                8: "Species: ",
-            }
 
         xScale.domain([0, root.value]).nice();
         down(root, 0);
@@ -242,14 +244,17 @@ const viewHierarchicalBarChart = {
         }
         // Creates a set of bars for the given data node, at the specified index.
         function bar(d) {
+            let data  = d.children.filter(d => d.value !== 0);
+
             var bar = chart.insert("g", ".y.axis")
                 .attr("class", "enter")
                 .attr("transform", "translate(0,5)")
                 .selectAll("g")
-                .data(d.children)
+                .data(data)
                 .enter().append("g")
                 .style("cursor", function(d) { return !d.children ? null : "pointer"; })
-                .on("click", down);
+                .on("click", down)
+                .on("contextmenu", d3.contextMenu(viewHierarchicalBarChart.menu));
 
             bar.append("text")
                 .attr("x", -6)

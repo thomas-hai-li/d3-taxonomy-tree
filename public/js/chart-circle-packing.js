@@ -6,14 +6,12 @@ const viewCirclePacking = {
             {
                 title: "View MS intensities",
                 action: function(elm, d, i) {
-                    let sampleIntensities = Object.values(d.data.samples);
-                    if (!sampleIntensities) {
+                    if (!d.data.samples) {
                         alert("No additional MS quantities for this dataset");  // change to modal
                         return;
                     }
-                    const ids = d.id.split("@"),
-                        name = ids[ids.length - 1];
-                    viewMiniChart.render(name, sampleIntensities);
+                    const name = d.data.taxon;
+                    viewMiniChart.render(name, Object.entries(d.data.samples));
                 }
             }
         ];
@@ -69,7 +67,8 @@ const viewCirclePacking = {
                 .on("mousemove", function(d) {
                     let height = tooltip.node().clientHeight;
                     let width = tooltip.node().clientWidth;
-                    tooltip.html(`Taxon: ${d.data.taxon}<br>Rank: ${d.data.rank}<br>Intensity: ${format(d.data.value)}`)
+                    let childrenCount = d.children ? d.children.length : 0;
+                    tooltip.html(`Taxon: ${d.data.taxon}<br>Rank: ${d.data.rank}<br>Children: ${childrenCount}<br><br>MS Intensity: ${format(d.data.value)}`)
                         .style("left", (d3.event.pageX - width) + "px")
                         .style("top", (d3.event.pageY - height) + "px");
                 })

@@ -8,12 +8,12 @@ const viewStaticTreemapChart = {
             {
                 title: "View MS intensities",
                 action: function(elm, d, i) {
-                    let sampleIntensities = Object.values(d.data.samples);
-                    if (!sampleIntensities) {
+                    if (!d.data.samples) {
                         alert("No additional MS quantities for this dataset");  // change to modal
                         return;
                     }
-                    viewMiniChart.render(d.data.taxon, sampleIntensities);
+                    const name = d.data.taxon;
+                    viewMiniChart.render(name, Object.entries(d.data.samples));
                 }
             },
             {

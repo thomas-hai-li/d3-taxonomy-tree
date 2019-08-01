@@ -54,9 +54,9 @@ let ctrlMain = {
         console.log(dataParsed)
         
         this.parseTaxonRank(dataParsed);
-        this.parseSamples(dataParsed);
+        const areSamples = this.parseSamples(dataParsed);
+        if (areSamples) { this.callSamples(dataParsed) };
         this.setCurrentData(dataParsed);
-        this.callSamples(this.getCurrentData());
         this.buildChart(this.getCurrentData());     // load the data immediately
     },
     onFileChange: function() {
@@ -71,12 +71,10 @@ let ctrlMain = {
                 const reader = new FileReader();
                 reader.onload = () => {
                     const data = d3.csvParse(reader.result);    // array of objects
-                    this.parseTaxonRank(dataParsed);
-                    this.parseSamples(data);
+                    this.parseTaxonRank(data);
+                    const areSamples = this.parseSamples(data);
+                    if (areSamples) { this.callSamples(data); }
                     this.setCurrentData(data);
-                    // Setup samples in the list
-                    this.callSamples(data);
-                    // build the chart
                     this.buildChart(this.getCurrentData());
                 }
                 reader.readAsText(file);
@@ -116,14 +114,17 @@ let ctrlMain = {
         });
     },
     parseSamples: function(data) {
+        // Returns true if there is a sample column in the given csv
         // Accepts array of objects as data, parses for the individual samples and saves as a sub-object
         // In the csv, the column is usually formatted as such: "Intensity s1; Intensity s2; Intensity s3; ..."
+        const col = Object.keys(data[0]).find(ele => ele.match(/;/));
+        if(! col) { return false; }
+
         data = data.map(e => {
             e.value = +e.value;
             e.avgIntensity = e.value;   // the "value" column in the originial csv is the average MS intensity
             
-            const col = Object.keys(e).find((ele) => ele.match(/;/)),
-                sampleNames = col.split(";"),
+            const sampleNames = col.split(";"),
                 sampleIntensies = e[col].split(";").map(val => +val);
             delete e[col];
             e.samples = new Object();
@@ -131,6 +132,7 @@ let ctrlMain = {
                 e.samples[sample] = sampleIntensies[i];
             });
         });
+        return true;
     },
     callSamples: function(data) {
         // Accepts array of objects as data, gets samples if they exist and calls the view to render them.
@@ -171,7 +173,7 @@ let ctrlMain = {
             case "hierarchical-bars":
                 this.buildRoot(data);
                 viewHierarchicalBarChart.render();
-                // render barchart
+                viewMiniChart.init(data);
                 // disable toolbar
                 // disable mini chart?
                 break;
