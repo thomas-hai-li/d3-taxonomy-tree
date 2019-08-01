@@ -46,24 +46,11 @@ let ctrlMain = {
         this.onChartTypeChange();
         // Load data from global variable and save each node's value if it changes
         let dataParsed = JSON.parse(data);
-        dataParsed = dataParsed.map((e) => {
-            e.value = +e.value;
-            e.avgIntensity = e.value;   // saved
-            
-            const col = Object.keys(e).find((ele) => ele.match(/;/)),
-                sampleNames = col.split(";"),
-                sampleIntensies = e[col].split(";").map(val => +val);
-            delete e[col];
-            e.samples = new Object();
-            sampleNames.forEach((sample, i) => {
-                e.samples[sample] = sampleIntensies[i];
-            });
-            return e;
-        });
-
         console.log(dataParsed)
+        
+        this.parseSamples(dataParsed);
         this.setCurrentData(dataParsed);
-        this.parseSamples(this.getCurrentData());
+        this.callSamples(this.getCurrentData());
         this.buildChart(this.getCurrentData());     // load the data immediately
     },
     onFileChange: function() {
@@ -78,9 +65,10 @@ let ctrlMain = {
                 const reader = new FileReader();
                 reader.onload = () => {
                     const data = d3.csvParse(reader.result);    // array of objects
+                    this.parseSamples(data);
                     this.setCurrentData(data);
                     // Setup samples in the list
-                    this.parseSamples(data);
+                    this.callSamples(data);
                     // build the chart
                     this.buildChart(this.getCurrentData());
                 }
@@ -103,8 +91,26 @@ let ctrlMain = {
         });
     },
     parseSamples: function(data) {
-        // Accepts array of objects as data, parses for the individual samples and calls the view to render them.
+        // Accepts array of objects as data, parses for the individual samples and saves as a sub-object
         // In the csv, the column is usually formatted as such: "Intensity s1; Intensity s2; Intensity s3; ..."
+        data = data.map((e) => {
+            e.value = +e.value;
+            e.avgIntensity = e.value;   // the "value" column in the originial csv is the average MS intensity
+            
+            const col = Object.keys(e).find((ele) => ele.match(/;/)),
+                sampleNames = col.split(";"),
+                sampleIntensies = e[col].split(";").map(val => +val);
+            delete e[col];
+            e.samples = new Object();
+            sampleNames.forEach((sample, i) => {
+                e.samples[sample] = sampleIntensies[i];
+            });
+            return e;
+        });
+    },
+    callSamples: function(data) {
+        // Accepts array of objects as data, gets samples if they exist and calls the view to render them.
+        if (! data[0].samples) { return; }
         const sampleNames = Object.keys(data[0].samples);
         viewSamples.clearPrevious();
         sampleNames.forEach((sample) => {
