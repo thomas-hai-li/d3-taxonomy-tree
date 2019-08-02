@@ -50,13 +50,13 @@ let ctrlMain = {
         this.onFileChange();
         this.onChartTypeChange();
         // Load data from global variable and save each node's value if it changes
-        let dataParsed = JSON.parse(data);
-        console.log(dataParsed)
+        let loadedData = JSON.parse(data);
+        console.log(loadedData)
         
-        this.parseTaxonRank(dataParsed);
-        const areSamples = this.parseSamples(dataParsed);
-        if (areSamples) { this.callSamples(dataParsed) };
-        this.setCurrentData(dataParsed);
+        this.parseTaxonRank(loadedData);
+        const areSamples = this.parseSamples(loadedData);
+        if (areSamples) { this.callSamples(loadedData) };
+        this.setCurrentData(loadedData);
         this.buildChart(this.getCurrentData());     // load the data immediately
     },
     onFileChange: function() {
@@ -129,6 +129,7 @@ let ctrlMain = {
             delete e[col];
             e.samples = new Object();
             sampleNames.forEach((sample, i) => {
+                sample = sample.replace(/intensity./ig, "").trim();
                 e.samples[sample] = sampleIntensies[i];
             });
         });

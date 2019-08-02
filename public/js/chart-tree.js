@@ -124,7 +124,11 @@ const viewTreeChart = {
                 let height = tooltip.node().clientHeight;
                 let width = tooltip.node().clientWidth;
                 let childrenCount = d.children ? d.children.length : 0;
-                tooltip.html(`Taxon: ${d.data.taxon}<br>Rank: ${d.data.rank}<br>Children: ${childrenCount}<br><br>MS Intensity: ${format(d.data.value)}`)
+                    tooltip.html(`<strong>Taxon</strong>: ${d.data.taxon}<br>
+                                  <strong>Rank</strong>: ${d.data.rank}<br>
+                                  <strong>Children</strong>: ${childrenCount}<br>
+                                  <strong>MS Intensity</strong>: ${format(d.data.value)}
+                                `)
                     .style("left", (d3.event.pageX - width) + "px")
                     .style("top", (d3.event.pageY - height) + "px");
             })
