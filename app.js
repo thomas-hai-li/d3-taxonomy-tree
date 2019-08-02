@@ -33,7 +33,7 @@ app.post("/feedback", (req, res) => {
     `;
     
     let transporter = nodemailer.createTransport({
-        service: "Gmail",
+        service: "Mailgun",
         auth: {
             user: process.env.EMAIL,
             pass: process.env.PASSWORD
@@ -41,7 +41,7 @@ app.post("/feedback", (req, res) => {
     });
 
     let mailOptions = {
-        from: '"Polar Foo 🐼" <superpolarfoo@gmail.com>',
+        from: '"Polar Foo 🐼" <foobear@superpolarfoo.com>',
         to: "limera2nn@gmail.com",
         subject: "New Feedback!",
         text: "blah",
