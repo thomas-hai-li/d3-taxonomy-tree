@@ -8,7 +8,7 @@ const viewHierarchicalBarChart = {
             barHeight= 20;
 
         const xScale = d3.scaleLinear().range([0, width]),
-            xAxis = d3.axisTop(xScale).tickFormat(d3.format(".3")),
+            xAxis = d3.axisTop(xScale).tickFormat(d3.format(".4g")),
             color = d3.scaleOrdinal().range(["steelblue", "#ccc"]),
             duration = 750,
             delay = 25
@@ -18,14 +18,25 @@ const viewHierarchicalBarChart = {
 
         this.menu = [
             {
-                title: "View MS intensities",
+                title: "Compare Sample Intensities",
                 action: function(elm, d, i) {
                     if (!d.data.samples) {
                         alert("No additional MS quantities for this dataset");  // change to modal
                         return;
                     }
                     const name = d.data.taxon;
-                    viewMiniChart.render(name, Object.entries(d.data.samples));
+                    viewMiniChart.renderSamples(name, Object.entries(d.data.samples));
+                }
+            },
+            {
+                title: "Compare Subtaxa Intensities",
+                action: function(elm, d, i) {
+                    if (!d.children) {
+                        alert("No subtaxa to compare");
+                        return;
+                    }
+                    const sample = ctrlMain.getCurrentSample();
+                    viewMiniChart.renderSubtaxa(sample, d);
                 }
             }
         ];

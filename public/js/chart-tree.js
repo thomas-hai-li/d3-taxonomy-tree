@@ -6,14 +6,25 @@ const viewTreeChart = {
         this.drawLabels = true;
         this.menu = [
             {
-                title: "View MS intensities",
+                title: "Compare Sample Intensities",
                 action: function(elm, d, i) {
                     if (!d.data.samples) {
                         alert("No additional MS quantities for this dataset");  // change to modal
                         return;
                     }
                     const name = d.data.taxon;
-                    viewMiniChart.render(name, Object.entries(d.data.samples));
+                    viewMiniChart.renderSamples(name, Object.entries(d.data.samples));
+                }
+            },
+            {
+                title: "Compare Subtaxa Intensities",
+                action: function(elm, d, i) {
+                    if (!d.children) {
+                        alert("No subtaxa to compare");
+                        return;
+                    }
+                    const sample = ctrlMain.getCurrentSample();
+                    viewMiniChart.renderSubtaxa(sample, d);
                 }
             },
             {
@@ -49,8 +60,8 @@ const viewTreeChart = {
               { width, height } = ctrlMain.getDim();
         const tooltip = d3.select(".tooltip"),
               tooltipDuration = 200;
-        const format = d3.format(".3");
-        root.sort((a, b) => a.data.value - b.data.value);
+        const format = d3.format(".4g");
+        root.sort((a, b) => b.data.value - a.data.value);
             // .sort((a, b) => (a.height - b.height) || a.id.localeCompare(b.id)); // by alphabetical
             
         // Reset chart display and previous tooltips
@@ -124,9 +135,8 @@ const viewTreeChart = {
                 let height = tooltip.node().clientHeight;
                 let width = tooltip.node().clientWidth;
                 let childrenCount = d.children ? d.children.length : 0;
-                    tooltip.html(`<strong>Taxon</strong>: ${d.data.taxon}<br>
-                                  <strong>Rank</strong>: ${d.data.rank}<br>
-                                  <strong>Children</strong>: ${childrenCount}<br>
+                    tooltip.html(`<strong>Taxon</strong>: ${d.data.taxon} (${d.data.rank})<br>
+                                  <strong>Subtaxa</strong>: ${childrenCount}<br>
                                   <strong>MS Intensity</strong>: ${format(d.data.value)}
                                 `)
                     .style("left", (d3.event.pageX - width) + "px")

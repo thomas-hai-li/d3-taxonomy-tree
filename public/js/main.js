@@ -45,6 +45,7 @@ let ctrlMain = {
         viewHierarchicalBarChart.init();
         viewStaticTreemapChart.init();
         viewCirclePacking.init();
+        viewSunburst.init();
         viewZoom.init();
         // viewBrush.init();
         this.onFileChange();
@@ -145,7 +146,7 @@ let ctrlMain = {
         });
         // On sample selection, display the correct information in chart
         d3.select("#samples")
-            .on("change", function() {
+            .on("change", function() {     
                 let sample = this.value;
                 ctrlMain.setCurrentSample(sample);
                 data.map((e) => {
@@ -190,6 +191,12 @@ let ctrlMain = {
                 this.buildPack();
                 viewCirclePacking.render();
                 viewMiniChart.init(data);
+                break;
+            case "sunburst":
+                this.buildRoot(data);
+                viewSunburst.render();
+                viewMiniChart.init(data);
+                break;
         }
         ctrlExportChart.init();
     },

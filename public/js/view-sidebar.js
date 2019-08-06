@@ -79,34 +79,18 @@ let viewMiniChart = {
             x: width * 0.15,
             y: height * 0.1
         }
-        const {svg, margin} = this;
+        const { svg, margin } = this;
         this.chart = d3.select("#mini-chart").append("g")
             .style("transform", `translate(${margin.x}px, ${margin.y}px)`);
-
-        let areSamples = data[0].samples;
-        if (!areSamples) { return }
-            
-        // Find max value of MS intensities
-        let values = [];
-        data.forEach(ele => { values = values.concat(Object.values(ele.samples)); });
-        const maxVal = d3.max(values);
-        
-        this.intensities =  Object.keys(data[0].samples).map((ele) => {
-            return ele.replace("Intensity", "").trim();
-        });
         
         // Set up scales
         this.xScale = d3.scaleLinear()
-            .domain([0, maxVal])
             .range([0, width - 2 * margin.x]);
         this.yScale = d3.scaleBand()
-            .domain(this.intensities)
             .range([0, height - 2 * margin.y])
             .padding(0.5);
-        const xAxis = d3.axisBottom(this.xScale)
-            .tickFormat(d3.format(".3"))
-            .ticks(5);
-        const yAxis = d3.axisLeft(this.yScale);
+
+        this.scalesToSamples(data);
 
         // x-axis label
         svg.append("text")
@@ -121,15 +105,65 @@ let viewMiniChart = {
 
         // Draw axes
         svg.append("g")
+            .attr("class", "x-axis")
             .style("transform", `translate(${margin.x}px,${height - margin.y}px)`)
-            .call(xAxis);
+            .call(this.xAxis);
         svg.append("g")
+            .attr("class", "y-axis")
             .style("transform", `translate(${margin.x}px, ${margin.y}px)`)
-            .call(yAxis);
+            .call(this.yAxis);
     },
-    render: function(name, data) {
-        const {svg, chart, margin, xScale, yScale} = this,
-            format = d3.format(".3"),
+    scalesToSamples: function(data) {
+        // Helper function for this.renderSamples
+        let areSamples = data[0].samples;
+        if (!areSamples) { return }
+
+        // Find max value of MS intensities in all samples, for unbiased x-axis
+        let values = [];
+        data.forEach(ele => { values = values.concat(Object.values(ele.samples)); });
+        const maxVal = d3.max(values);
+        
+        this.samples =  Object.keys(data[0].samples).map((ele) => {
+            return ele.replace("Intensity", "").trim();
+        });
+
+        this.xScale.domain([0, maxVal]);
+        this.yScale.domain(this.samples);
+
+        this.xAxis = d3.axisBottom(this.xScale)
+            .tickFormat(d3.format(".4g"))
+            .ticks(3);
+        this.yAxis = d3.axisLeft(this.yScale);
+    },
+    scalesToSubtaxa: function(sample, data) {
+        // Helper function for this.renderSubtaxa
+
+        // Find max value of MS intensity in given sample, for unbiased x-axis
+        let values = [];
+        if (sample) { data.forEach(d => values.push(d.samples[sample])); }
+        else { data.forEach(d => values.push(d.avgIntensity)); }
+        const maxVal = d3.max(values);
+        const subtaxa = data.map(d => d.taxon);
+
+        this.xScale.domain([0, maxVal]);
+        this.yScale.domain(subtaxa);
+
+        this.xAxis = d3.axisBottom(this.xScale)
+            .tickFormat(d3.format(".4g"))
+            .ticks(3);
+        this.yAxis = d3.axisLeft(this.yScale);
+    },
+    renderSamples: function(name, data) {
+        // data:
+        // d[0] = sample name
+        // d[1] = sample intensity
+
+        this.scalesToSamples(ctrlMain.getCurrentData());
+        d3.select(".x-axis").call(this.xAxis);
+        d3.select(".y-axis").call(this.yAxis);
+
+        const { svg, chart, margin, xScale, yScale } = this,
+            format = d3.format(".4g"),
             tooltip = d3.select(".tooltip"),
             duration = 200;
         // Draw title
@@ -144,19 +178,20 @@ let viewMiniChart = {
             .attr("y", margin.y - 10);
 
         // Draw bar chart
-        const bar = chart.selectAll(".bar").data(data);
+        const bar = chart.selectAll(".bar").data(data, d => d[0]);
         const barsEnter = bar.enter().append("rect")
             .attr("class", "bar")
-            .on("mouseover", function(d) {
-                let height = tooltip.node().clientHeight;
-                let width = tooltip.node().clientWidth;
+            .on("mouseover", function() {
                 d3.select(this).transition()
                     .duration(duration)
                     .style("opacity", 0.5);
                 tooltip.transition()
                     .duration(duration)
                     .style("opacity", 0.9);
-                tooltip.html(`Sample: ${d[0]}<br>MS Intensity: ${format(d[1])}`)
+            })
+            .on("mousemove", function(d) {
+                let height = tooltip.node().clientHeight;
+                tooltip.html(`<strong>Sample</strong>: ${d[0]}<br><strong>MS Intensity</strong>: ${format(d[1])}`)
                     .style("left", (d3.event.pageX) + "px")
                     .style("top", (d3.event.pageY - height) + "px");
             })
@@ -169,10 +204,80 @@ let viewMiniChart = {
                     .style("opacity", 0);
             });
     
-        bar.merge(barsEnter).transition().duration(750)
-            .attr("width", (d) => xScale(d[1]))
+        const currentBar = bar.merge(barsEnter)
             .attr("height", yScale.bandwidth())
-            .attr("y", (d, i) => yScale(this.intensities[i]))
+            .attr("y", (d, i) => yScale(this.samples[i]))
             .attr("fill", "#2a5599");
+        
+        currentBar.transition().duration(750)
+            .attr("width", (d) => xScale(d[1]));
+
+        bar.exit().remove();
+    },
+    renderSubtaxa: function(sample, parent) {
+        // For comparing proportions of subtaxa of parent node
+        const data = parent.children.map(d => d.data);
+
+        this.scalesToSubtaxa(sample, data);
+        d3.select(".x-axis").call(this.xAxis);
+        d3.select(".y-axis").call(this.yAxis);
+
+        const { svg, chart, margin, xScale, yScale } = this,
+            format = d3.format(".4g"),
+            tooltip = d3.select(".tooltip"),
+            duration = 200;
+
+        // Draw title
+        svg.select(".mini-chart-title").remove()
+        svg.append("text")
+            .attr("class", "mini-chart-title")
+            .text(sample ? sample : "Average Intensity")
+            .style("font", "sans-serif")
+            .style("font-size", "14px")
+            .attr("text-anchor", "middle")
+            .attr("x", "50%")
+            .attr("y", margin.y - 10);
+
+        // Draw bar chart
+        const bar = chart.selectAll(".bar").data(data, d => d.taxon);
+        const barsEnter = bar.enter().append("rect")
+            .attr("class", "bar")
+            .on("mouseover", function(d) {
+                d3.select(this).transition()
+                    .duration(duration)
+                    .style("opacity", 0.5);
+                tooltip.transition()
+                    .duration(duration)
+                    .style("opacity", 0.9);
+            })
+            .on("mousemove", function(d) {
+                let height = tooltip.node().clientHeight;
+                let proportion;
+                if (sample) { proportion = d.samples[sample] / parent.data.samples[sample]; }
+                else { proportion = d.avgIntensity / parent.data.avgIntensity; }
+               
+                tooltip.html(`<strong>Taxon</strong>: ${d.taxon} (${d.rank})<br><strong>MS Intensity</strong>: ${format(sample ? d.samples[sample] : d.avgIntensity)}<br><br>
+                               <i class="fas fa-chart-pie"></i> \t${d3.format(".1%")(proportion)} of ${parent.data.taxon}`)
+                    .style("left", (d3.event.pageX) + "px")
+                    .style("top", (d3.event.pageY - height) + "px");
+            })
+            .on("mouseout", function() {
+                d3.select(this).transition()
+                    .duration(duration)
+                    .style("opacity", 1);
+                tooltip.transition()
+                    .duration(duration)
+                    .style("opacity", 0);
+            });
+
+        let currentBar = bar.merge(barsEnter)
+            .attr("height", yScale.bandwidth())
+            .attr("y", d => yScale(d.taxon))
+            .attr("fill", "#2a5599");
+        
+        currentBar.transition().duration(750)
+            .attr("width", d => xScale(sample ? d.samples[sample] : d.avgIntensity))
+
+        bar.exit().remove();
     }
 }
