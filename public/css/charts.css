@@ -14,6 +14,10 @@
     fill: #006cb4;
 }
 
+.node-selected circle {
+    stroke: black;
+}
+
 .node-normalized circle {
     r: 3;
 }

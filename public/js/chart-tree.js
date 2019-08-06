@@ -158,7 +158,7 @@ const viewTreeChart = {
             .on("mousemove", function(d) {
                 let height = tooltip.node().clientHeight;
                 let width = tooltip.node().clientWidth;
-                let childrenCount = d.children ? d.children.length : 0;
+                let childrenCount = d.children ? d.children.length : d._children ? d._children.length : 0;
                     tooltip.html(`<strong>Taxon</strong>: ${d.data.taxon} (${d.data.rank})<br>
                                   <strong>Subtaxa</strong>: ${childrenCount}<br>
                                   <strong>MS Intensity</strong>: ${format(d.data.value)}
@@ -172,8 +172,14 @@ const viewTreeChart = {
                     .style("opacity", 0);
             })
             .on("click", function(d) {
-                viewTreeChart.collapseNode(d, this);  // pass in data and this elem                
-                viewTreeChart.render(ctrlMain.getChartType());
+                if (d3.event.ctrlKey) {
+                    ctrlMain.toggleCurrentSelection(this);
+                    this.classList.toggle("node-selected");
+                }
+                else {
+                    viewTreeChart.collapseNode(d, this);  // pass in data and this elem                
+                    viewTreeChart.render(ctrlMain.getChartType());
+                }
             })
             .on("contextmenu", d3.contextMenu(this.menu));
     

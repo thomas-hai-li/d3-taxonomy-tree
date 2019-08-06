@@ -6,7 +6,7 @@ let model = {
     chartType: document.getElementById("chart-selection").value,
     currentData: null,  // Array of objects, loaded from csv
     currentSample: null,  // String, determined from user selection
-    currentSelecetion: [],  // Array of nodes, determined from user selection
+    currentSelection: new Set(),  // Set of DOM elems corresponding to nodes, selected for further analysis (used by tree chart)
     hierarchical: {
         // d3 hierarchy layours:
         root: null,
@@ -237,9 +237,15 @@ let ctrlMain = {
     setChartType: (type) => model.chartType = type,
     getCurrentData: () => model.currentData,
     getCurrentSample: () => model.currentSample,
+    getCurrentSelection: () => model.currentSelection,
     getChartType: () => model.chartType,
     getDim: () => model.dim,
     getHierarchical: () => model.hierarchical,
+    clearCurrentSelection: () => model.currentSelection.clear(),
+    toggleCurrentSelection: (e) => {
+        if (model.currentSelection.has(e)) { model.currentSelection.delete(e); }    // remove element if it exists
+        else { model.currentSelection.add(e); }                // or else add it
+    },
     submitFeedback: () => {
         let messageToUser = document.querySelector("#feedback-result"),
             name = document.querySelector("#feedback-name").value,
