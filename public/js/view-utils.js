@@ -32,7 +32,9 @@ let viewZoom = {
                     + " " + transform.applyX(d.parent.y) + "," + transform.applyY(d.parent.x);
             });
         }
-        this.svg.call(this.zoom);
+        this.svg
+            .call(this.zoom)
+            .on("dblclick.zoom", null);
     }
 }
 
