@@ -161,8 +161,10 @@ const viewTreeChart = {
                 let childrenCount = d.children ? d.children.length : d._children ? d._children.length : 0;
                     tooltip.html(`<strong>Taxon</strong>: ${d.data.taxon} (${d.data.rank})<br>
                                   <strong>Subtaxa</strong>: ${childrenCount}<br>
-                                  <strong>MS Intensity</strong>: ${format(d.data.value)}
-                                `)
+                                  <strong>MS Intensity</strong>: ${format(d.data.value)}` + (d.parent ?
+                                    `<br><br><i class="fas fa-chart-pie"></i> ${d3.format(".1%")(d.data.avgProportion)} of ${d.parent.data.taxon}` :
+                                    ``)
+                                )
                     .style("left", (d3.event.pageX - width) + "px")
                     .style("top", (d3.event.pageY - height) + "px");
             })

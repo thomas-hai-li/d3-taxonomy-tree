@@ -207,6 +207,11 @@ let ctrlMain = {
             .parentId(d => d.id.substring(0, d.id.lastIndexOf("@")));
         let root = stratify(data);
 
+        // calculate proportion to parent node
+        root.each(node => {
+            if (node.parent) { node.data.avgProportion = node.data.avgIntensity / node.parent.data.avgIntensity; }
+        })
+
         model.hierarchical.root = root;
     },
     buildTree: function() {
