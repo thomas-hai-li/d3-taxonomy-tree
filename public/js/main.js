@@ -6,6 +6,7 @@ let model = {
     chartType: document.getElementById("chart-selection").value,
     currentData: null,  // Array of objects, loaded from csv
     currentSample: null,  // String, determined from user selection
+    currentSelecetion: [],  // Array of nodes, determined from user selection
     hierarchical: {
         // d3 hierarchy layours:
         root: null,

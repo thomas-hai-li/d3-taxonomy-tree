@@ -51,6 +51,25 @@ const viewTreeChart = {
                     });
                     viewTreeChart.render(ctrlMain.getChartType());
                 }
+            },
+            {
+                title: "Expand child nodes",
+                action: function(d, i) {
+                    // Get array of child DOM elements
+                    const childNodeElems = d3.selectAll(".node").nodes().filter(ele => ele.__data__.parent === d);
+                    // Make all nodes in array visible
+                    if (childNodeElems.length === 0) {
+                        viewTreeChart.collapseNode(d, this);
+                    }
+                    else {
+                        childNodeElems.forEach(ele => {
+                            if (ele.classList.contains("node-collapsed")) {
+                                viewTreeChart.collapseNode(ele.__data__, ele);
+                            }
+                        });
+                    }
+                    viewTreeChart.render(ctrlMain.getChartType());
+                }
             }
         ];
     },
