@@ -4,28 +4,32 @@ const viewCirclePacking = {
         this.drawLabels = true;
         this.menu = [
             {
-                title: "Compare Sample Intensities",
-                action: function(elm, d, i) {
-                    if (!d.data.samples) {
-                        alert("No additional MS quantities for this dataset");  // change to modal
-                        return;
-                    }
-                    const name = d.data.taxon;
-                    viewMiniChart.renderSamples(name, Object.entries(d.data.samples));
-                }
+                title: "MS Intensity",
+                children: [
+                    {
+                        title: "Compare Sample Intensities",
+                        action: d => {
+                            if (!d.data.samples) {
+                                alert("No additional MS quantities for this dataset");  // change to modal
+                                return;
+                            }
+                            const name = d.data.taxon;
+                            viewMiniChart.renderSamples(name, Object.entries(d.data.samples));
+                        }
+                    },
+                    {
+                        title: "Compare Subtaxa Intensities",
+                        action: d => {
+                            if (!d.children) {
+                                alert("No subtaxa to compare");
+                                return;
+                            }
+                            const sample = ctrlMain.getCurrentSample();
+                            viewMiniChart.renderSubtaxa(sample, d);
+                        }
+                    },
+                ]
             },
-            {
-                title: "Compare Subtaxa Intensities",
-                action: function(elm, d, i) {
-                    if (!d.children) {
-                        alert("No subtaxa to compare");
-                        return;
-                    }
-
-                    const sample = ctrlMain.getCurrentSample();
-                    viewMiniChart.renderSubtaxa(sample, d);
-                }
-            }
         ];
     },
     render: function() {
