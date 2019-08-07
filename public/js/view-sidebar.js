@@ -83,6 +83,10 @@ let viewMiniChart = {
         this.chart = d3.select("#mini-chart").append("g")
             .style("transform", `translate(${margin.x}px, ${margin.y}px)`);
         
+        // Value selection:
+        d3.select("#abs-option").on("change", () => console.log(123))
+        d3.select("#normalized-option").on("change", () => console.log(456))
+        
         // Set up scales
         this.xScale = d3.scaleLinear()
             .range([0, width - 2 * margin.x]);

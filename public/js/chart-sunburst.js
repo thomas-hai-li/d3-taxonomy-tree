@@ -2,35 +2,6 @@ const viewSunburst = {
     init: function() {
         this.svg = d3.select("#chart-display");
         this.drawLabels = true;
-        this.menu = [
-            {
-                title: "MS Intensity",
-                children: [
-                    {
-                        title: "Compare Sample Intensities",
-                        action: d => {
-                            if (!d.data.samples) {
-                                alert("No additional MS quantities for this dataset");  // change to modal
-                                return;
-                            }
-                            const name = d.data.taxon;
-                            viewMiniChart.renderSamples(name, Object.entries(d.data.samples));
-                        }
-                    },
-                    {
-                        title: "Compare Subtaxa Intensities",
-                        action: d => {
-                            if (!d.children) {
-                                alert("No subtaxa to compare");
-                                return;
-                            }
-                            const sample = ctrlMain.getCurrentSample();
-                            viewMiniChart.renderSubtaxa(sample, d);
-                        }
-                    },
-                ]
-            },
-        ];
     },
     render: function() {
         this.svg.selectAll("*").remove();
@@ -43,8 +14,6 @@ const viewSunburst = {
         const chart = this.svg.append("g")
             .attr("class", "chart")
             .attr("transform", `translate(${width / 2}, ${height / 2})`);
-            // tooltip = d3.select(".tooltip"),
-            // tooltipDuration = 200;
             
         const format = d3.format(".4g"),
             color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, root.children.length + 1)),
@@ -81,18 +50,17 @@ const viewSunburst = {
             .join("path")
                 .attr("fill", d => { while (d.depth > 1) d = d.parent; return color(d.data.id); })
                 .attr("fill-opacity", d => arcVisible(d.current) ? (d.children ? 0.6 : 0.4) : 0)
+                .attr("class", d => arcVisible(d.current) ? "visible-arc" : "not-visible-arc")
                 .attr("d", d => arc(d.current));
       
         path.filter(d => d.children)
             .style("cursor", "pointer")
-            .on("click", clicked)
-            .on("contextmenu", d3.contextMenu(this.menu));
+            .on("click", clicked);
       
         path.append("title")
             .text(d => `${d.id.replace(/@/g,"/")}\nSubtaxa: ${d.children ? d.children.length: 3}\nAverage MS Intensity: ${format(d.data.avgIntensity)}`);
       
         const label = chart.append("g")
-            // .attr("class", "node-label")
             .attr("pointer-events", "none")
             .attr("text-anchor", "middle")
             .style("user-select", "none")
@@ -110,9 +78,28 @@ const viewSunburst = {
             .attr("fill", "none")
             .attr("pointer-events", "all")
             .on("click", clicked);
+
+        // 2 Center labels:
+        const taxonLabel = chart.append("text")
+            .attr("class", "taxon-label")
+            .attr("text-anchor", "middle")
+            .attr("font-size", "20px")
+            .attr("pointer-events", "none")
+            .text(root.data.taxon);
+        
+        const propLabel = chart.append("text")
+            .attr("class", "proportion-label")
+            .attr("text-anchor", "middle")
+            .attr("font-size", "14px")
+            .attr("pointer-events", "none")
+            .attr("dy", "1.2em");
       
         function clicked(p) {
             parent.datum(p.parent || root);
+            
+            // Update center labels 
+            taxonLabel.text(!p.parent ? root.data.taxon : `${ p.data.taxon }`);
+            propLabel.text(!p.parent ? `` : `${ d3.format(".1%")(p.data.avgProportion)} of ${p.parent.data.taxon }`)
 
             root.each(d => d.target = {
                 x0: Math.max(0, Math.min(1, (d.x0 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
@@ -131,10 +118,8 @@ const viewSunburst = {
                     const i = d3.interpolate(d.current, d.target);
                     return t => d.current = i(t);
                 })
-            // .filter(function(d) {
-            //     return +this.getAttribute("fill-opacity") || arcVisible(d.target);
-            // })
             .attr("fill-opacity", d => arcVisible(d.target) ? (d.children ? 0.6 : 0.4) : 0)
+            .attr("class", d => arcVisible(d.target) ? "visible-arc" : "not-visible-arc")
             .attrTween("d", d => () => arc(d.current));
 
             label.filter(function(d) {
