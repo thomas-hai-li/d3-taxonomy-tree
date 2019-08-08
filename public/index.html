@@ -40,7 +40,7 @@
                 <div class="sidebar py-3 d-flex flex-column h-100">
                     <div class="sidebar-item">
                         <label for="samples" class="text-primary">Samples</label>
-                        <button class="btn btn-sm btn-light" data-toggle="modal" data-target="#datasets-modal"><i class="fas fa-info-circle"></i></button>
+                        <button class="btn btn-sm btn-light" data-toggle="modal" data-target="#samples-modal"><i class="fas fa-info-circle"></i></button>
                         <select id="samples" class="form-control" size="15">
                         </select>
                     </div>
@@ -153,8 +153,8 @@
         </div>
     </div>
 
-    <!-- Datasets Modal -->
-    <div class="modal fade" id="datasets-modal" tabindex="-1">
+    <!-- Samples Modal -->
+    <div class="modal fade" id="samples-modal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -165,10 +165,35 @@
                 </div>
                 <div class="modal-body">
                     <h6 class="text-primary">Browsing Different Samples</h6>
-                    <p>All of your samples have been loaded in the list below. Clicking on a selection will display their corresponding MS
-                        intensities.</p>
+                    <p>All of your samples have been loaded in the list below. Clicking on a selection will display their corresponding MS intensities.</p>
+
                     <h6 class="text-primary">Changing Files</h6>
-                    <p>You may upload another file if you'd like. They should be of type <strong>csv</strong> and obtained from iMetaLab's data processing module.</p>
+                    <p>You may upload another file if you'd like. They should be of type <strong>csv</strong> and be in the correct format.
+                    This <a href="data/sample.csv">sample file</a> demonstrates the proper formatting. The column headers are described below...</p>
+
+                    <ul>
+                        <li>
+                            <strong>id</strong>:
+                            The complete taxonomic path/identity, delimited by "@".<br>
+                            <em>ie. cellular organisms@Bacteria@Firmicutes@Clostridia</em>
+                        </li>
+                        <br>
+                        <li>
+                            <strong>value</strong>:
+                            The average MS intensity across all samples.
+                        </li>
+                        <br>
+                        <li>
+                            <strong>*sample intensities*</strong> :
+                            The MS intensity of each sample, delimited by ";".
+                            The header title should list the name of all samples, also delimited by ";". There must be no spacing in the header title.<br>
+                            <em>ie.<br>
+                                header: s1;s2;s3<br>
+                                row: 1039022.58;703890.17;0
+                            </em>
+                        </li>
+                    </ul>
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
