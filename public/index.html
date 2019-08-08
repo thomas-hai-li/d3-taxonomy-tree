@@ -169,31 +169,40 @@
 
                     <h6 class="text-primary">Changing Files</h6>
                     <p>You may upload another file if you'd like. They should be of type <strong>csv</strong> and be in the correct format.
-                    This <a href="data/sample.csv">sample file</a> demonstrates the proper formatting. The column headers are described below...</p>
+                    This <a href="data/sample.csv" title="sample.csv">sample file</a> demonstrates the proper formatting. The column headers are in <strong>bold</strong> below...</p>
 
+                    <h6 class="text-primary">File Formatting</h6>
                     <ul>
                         <li>
                             <strong>id</strong>:
                             The complete taxonomic path/identity, delimited by "@".<br>
-                            <em>ie. cellular organisms@Bacteria@Firmicutes@Clostridia</em>
                         </li>
-                        <br>
                         <li>
                             <strong>value</strong>:
-                            The average MS intensity across all samples.
+                            The average MS intensity across all samples.<br>
                         </li>
-                        <br>
                         <li>
                             <strong>*sample intensities*</strong> :
                             The MS intensity of each sample, delimited by ";".
                             The header title should list the name of all samples, also delimited by ";". There must be no spacing in the header title.<br>
-                            <em>ie.<br>
-                                header: s1;s2;s3<br>
-                                row: 1039022.58;703890.17;0
-                            </em>
                         </li>
                     </ul>
-
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">id</th>
+                                <th scope="col">value</th>
+                                <th scope="col">s1;s2;s3</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>cellular organisms@Bacteria</td>
+                                <td>580970.92</td>
+                                <td>1039022.58;703890.17;0</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
