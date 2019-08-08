@@ -18,18 +18,21 @@
 
 <body>
     <!-- Top Navigation Bar -->
-    <nav class="navbar navbar-dark bg-dark flex-md-nowrap p-0 shadow">
-        <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Visualization Dashboard</a>
-        <a class="text-light" href="#" data-toggle="modal" data-target="#about-modal">About</a>
-        <a class="text-light" href="#" data-toggle="modal" data-target="#feedback-modal">Submit Feedback</a>
-        <select id="chart-selection" class="col-sm-2 custom-select">
-            <option value="sunburst">Sunburst</option>
-            <option value="static-treemap">Treemap</option>
-            <option value="simple-tree">Simple Tree</option>
-            <option value="circle-packing">Circle Packing</option>
-            <option value="hierarchical-bars">Hierarchical Bar Chart</option>
-            <option value="radial-tree">Radial Tree</option>
-        </select>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark p-0">
+        <a class="navbar-brand ml-3" href="#">Visualization Dashboard</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#nav-items" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse col-lg-10 ml-auto p-0" id="nav-items">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="text-light nav-item nav-link" href="#" data-toggle="modal" data-target="#about-modal">About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="text-light nav-item nav-link" href="#" data-toggle="modal" data-target="#feedback-modal">Submit Feedback</a>
+                </li>
+            </ul>
+        </div>
     </nav>
 
     <!-- Main view -->
@@ -38,14 +41,36 @@
             <!-- Sidebar -->
             <div class="col-lg-2 bg-light shadow">
                 <div class="sidebar py-3 d-flex flex-column h-100">
+                    <!-- Chart Select -->
+                    <select id="chart-selection" class="sidebar-item custom-select">
+                        <option value="simple-tree">Simple Tree</option>
+                        <option value="sunburst">Sunburst</option>
+                        <option value="static-treemap">Treemap</option>
+                        <option value="circle-packing">Circle Packing</option>
+                        <option value="hierarchical-bars">Hierarchical Bar Chart</option>
+                        <option value="radial-tree">Radial Tree</option>
+                    </select>
+                    <!-- Data-specific Sample Selection -->
                     <div class="sidebar-item">
                         <label for="samples" class="text-primary">Samples</label>
                         <button class="btn btn-sm btn-light" data-toggle="modal" data-target="#samples-modal"><i class="fas fa-info-circle"></i></button>
-                        <select id="samples" class="form-control" size="15">
+                        <select id="samples" class="form-control" size="10">
                         </select>
                     </div>
+                    <!-- Upload & Export buttons -->
                     <input type="file" id="file-upload" style="display: none;"/>
                     <button class="sidebar-item btn btn-sm btn-outline-primary btn-block" onclick="document.getElementById('file-upload').click();">Change File</button>
+                    <div class="sidebar-item btn-group dropright" id="chart-export">
+                        <button type="button" class="btn btn-sm btn-outline-success btn-block dropdown-toggle" data-toggle="dropdown">
+                            Export
+                        </button>
+                        <div class="dropdown-menu">
+                            <button id="convert-png" class="dropdown-item">PNG (coming soon)</button>
+                            <button id="convert-svg" class="dropdown-item">SVG</button>
+                        </div>
+                    </div>
+                    <!-- Toolbar -->
+                    <label for="toolbar" class="text-primary">Tools</label>
                     <div id="toolbar" class="sidebar-item btn-group">
                         <button class="btn btn-sm btn-outline-dark toolbar-button zoom-button" id="zoom-in"><i class="fas fa-search-plus"></i></button>
                         <button class="btn btn-sm btn-outline-dark toolbar-button zoom-button" id="zoom-out"><i class="fas fa-search-minus"></i></button>
@@ -55,8 +80,12 @@
                         <button class="btn btn-sm btn-outline-dark toolbar-button toggle-button" id="toggle-node-circles"><i class="fas fa-genderless"></i></button>
                         <button class="btn btn-sm btn-outline-primary toolbar-button" id="toolbar-help" data-toggle="modal" data-target="#tools-modal"><i class="fas fa-question"></i></button>
                     </div>
-                    <label for="slider" id="color-rank" class="my-0">Color by</label>
-                    <input type="range" id="slider" class="custom-range" name="slider" value="2" min="2" max="8" step="1" disabled>
+                    <!-- Color Slider -->
+                    <div class="sidebar-item">
+                        <input type="range" id="toolbar-slider" class="custom-range" name="toolbar-slider" value="2" min="2" max="8" step="1" disabled>
+                        <label for="toolbar-slider" id="color-rank" class="my-0">Color by</label>
+                    </div>
+                    <!-- Mini Chart -->
                     <div class="sidebar-item mt-auto">
                         <input type="radio" id="abs-option" name="ms-intensity-option" value="abs" checked>
                         <label for="abs-option">Absolute</label>
@@ -78,17 +107,6 @@
                                 <tbody>
                                 </tbody>
                             </table>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="offset-sm-10 dropup btn-block">
-                            <button type="button" class="btn btn-sm btn-outline-success btn-block dropdown-toggle" data-toggle="dropdown">
-                                Export
-                            </button>
-                            <div class="dropdown-menu">
-                                <button id="convert-png" class="dropdown-item">PNG (coming soon)</button>
-                                <button id="convert-svg" class="dropdown-item">SVG</button>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -169,10 +187,10 @@
 
                     <h6 class="text-primary">Changing Files</h6>
                     <p>You may upload another file if you'd like. They should be of type <strong>csv</strong> and be in the correct format.
-                    This <a href="data/sample.csv" title="sample.csv">sample file</a> demonstrates the proper formatting. The column headers are in <strong>bold</strong> below...</p>
+                    This <a href="data/sample.csv" data-toggle="tooltip" data-placement="top" title="sample.csv">sample file</a> demonstrates the proper formatting; there are 3 columns. The column headers are in <strong>bold</strong> below...</p>
 
                     <h6 class="text-primary">File Formatting</h6>
-                    <ul>
+                    <ol>
                         <li>
                             <strong>id</strong>:
                             The complete taxonomic path/identity, delimited by "@".<br>
@@ -186,7 +204,8 @@
                             The MS intensity of each sample, delimited by ";".
                             The header title should list the name of all samples, also delimited by ";". There must be no spacing in the header title.<br>
                         </li>
-                    </ul>
+                    </ol>
+                    <h6 class="text-primary">Example</h6>
                     <table class="table">
                         <thead>
                             <tr>
@@ -360,6 +379,11 @@
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script>
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        })
+    </script>
     <!-- D3 App -->
     <script src="js/d3.js"></script>
     <script type="text/javascript" src="js/d3-context-menu.js"></script>
