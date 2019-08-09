@@ -7,6 +7,17 @@ let model = {
     currentData: null,  // Array of objects, loaded from csv
     currentSample: null,  // String, determined from user selection
     currentSelection: new Set(),  // Set of DOM elems corresponding to nodes, selected for further analysis (used by tree chart)
+    identifiedTaxa: {
+        "All cellular organisms": new Set(),
+        "Superkingdom": new Set(),
+        "Kingdom": new Set(),
+        "Phylum": new Set(),
+        "Class": new Set(),
+        "Order": new Set(),
+        "Family": new Set(),
+        "Genus": new Set(),
+        "Species": new Set()
+    },
     hierarchical: {
         // d3 hierarchy layours:
         root: null,
@@ -106,13 +117,15 @@ let ctrlMain = {
             
             const { taxonRanks } = ctrlMain.getHierarchical();
             let countTaxa = taxa.length;
-            let countSymbol = countTaxa - 1;  // count "@"
+            let countSymbol = countTaxa - 1;  // count "@" symbol
             if (countTaxa > 2 && (taxa.indexOf("Bacteria") !== -1 || taxa.indexOf("Archaea") !== -1)) { // skip the kingdom rank
                 e.rank = taxonRanks[ countSymbol + 1 ];
             }
             else {
                 e.rank = taxonRanks[ countSymbol ];
             }
+            // Add taxon to identified taxa (object of sets)
+            model.identifiedTaxa[e.rank].add(e.taxon);
         });
     },
     parseSamples: function(data) {
@@ -200,7 +213,7 @@ let ctrlMain = {
                 viewMiniChart.init(data);
                 break;
         }
-        ctrlExportChart.init();
+        ctrlToolbar.initExport();   // export buttons
     },
     buildRoot: function(data) {
         // Generate the root data structure
@@ -271,167 +284,6 @@ let ctrlMain = {
             http.send(params);
             messageToUser.textContent = "Submitted, thanks!";
         }
-    }
-}
-
-let ctrlToolbar = {
-    initTreeChart: function() {
-        d3.selectAll(".toolbar-button")
-            .attr("disabled", null);
-        // 🔍 Magnifying buttons control zoom (+/-)
-        const duration = 500;
-        d3.select("#zoom-in").on("click", () => {
-            viewZoom.zoom
-                .scaleBy(viewZoom.svg.transition().duration(duration), 1.3);
-        });
-        d3.select("#zoom-out").on("click", () => {
-            viewZoom.zoom
-                .scaleBy(viewZoom.svg.transition().duration(duration), 1 / 1.3);
-        });
-        // 🅰 A+ A- buttons control fontsize
-        d3.select("#font-up").on("click", () => {
-            let labels = d3.selectAll(".node-label"),
-                fontSize = parseInt(labels.style("font-size")),
-                maxFontSize = 20;
-            if (fontSize < maxFontSize) {
-                labels.style("font-size", ++fontSize + "px")
-            }
-        });
-        d3.select("#font-down").on("click", () => {
-            let labels = d3.selectAll(".node-label"),
-                fontSize = parseInt(labels.style("font-size")),
-                minFontSize = 9;
-            if (fontSize > minFontSize) {
-                labels.style("font-size", --fontSize + "px")
-            }
-        });
-        // ⭕ 🅰 buttons toggle nodes and node-labels respectively
-        d3.select("#toggle-node-circles").on("click", () => {
-            d3.selectAll(".node")
-                .classed("node-normalized", d3.selectAll(".node").classed("node-normalized") ? false : true);
-        });
-        d3.select("#toggle-node-labels").on("click", () => {
-            let labels = d3.selectAll(".node-label"),
-                display = labels.style("display");
-            
-            if (display === "block") {
-                labels.style("display", "none");
-                viewTreeChart.drawLabels = false;
-            } else {
-                labels.style("display", "block");
-                viewTreeChart.drawLabels = true;
-            }
-        });
-        // Slider controls color based on taxonomic rank (kingdom, phylum, etc ...)
-        const slider = d3.select("#slider"),
-            colorLabel = d3.select("#color-rank");
-        
-        slider.attr("disabled", null);
-        slider.on("input", () => {
-            const { color, taxonRanks } = ctrlMain.getHierarchical();
-            const { taxonLevelColor, branchColor } = color;
-            color.currentRank = parseInt(slider.valueOf()._groups[0][0].value);
-            colorLabel.text(taxonRanks[color.currentRank]);
-            d3.selectAll(".node circle")
-                .style("fill", (d) => viewTreeChart.colorNode(d, taxonLevelColor, branchColor))
-        });
-    },
-    initTreemapChart: function () {
-        // Disable font and toggle buttons
-        d3.selectAll("#toggle-node-circles")
-            .attr("disabled", true);
-        d3.selectAll(".zoom-button, .font-button, #toggle-node-labels")
-            .attr("disabled", null);
-
-        // 🔍 Magnifying buttons control depth of depth of nodes/rectangles
-        d3.select("#zoom-in").on("click", () => {
-            if (viewStaticTreemapChart.drawDepth < 7) {
-                viewStaticTreemapChart.drawDepth++;
-                viewStaticTreemapChart.render();
-            }
-        });
-        d3.select("#zoom-out").on("click", () => {
-            if (viewStaticTreemapChart.drawDepth > 0) {
-              viewStaticTreemapChart.drawDepth--;
-              viewStaticTreemapChart.render();
-            }
-        });
-        // 🅰 A+ A- buttons control fontsize
-        d3.select("#font-up").on("click", () => {
-            let labels = d3.selectAll(".node-label"),
-                fontSize = parseInt(labels.style("font-size")),
-                maxFontSize = 20;
-            if (fontSize < maxFontSize) {
-                labels.style("font-size", ++fontSize + "px")
-            }
-        });
-        d3.select("#font-down").on("click", () => {
-            let labels = d3.selectAll(".node-label"),
-                fontSize = parseInt(labels.style("font-size")),
-                minFontSize = 9;
-            if (fontSize > minFontSize) {
-                labels.style("font-size", --fontSize + "px")
-            }
-        });
-        // 🅰 Toggle node labels
-        d3.select("#toggle-node-labels").on("click", () => {
-            let labels = d3.selectAll(".node-label"),
-                display = labels.style("display");
-            
-            if (display === "block") {
-                labels.style("display", "none");
-                viewTreeChart.drawLabels = false;
-            } else {
-                labels.style("display", "block");
-                viewTreeChart.drawLabels = true;
-            }
-        });
-        // Slider controls color based on taxonomic rank (kingdom, phylum, etc ...)
-        const slider = d3.select("#slider"),
-            colorLabel = d3.select("#color-rank");
-        
-        slider.attr("disabled", null);
-        slider.on("input", () => {
-            const { color, taxonRanks } = ctrlMain.getHierarchical();
-            const { taxonLevelColor, branchColor } = color;
-            color.currentRank = parseInt(slider.valueOf()._groups[0][0].value);
-            colorLabel.text(taxonRanks[color.currentRank]);
-            d3.selectAll("rect")
-                .style("fill", (d) => viewStaticTreemapChart.colorNode(d, taxonLevelColor, branchColor))
-        });
-    }
-}
-
-let ctrlExportChart = {
-    init: function() {
-        // Export buttons
-        d3.select("#convert-svg").on("click", () => {
-            if (! document.querySelector("#chart-display g")) {
-                alert("No chart to export!")
-            } else {
-                // Really hacky, pls rework
-                let svgData = document.querySelector("#chart-display").outerHTML.replace("</svg>", "<style>"),
-                    sheets = document.styleSheets,
-                    style;
-                for (let i = 0; i < sheets.length; i++) {
-                    if (sheets[i].href && sheets[i].href.match("charts.css")) {style = sheets[i].cssRules || sheet[i].rules;}
-                }
-                for (let i = 0; i < style.length; i++) {
-                    svgData += style[i].cssText;
-                }
-                svgData += "</style></svg>";
-                
-                let svgBlob = new Blob([svgData], {type:"image/svg+xml;charset=utf-8"}),
-                    svgUrl = URL.createObjectURL(svgBlob),
-                    downloadLink = document.createElement("a");
-        
-                downloadLink.href = svgUrl;
-                downloadLink.download = "visualization.svg";
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-            }
-        });
     }
 }
 
