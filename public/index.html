@@ -72,13 +72,31 @@
                     <!-- Toolbar -->
                     <label for="toolbar" class="text-primary">Tools</label>
                     <div id="toolbar" class="sidebar-item btn-group">
-                        <button class="btn btn-sm btn-outline-dark toolbar-button zoom-button" id="zoom-in"><i class="fas fa-search-plus"></i></button>
-                        <button class="btn btn-sm btn-outline-dark toolbar-button zoom-button" id="zoom-out"><i class="fas fa-search-minus"></i></button>
-                        <button class="btn btn-sm btn-outline-dark toolbar-button font-button" id="font-up"><i class="fas fa-font"></i><sup>+</sup></button>
-                        <button class="btn btn-sm btn-outline-dark toolbar-button font-button" id="font-down"><i class="fas fa-font"></i><sup>-</sup></button>
-                        <button class="btn btn-sm btn-outline-dark toolbar-button toggle-button" id="toggle-node-labels"><i class="fas fa-font"></i></button>
-                        <button class="btn btn-sm btn-outline-dark toolbar-button toggle-button" id="toggle-node-circles"><i class="fas fa-genderless"></i></button>
-                        <button class="btn btn-sm btn-outline-primary toolbar-button" id="toolbar-help" data-toggle="modal" data-target="#tools-modal"><i class="fas fa-question"></i></button>
+                        <!-- Zoom Buttons -->
+                        <button class="btn btn-sm btn-outline-dark toolbar-button zoom-button" id="zoom-in" data-tooltip="tooltip" data-placement="top" title="Zoom In" data-delay='{"show":"500"}'>
+                            <i class="fas fa-search-plus"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-dark toolbar-button zoom-button" id="zoom-out" data-tooltip="tooltip" data-placement="top" title="Zoom Out" data-delay='{"show":"500"}'>
+                            <i class="fas fa-search-minus"></i>
+                        </button>
+                        <!-- Font Size Buttons -->
+                        <button class="btn btn-sm btn-outline-dark toolbar-button font-button" id="font-up" data-tooltip="tooltip" data-placement="top" title="Increase Font Size" data-delay='{"show":"500"}'>
+                            <i class="fas fa-font"></i><sup>+</sup>
+                        </button>
+                        <button class="btn btn-sm btn-outline-dark toolbar-button font-button" id="font-down" data-tooltip="tooltip" data-placement="top" title="Decrease Font Size" data-delay='{"show":"500"}'>
+                            <i class="fas fa-font"></i><sup>-</sup>
+                        </button>
+                        <!-- Toggle Buttons -->
+                        <button class="btn btn-sm btn-outline-dark toolbar-button toggle-button" id="toggle-node-labels" data-tooltip="tooltip" data-placement="top" title="Toggle Labels" data-delay='{"show":"500"}'>
+                            <i class="fas fa-font"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-dark toolbar-button toggle-button" id="toggle-node-circles" data-tooltip="tooltip" data-placement="top" title="Normalize Node Size" data-delay='{"show":"500"}'>
+                            <i class="fas fa-genderless"></i>
+                        </button>
+                        <!-- Help Button -->
+                        <button class="btn btn-sm btn-outline-primary toolbar-button" id="toolbar-help" data-toggle="modal" data-target="#tools-modal" data-tooltip="tooltip" data-placement="top" title="Help" data-delay='{"show":"500"}'>
+                            <i class="fas fa-question"></i>
+                        </button>
                     </div>
                     <!-- Color Slider -->
                     <div class="sidebar-item">
@@ -187,7 +205,7 @@
 
                     <h6 class="text-primary">Changing Files</h6>
                     <p>You may upload another file if you'd like. They should be of type <strong>csv</strong> and be in the correct format.
-                    This <a href="data/sample.csv" data-toggle="tooltip" data-placement="top" title="sample.csv">sample file</a> demonstrates the proper formatting; there are 3 columns. The column headers are in <strong>bold</strong> below...</p>
+                    This <a href="data/sample.csv" data-tooltip="tooltip" data-placement="top" title="sample.csv">sample file</a> demonstrates the proper formatting; there are 3 columns. The column headers are in <strong>bold</strong> below...</p>
 
                     <h6 class="text-primary">File Formatting</h6>
                     <ol>
@@ -380,9 +398,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <script>
-        $(function () {
-            $('[data-toggle="tooltip"]').tooltip();
-        })
+        // Tooltip for GUI (not for visualization charts) 
+        $('[data-tooltip="tooltip"]').tooltip();
+
+        $(document).ready(function(){
+            $('[data-tooltip=tooltip]').tooltip({ trigger: "hover" });
+        });
+
+        $(document).ready(function(){
+            $('[data-tooltip="tooltip"]').click(function () {
+                $('[data-tooltip="tooltip"]').tooltip("hide");
+
+            });
+        });
     </script>
     <!-- D3 App -->
     <script src="js/d3.js"></script>
