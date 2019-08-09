@@ -70,6 +70,27 @@ const viewTreeChart = {
                     }
                     viewTreeChart.render(ctrlMain.getChartType());
                 }
+            },
+            {
+                title: "Change Color",
+                action: function(d, i) {
+                    // const nodeCircle = d3.select(this).select("circle");
+                    const nodeCircle = d3.selectAll(Array.from(ctrlMain.getCurrentSelection())).selectAll("circle");
+                    console.log(nodeCircle);
+                    jsPanel.create({
+                        theme: "none",
+                        headerTitle: "Select Color",
+                        panelSize: '0,0',
+                        dragit: { containment: 0 },
+                        callback: panel => {
+                            panel.content.innerHTML = `<input id="node-color-picker" type="text" value="${ nodeCircle.style("fill") }">`
+                        }
+                    })
+                    $("#node-color-picker").colorpicker().focus();
+                    $('#node-color-picker').on('colorpickerChange', function(event) {
+                        nodeCircle.style("fill", event.color.toString());
+                    });
+                }
             }
         ];
     },
@@ -162,7 +183,7 @@ const viewTreeChart = {
                     tooltip.html(`<strong>Taxon</strong>: ${d.data.taxon} (${d.data.rank})<br>
                                   <strong>Subtaxa</strong>: ${childrenCount}<br>
                                   <strong>MS Intensity</strong>: ${format(d.data.value)}` + (d.parent ?
-                                    `<br><br><i class="fas fa-chart-pie"></i> ${d3.format(".1%")(d.data.avgProportion)} of ${d.parent.data.taxon}` :
+                                    `<br><br><i class="fas fa-chart-pie"></i> ${d3.format(".1%")(d.data.avgProportion)} of ${d.parent.data.taxon} (average)` :
                                     ``)
                                 )
                     .style("left", (d3.event.pageX - width) + "px")
