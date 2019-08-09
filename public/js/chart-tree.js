@@ -4,6 +4,7 @@ const viewTreeChart = {
             .style("background-color", "white")
             .on("contextmenu", () => d3.event.preventDefault());
         this.drawLabels = true;
+        this.nodeSizeNormalized = false;
         this.menu = [
             {
                 title: "MS Intensity",
@@ -74,21 +75,47 @@ const viewTreeChart = {
             {
                 title: "Change Color",
                 action: function(d, i) {
-                    // const nodeCircle = d3.select(this).select("circle");
-                    const nodeCircle = d3.selectAll(Array.from(ctrlMain.getCurrentSelection())).selectAll("circle");
-                    console.log(nodeCircle);
+                    // Get nodes which color we want to change
+                    const selectionArr = Array.from(ctrlMain.getCurrentSelection());
+                    const nodeCircle = (selectionArr.length !== 0) ?
+                                        d3.selectAll(selectionArr).selectAll("circle") :
+                                        d3.select(this).select("circle");
+                    const currentColor = d3.color(nodeCircle.style("fill")).hex();
+
+                    // Allow only one instance of color panel
+                    const existingPanel = document.getElementById("color-panel");
+                    if (existingPanel) { existingPanel.remove(); }
+                    
+                    // Create panel with color picker
                     jsPanel.create({
+                        id: "color-panel",
                         theme: "none",
-                        headerTitle: "Select Color",
-                        panelSize: '0,0',
+                        headerTitle: "Color",
                         dragit: { containment: 0 },
+                        panelSize: "200 260",
+                        resizeit: false,
+                        headerControls: {
+                            smallify: "remove",
+                            maximize: "remove",
+                            minimize: "remove"
+                        },
+                        position: {
+                            my: "left-top",
+                            at: "right-top",
+                            of: nodeCircle.node()
+                        },
                         callback: panel => {
-                            panel.content.innerHTML = `<input id="node-color-picker" type="text" value="${ nodeCircle.style("fill") }">`
-                        }
-                    })
-                    $("#node-color-picker").colorpicker().focus();
-                    $('#node-color-picker').on('colorpickerChange', function(event) {
-                        nodeCircle.style("fill", event.color.toString());
+                            panel.content.innerHTML = `<form><input type="text" id="color-val" name="color-val" value="#123456" style='display="none";' /><form>
+                                                        <div id="colorpicker"></div>`
+                        },
+                    });
+                    // callback fires on color change
+                    $.farbtastic("#colorpicker").setColor(currentColor).linkTo(color => {
+                        d3.select("#color-val")
+                            .style("background-color", color)
+                            .attr("value", color);
+                        
+                        nodeCircle.style("fill", color);
                     });
                 }
             }
@@ -209,6 +236,7 @@ const viewTreeChart = {
         // Update nodes
         let nodeUpdate = node.merge(nodeEnter)
             .classed("node-collapsed", d => d._children)
+            .classed("node-normalized", this.nodeSizeNormalized)
         if (type === "radial-tree") {
             nodeUpdate.attr("transform", d => "translate(" + this.project(d.x, d.y) + ")")
         } else {

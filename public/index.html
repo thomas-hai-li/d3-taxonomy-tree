@@ -8,7 +8,7 @@
     <!-- 3rd Party -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" href="css/jspanel.css">
-    <link rel="stylesheet" href="css/bootstrap-colorpicker.css">
+    <link rel="stylesheet" href="css/farbtastic.css">
     <link rel="stylesheet" href="css/fontawesome.all.min.css">
     <!-- App -->
     <link rel="stylesheet" href="css/main.css">
@@ -27,11 +27,16 @@
         </button>
         <div class="collapse navbar-collapse col-lg-10 ml-auto p-0" id="nav-items">
             <ul class="navbar-nav">
-                <li class="nav-item active">
+                <li class="nav-item">
                     <a class="text-light nav-item nav-link" href="#" data-toggle="modal" data-target="#about-modal">About</a>
                 </li>
-                <li class="nav-item">
-                    <a class="text-light nav-item nav-link" href="#" data-toggle="modal" data-target="#feedback-modal">Submit Feedback</a>
+                <li class="nav-item" data-tooltip="tooltip" data-placement="bottom" title="View GitHub Repo" data-delay='{"show":"500"}'>
+                    <a class="text-light nav-item nav-link" href="https://github.com/thomas-hai-li/metaproteomics-data-visualization" target="_blank">
+                        <i class="fab fa-github"></i>
+                    </a>
+                </li>
+                <li class="nav-item" data-tooltip="tooltip" data-placement="bottom" title="Submit Feedback!" data-delay='{"show":"500"}'>
+                    <a class="text-light nav-item nav-link" href="#" data-toggle="modal" data-target="#feedback-modal">😎</a>
                 </li>
             </ul>
         </div>
@@ -138,7 +143,9 @@
             </div>
         </div>
     </div>
+
     <div class="tooltip"></div>
+    
     <!-- About Modal -->
     <div class="modal fade" id="about-modal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
@@ -152,10 +159,6 @@
                 <div class="modal-body">
                     <p>A suite of metaproteomics data visualization tools.</p>
                     <p>This project was started this summer in 2019 and is currently under development. Features and bug fixes are being pushed out every week.</p>
-                    <p>Check out the
-                        <a href="https://github.com/thomas-hai-li/metaproteomics-data-visualization" target="_blank" and rel="noopener noreferrer">GitHub Repository</a>
-                        to view recent commits.
-                    </p>
                     <footer class="blockquote-footer">Thomas Hai Li</footer>
                 </div>
                 <div class="modal-footer">
@@ -406,7 +409,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <!-- Bootstrap Colorpicker -->
-    <script src="js/bootstrap-colorpicker.js"></script>
+    <!-- <script src="js/bootstrap-colorpicker.js"></script> -->
+    <script type="text/javascript" src="js/farbtastic.js"></script>
     <script>
         // Tooltip for GUI (not for visualization charts) 
         $('[data-tooltip="tooltip"]').tooltip();

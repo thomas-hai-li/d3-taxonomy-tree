@@ -33,6 +33,8 @@ let ctrlToolbar = {
         d3.select("#toggle-node-circles").on("click", () => {
             d3.selectAll(".node")
                 .classed("node-normalized", d3.selectAll(".node").classed("node-normalized") ? false : true);
+            // toggle bool
+            viewTreeChart.nodeSizeNormalized = ! viewTreeChart.nodeSizeNormalized;
         });
         d3.select("#toggle-node-labels").on("click", () => {
             let labels = d3.selectAll(".node-label"),
@@ -48,7 +50,27 @@ let ctrlToolbar = {
         });
         // customize color palette
         d3.select("#color-palette").on("click", () => {
-            let palettePicker = jsPanel.create();
+            let palettePicker = document.getElementById("color-palette-panel");
+            // Allow only one instance
+            if (! palettePicker) {
+                palettePicker = jsPanel.create({
+                    headerTitle: 'Customize Color Palette',
+                    id: "color-palette-panel",
+                    dragit: { containment: 0 },
+                    callback: panel => {
+                        panel.content.innerHTML = `
+                        <div>
+                            <input id="superkingdom-color" type="text" value="rgb(255, 128, 0)">
+                            <label>Superkingdom</label>
+                        </div>
+                        <div>
+                            <input id="kingdom-color" type="text" value="rgb(255, 128, 0)">
+                            <label>Kingdom</label>
+                        </div>
+                        `
+                    }
+                });
+            }
         })
 
         // slider controls color based on taxonomic rank (kingdom, phylum, etc ...)
