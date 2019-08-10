@@ -4,10 +4,13 @@ const viewCirclePacking = {
         this.drawLabels = true;
         this.menu = [
             {
+                title: d => "Selection: " + d.data.taxon
+            },
+            {
                 title: "MS Intensity",
                 children: [
                     {
-                        title: "Compare Sample Intensities",
+                        title: "Compare sample intensities",
                         action: d => {
                             if (!d.data.samples) {
                                 alert("No additional MS quantities for this dataset");  // change to modal
@@ -18,7 +21,7 @@ const viewCirclePacking = {
                         }
                     },
                     {
-                        title: "Compare Subtaxa Intensities",
+                        title: "Compare subtaxa proportions",
                         action: d => {
                             if (!d.children) {
                                 alert("No subtaxa to compare");
