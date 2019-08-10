@@ -8,7 +8,7 @@ let model = {
     currentSample: null,  // String, determined from user selection
     currentSelection: new Set(),  // Set of DOM elems corresponding to nodes, selected for further analysis (used by tree chart)
     identifiedTaxa: {
-        "All cellular organisms": new Set(),
+        "Cellular organisms": new Set(),
         "Superkingdom": new Set(),
         "Kingdom": new Set(),
         "Phylum": new Set(),
@@ -26,7 +26,7 @@ let model = {
         pack: null,
         // Rank keys based on the number of "@" in the id of each data point
         taxonRanks: {
-            0: "All cellular organisms",
+            0: "Cellular organisms",
             1: "Superkingdom",
             2: "Kingdom",   // bacteria and archaea skip kingdom
             3: "Phylum",
@@ -37,8 +37,7 @@ let model = {
             8: "Species"
         },
         color: {
-            // Based on number of "@"
-            currentRank: 2,
+            currentRank: "Kingdom",
             // Color schemes for nodes:
             taxonLevelColor: d3.scaleOrdinal()
                 .domain(d3.range(0, 10))

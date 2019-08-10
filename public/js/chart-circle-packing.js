@@ -39,7 +39,7 @@ const viewCirclePacking = {
         this.svg.selectAll("*").remove();
         
         // Setup:
-        const { root, pack, taxonRanks } = ctrlMain.getHierarchical(),
+        const { root, pack } = ctrlMain.getHierarchical(),
             { width, height } = ctrlMain.getDim();
 
         const chart = this.svg.append("g")

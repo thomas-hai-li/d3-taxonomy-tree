@@ -118,7 +118,7 @@ let ctrlToolbar = {
 
                 // init color picker at superkingdom level
                 $.farbtastic("#colorpicker").linkTo(color => {
-                    d3.select("#superkingdom-color")
+                    d3.select("#organisms-color")
                         .style("background-color", color)
                         .attr("value", color);
                 });
@@ -142,11 +142,11 @@ let ctrlToolbar = {
         slider.attr("disabled", null);
         slider.on("input", () => {
             const { color, taxonRanks } = ctrlMain.getHierarchical();
-            const { taxonLevelColor, branchColor } = color;
-            color.currentRank = parseInt(slider.valueOf()._groups[0][0].value);
-            colorLabel.text(taxonRanks[color.currentRank]);
+            const currentVal = parseInt(slider.valueOf()._groups[0][0].value);
+            color.currentRank = taxonRanks[currentVal];
+            colorLabel.text(color.currentRank);
             d3.selectAll(".node circle")
-                .style("fill", (d) => viewTreeChart.colorNode(d, taxonLevelColor, branchColor))
+                .style("fill", (d) => viewTreeChart.colorNode(d));
         });
     },
     initTreemapChart: function () {
@@ -206,11 +206,10 @@ let ctrlToolbar = {
         slider.attr("disabled", null);
         slider.on("input", () => {
             const { color, taxonRanks } = ctrlMain.getHierarchical();
-            const { taxonLevelColor, branchColor } = color;
             color.currentRank = parseInt(slider.valueOf()._groups[0][0].value);
             colorLabel.text(taxonRanks[color.currentRank]);
             d3.selectAll("rect")
-                .style("fill", (d) => viewStaticTreemapChart.colorNode(d, taxonLevelColor, branchColor))
+                .style("fill", (d) => viewStaticTreemapChart.colorNode(d));
         });
     },
     initExport: function() {
