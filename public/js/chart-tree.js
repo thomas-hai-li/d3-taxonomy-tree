@@ -121,11 +121,6 @@ const viewTreeChart = {
             }
         ];
     },
-    project: function(x, y) {
-        // calculate node and link position For radial tree
-        const angle = (x - 90) / 180 * Math.PI, radius = y;
-        return [radius * Math.cos(angle), radius * Math.sin(angle)];
-    },
     render: function(type) {
         // Renders either simple or radial tree
         const { root, tree, color } = ctrlMain.getHierarchical(),
@@ -133,8 +128,11 @@ const viewTreeChart = {
         const tooltip = d3.select(".tooltip"),
               tooltipDuration = 200;
         const format = d3.format(".4g");
+        const propToPixels = d3.scaleLinear()   // proportion to radius/stroke width
+            .domain([0, 1])
+            .range([3, 15]);                    // Math.log10(d.data.value + 1) + 1
+
         root.sort((a, b) => b.data.value - a.data.value);
-            // .sort((a, b) => (a.height - b.height) || a.id.localeCompare(b.id)); // by alphabetical
             
         // Reset chart display and previous tooltips
         this.svg.selectAll("*").remove();
@@ -172,6 +170,7 @@ const viewTreeChart = {
     
         const linkEnter = link.enter().append("path")
             .attr("class", "link")
+            .style("stroke-width", d => 2 * propToPixels(d.data.avgProportion));
         
         // Update and exit links
         link.merge(linkEnter)
@@ -245,7 +244,7 @@ const viewTreeChart = {
 
         const { taxonLevelColor, branchColor } = color;
         nodeUpdate.append("circle")
-            .attr("r", d => Math.log10(d.data.value + 1) + 2)
+            .attr("r", d => d.depth === 0 ? 20 : propToPixels(d.data.avgProportion))
             .style("fill", d => this.colorNode(d, taxonLevelColor, branchColor));
         
         const nodeLabel = nodeUpdate.append("text")
@@ -282,6 +281,11 @@ const viewTreeChart = {
         if (viewZoom.zoom) {
             viewZoom.zoom.translateBy(viewZoom.svg, 1e-9, 1e-9);
         }
+    },
+    project: function(x, y) {
+        // calculate node and link position For radial tree
+        const angle = (x - 90) / 180 * Math.PI, radius = y;
+        return [radius * Math.cos(angle), radius * Math.sin(angle)];
     },
     collapseNode: function(d, nodeElem) {
         if (d.children) {
