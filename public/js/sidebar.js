@@ -61,7 +61,7 @@ let ctrlToolbar = {
                     theme: "none",
                     headerTitle: 'Customize Color Palette',
                     dragit: { containment: 0 },
-                    panelSize: "550 360",
+                    panelSize: "auto 350",
                     resizeit: false,
                     headerControls: {
                         maximize: "remove",
@@ -72,26 +72,30 @@ let ctrlToolbar = {
                             <div style="display: flex;">
                                 <div>
                                     <form>
-                                        <input type="text" id="superkingdom-color" class="rank-color" value="#123456" />
-                                        <label>Superkingdom</label>
-                                        <input type="text" id="kingdom-color" class="rank-color" value="#123456" />
-                                        <label>Kingdom</label>
-                                        <input type="text" id="phylum-color" class="rank-color" value="#123456" />
-                                        <label>Phylum</label>
-                                        <input type="text" id="class-color" class="rank-color" value="#123456" />
-                                        <label>Class</label>
-                                        <input type="text" id="order-color" class="rank-color" value="#123456" />
-                                        <label>Order</label>
-                                        <input type="text" id="family-color" class="rank-color" value="#123456" />
-                                        <label>Family</label>
-                                        <input type="text" id="genus-color" class="rank-color" value="#123456" />
-                                        <label>Genus</label>
-                                        <input type="text" id="species-color" class="rank-color" value="#123456" />
-                                        <label>Species</label>
-                                        <button type="submit" id="submit-rank-color" class="btn btn-outline-success btn-block" onsubmit="return false">Confirm Epic Selection</button>
+                                        <input type="text" readonly id="organisms-color" class="rank-color" value="#123456" />
+                                        <label>Organisms</label> <br>
+                                        <input type="text" readonly id="superkingdom-color" class="rank-color" value="#123456" />
+                                        <label>Superkingdom</label> <br>
+                                        <input type="text" readonly id="kingdom-color" class="rank-color" value="#123456" />
+                                        <label>Kingdom</label> <br>
+                                        <input type="text" readonly id="phylum-color" class="rank-color" value="#123456" />
+                                        <label>Phylum</label> <br>
+                                        <input type="text" readonly id="class-color" class="rank-color" value="#123456" />
+                                        <label>Class</label> <br>
+                                        <input type="text" readonly id="order-color" class="rank-color" value="#123456" />
+                                        <label>Order</label> <br>
+                                        <input type="text" readonly id="family-color" class="rank-color" value="#123456" />
+                                        <label>Family</label> <br>
+                                        <input type="text" readonly id="genus-color" class="rank-color" value="#123456" />
+                                        <label>Genus</label> <br>
+                                        <input type="text" readonly id="species-color" class="rank-color" value="#123456" />
+                                        <label>Species</label> <br>
                                     <form>
                                 </div>
-                                <div id="colorpicker"></div>
+                                <div>
+                                    <div id="colorpicker"></div>
+                                    <button type="submit" id="submit-rank-color" class="btn btn-outline-success mt-5" onsubmit="return false">Confirm Epic Selection</button>
+                                </div>
                             </div>
                         `
                     },

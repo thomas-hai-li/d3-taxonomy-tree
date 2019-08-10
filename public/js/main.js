@@ -42,7 +42,7 @@ let model = {
             // Color schemes for nodes:
             taxonLevelColor: d3.scaleOrdinal()
                 .domain(d3.range(0, 10))
-                .range(d3.schemeAccent),
+                .range(d3.schemePastel1),
             branchColor: d3.scaleOrdinal()
                 .range(d3.schemeSet3)
         }
