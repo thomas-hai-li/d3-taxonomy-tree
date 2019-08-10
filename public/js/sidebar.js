@@ -61,7 +61,7 @@ let ctrlToolbar = {
                     theme: "none",
                     headerTitle: 'Customize Color Palette',
                     dragit: { containment: 0 },
-                    panelSize: "auto 350",
+                    panelSize: "auto 320",
                     resizeit: false,
                     headerControls: {
                         maximize: "remove",
@@ -88,8 +88,6 @@ let ctrlToolbar = {
                                         <label>Family</label> <br>
                                         <input type="text" readonly id="genus-color" class="rank-color" value="#123456" />
                                         <label>Genus</label> <br>
-                                        <input type="text" readonly id="species-color" class="rank-color" value="#123456" />
-                                        <label>Species</label> <br>
                                     <form>
                                 </div>
                                 <div>
