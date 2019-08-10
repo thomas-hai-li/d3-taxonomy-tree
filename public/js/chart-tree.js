@@ -5,12 +5,17 @@ const viewTreeChart = {
             .on("contextmenu", () => d3.event.preventDefault());
         this.drawLabels = true;
         this.nodeSizeNormalized = false;
+
+        // Context Menu
         this.menu = [
+            {
+                title: d => "Selection: " + d.data.taxon
+            },
             {
                 title: "MS Intensity",
                 children: [
                     {
-                        title: "Compare Sample Intensities",
+                        title: "Compare sample intensities",
                         action: d => {
                             if (!d.data.samples) {
                                 alert("No additional MS quantities for this dataset");  // change to modal
@@ -21,7 +26,7 @@ const viewTreeChart = {
                         }
                     },
                     {
-                        title: "Compare Subtaxa Intensities",
+                        title: "Compare subtaxa proportions",
                         action: d => {
                             if (!d.children) {
                                 alert("No subtaxa to compare");
@@ -34,43 +39,96 @@ const viewTreeChart = {
                 ]
             },
             {
-                title: "Collapse all other nodes",
-                action: function(d, i) {
-                    // Make selected node visible
-                    if (this.classList.contains("node-collapsed")) {
-                        viewTreeChart.collapseNode(d, this);
-                    }
-                    // Collapse all other nodes
-                    let depth = d.depth;
-                    let id = d.id;
-                    let otherNodes = d3.selectAll(".node").filter(d => d.depth === depth && d.id !== id);
-
-                    otherNodes.nodes().forEach(node => {
-                        if (! node.classList.contains("node-collapsed")) {
-                            viewTreeChart.collapseNode(node.__data__, node);
+                title: "Toggle Nodes",
+                children: [
+                    {
+                        title: "Collapse all other nodes",
+                        action: function(d, i) {
+                            // Make selected node visible
+                            if (this.classList.contains("node-collapsed")) {
+                                viewTreeChart.collapseNode(d, this);
+                            }
+                            // Collapse all other nodes
+                            let depth = d.depth;
+                            let id = d.id;
+                            let otherNodes = d3.selectAll(".node").filter(d => d.depth === depth && d.id !== id);
+        
+                            otherNodes.nodes().forEach(node => {
+                                if (! node.classList.contains("node-collapsed")) {
+                                    viewTreeChart.collapseNode(node.__data__, node);
+                                }
+                            });
+                            viewTreeChart.render(ctrlMain.getChartType());
                         }
-                    });
-                    viewTreeChart.render(ctrlMain.getChartType());
-                }
+                    },
+                    {
+                        title: "Expand child nodes",
+                        action: function(d, i) {
+                            // Get array of child DOM elements
+                            const childNodeElems = d3.selectAll(".node").nodes().filter(ele => ele.__data__.parent === d);
+                            // Make all nodes in array visible
+                            if (childNodeElems.length === 0) {
+                                viewTreeChart.collapseNode(d, this);
+                            }
+                            else {
+                                childNodeElems.forEach(ele => {
+                                    if (ele.classList.contains("node-collapsed")) {
+                                        viewTreeChart.collapseNode(ele.__data__, ele);
+                                    }
+                                });
+                            }
+                            viewTreeChart.render(ctrlMain.getChartType());
+                        }
+                    },
+                ]
             },
             {
-                title: "Expand child nodes",
-                action: function(d, i) {
-                    // Get array of child DOM elements
-                    const childNodeElems = d3.selectAll(".node").nodes().filter(ele => ele.__data__.parent === d);
-                    // Make all nodes in array visible
-                    if (childNodeElems.length === 0) {
-                        viewTreeChart.collapseNode(d, this);
-                    }
-                    else {
-                        childNodeElems.forEach(ele => {
-                            if (ele.classList.contains("node-collapsed")) {
-                                viewTreeChart.collapseNode(ele.__data__, ele);
+                title: "Select Nodes",
+                children: [
+                    {
+                        title: "Select this node (or ctrl+click)",
+                        action: function(d, i) {
+                            ctrlMain.addToCurrentSelection(this);
+                        }
+                    },
+                    {
+                        title: "Select direct subnodes",
+                        action: function(d, i) {
+                            if (!d.children) {
+                                alert("No subnodes to select");
+                                return;
                             }
-                        });
+                            const taxon = d.data.taxon;
+                            const depth = d.depth;
+                            const subnodes = d3.selectAll(".node")
+                                .filter(d => ( d.data.id.indexOf(taxon) > -1 ) && ( d.depth === depth + 1 ));
+                            
+                            subnodes.nodes().forEach(node => { ctrlMain.addToCurrentSelection(node); })
+                        }
+                    },
+                    {
+                        title: "Select all subnodes",
+                        action: function(d, i) {
+                            if (!d.children) {
+                                alert("No subnodes to select");
+                                return;
+                            }
+                            const taxon = d.data.taxon;
+                            const depth = d.depth;
+                            const subnodes = d3.selectAll(".node")
+                                .filter(d => ( d.data.id.indexOf(taxon) > -1 ) && ( d.depth > depth ));
+
+                            subnodes.nodes().forEach(node => { ctrlMain.addToCurrentSelection(node); })
+                        }
+                    },
+                    {
+                        divider: true
+                    },
+                    {
+                        title: "Clear selection",
+                        action: () => ctrlMain.clearCurrentSelection()
                     }
-                    viewTreeChart.render(ctrlMain.getChartType());
-                }
+                ]
             },
             {
                 title: "Change Color",
@@ -223,7 +281,6 @@ const viewTreeChart = {
             .on("click", function(d) {
                 if (d3.event.ctrlKey) {
                     ctrlMain.toggleCurrentSelection(this);
-                    this.classList.toggle("node-selected");
                 }
                 else {
                     viewTreeChart.collapseNode(d, this);  // pass in data and this elem                

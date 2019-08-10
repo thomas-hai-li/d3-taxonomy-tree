@@ -2,8 +2,12 @@
 
 .link {
     stroke: #6e6e6e;
+    opacity: 0.5;
     fill: none;
-    stroke-width: 1;
+}
+
+.link-normalized {
+    stroke-width: 3px;
 }
 
 .node circle {
@@ -17,10 +21,11 @@
 
 .node-selected circle {
     stroke: black;
+    stroke-width: 2px;
 }
 
 .node-normalized circle {
-    r: 3;
+    r: 3px;
 }
 
 .node-label  {

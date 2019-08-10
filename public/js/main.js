@@ -72,6 +72,9 @@ let ctrlMain = {
         this.setCurrentData(loadedData);
         this.buildChart(this.getCurrentData());     // load the data immediately
     },
+
+    // MAIN EVENT LISTENERS
+
     onFileChange: function() {
         const upload = document.querySelector("#file-upload");
 
@@ -108,6 +111,9 @@ let ctrlMain = {
             }
         });
     },
+
+    // METHODS FOR PARSING INPUT DATA && DATA FLOW
+
     parseTaxonRank: function(data) {
         // Accepts array of objects as data, parses for each individual taxon classification and its rank
         data = data.map(e => {
@@ -215,6 +221,9 @@ let ctrlMain = {
         }
         ctrlToolbar.initExport();   // export buttons
     },
+
+    // D3 HIERARCHY AND LAYOUT GENERATORS
+
     buildRoot: function(data) {
         // Generate the root data structure
         let stratify = d3.stratify()
@@ -251,20 +260,40 @@ let ctrlMain = {
         
         model.hierarchical.pack = pack;
     },
-    setCurrentData: (data) => model.currentData = data,
-    setCurrentSample: (sample) => model.currentSample = sample,
-    setChartType: (type) => model.chartType = type,
-    getCurrentData: () => model.currentData,
-    getCurrentSample: () => model.currentSample,
-    getCurrentSelection: () => model.currentSelection,
-    getChartType: () => model.chartType,
+
+    // GETTERS AND SETTERS
+
     getDim: () => model.dim,
     getHierarchical: () => model.hierarchical,
-    clearCurrentSelection: () => model.currentSelection.clear(),
-    toggleCurrentSelection: (e) => {
-        if (model.currentSelection.has(e)) { model.currentSelection.delete(e); }    // remove element if it exists
-        else { model.currentSelection.add(e); }                // or else add it
+    // methods for currentData:
+    setCurrentData: (data) => model.currentData = data,
+    getCurrentData: () => model.currentData,
+    // methods for currentSample:
+    setCurrentSample: (sample) => model.currentSample = sample,
+    getCurrentSample: () => model.currentSample,
+    // methods for chartType:
+    setChartType: (type) => model.chartType = type,
+    getChartType: () => model.chartType,
+    // methods for currentSelection (e = DOM element):
+    getCurrentSelection: () => model.currentSelection,
+    addToCurrentSelection: (e) => {
+        model.currentSelection.add(e);
+        e.classList.add("node-selected");
     },
+    removeFromCurrentSelection: (e) => {
+        model.currentSelection.delete(e);
+        e.classList.remove("node-selected");
+    },
+    clearCurrentSelection: () => {
+        model.currentSelection.forEach(e => { ctrlMain.removeFromCurrentSelection(e); })
+    },
+    toggleCurrentSelection: (e) => {
+        if (model.currentSelection.has(e)) { ctrlMain.removeFromCurrentSelection(e); }    // remove element if it exists
+        else { ctrlMain.addToCurrentSelection(e); }                // or else add it
+    },
+
+    // feedback form
+
     submitFeedback: () => {
         let messageToUser = document.querySelector("#feedback-result"),
             name = document.querySelector("#feedback-name").value,
