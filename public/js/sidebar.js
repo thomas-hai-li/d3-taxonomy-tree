@@ -50,25 +50,83 @@ let ctrlToolbar = {
         });
         // customize color palette
         d3.select("#color-palette").on("click", () => {
-            let palettePicker = document.getElementById("color-palette-panel");
             // Allow only one instance
+            const selectionColorPicker = document.getElementById("color-panel");
+            if (selectionColorPicker) { selectionColorPicker.remove(); }
+
+            let palettePicker = document.getElementById("color-palette-panel");
             if (! palettePicker) {
                 palettePicker = jsPanel.create({
-                    headerTitle: 'Customize Color Palette',
                     id: "color-palette-panel",
+                    theme: "none",
+                    headerTitle: 'Customize Color Palette',
                     dragit: { containment: 0 },
+                    panelSize: "550 360",
+                    resizeit: false,
+                    headerControls: {
+                        maximize: "remove",
+                        minimize: "remove"
+                    },
                     callback: panel => {
                         panel.content.innerHTML = `
-                        <div>
-                            <input id="superkingdom-color" type="text" value="rgb(255, 128, 0)">
-                            <label>Superkingdom</label>
-                        </div>
-                        <div>
-                            <input id="kingdom-color" type="text" value="rgb(255, 128, 0)">
-                            <label>Kingdom</label>
-                        </div>
+                            <div style="display: flex;">
+                                <div>
+                                    <form>
+                                        <input type="text" id="superkingdom-color" class="rank-color" value="#123456" />
+                                        <label>Superkingdom</label>
+                                        <input type="text" id="kingdom-color" class="rank-color" value="#123456" />
+                                        <label>Kingdom</label>
+                                        <input type="text" id="phylum-color" class="rank-color" value="#123456" />
+                                        <label>Phylum</label>
+                                        <input type="text" id="class-color" class="rank-color" value="#123456" />
+                                        <label>Class</label>
+                                        <input type="text" id="order-color" class="rank-color" value="#123456" />
+                                        <label>Order</label>
+                                        <input type="text" id="family-color" class="rank-color" value="#123456" />
+                                        <label>Family</label>
+                                        <input type="text" id="genus-color" class="rank-color" value="#123456" />
+                                        <label>Genus</label>
+                                        <input type="text" id="species-color" class="rank-color" value="#123456" />
+                                        <label>Species</label>
+                                        <button type="submit" id="submit-rank-color" class="btn btn-outline-success btn-block" onsubmit="return false">Confirm Epic Selection</button>
+                                    <form>
+                                </div>
+                                <div id="colorpicker"></div>
+                            </div>
                         `
-                    }
+                    },
+                });
+                const { color: { taxonLevelColor } } = ctrlMain.getHierarchical();
+                const colors = taxonLevelColor.range();
+                document.querySelectorAll('.rank-color').forEach((e,i) => {
+                    let currentColor = colors[i];
+                    d3.select(e)
+                        .style("background-color", currentColor)
+                        .attr("value", currentColor)
+                        .on("click", () => {
+                            $.farbtastic("#colorpicker").linkTo(color => {
+                                d3.select(`#${e.id}`)
+                                    .style("background-color", color)
+                                    .attr("value", color);
+                            }).setColor(currentColor);
+                        });
+                });
+
+                // init color picker at superkingdom level
+                $.farbtastic("#colorpicker").linkTo(color => {
+                    d3.select("#superkingdom-color")
+                        .style("background-color", color)
+                        .attr("value", color);
+                });
+
+                // on submission
+                document.getElementById("submit-rank-color").addEventListener("click", (event) => {
+                    event.preventDefault();
+                    let newColors = [];
+                    document.querySelectorAll('.rank-color').forEach(e => { newColors.push(e.value) });
+                    
+                    taxonLevelColor.range(newColors);
+                    viewTreeChart.render(ctrlMain.getChartType());
                 });
             }
         })

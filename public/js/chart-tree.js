@@ -143,6 +143,8 @@ const viewTreeChart = {
                     // Allow only one instance of color panel
                     const existingPanel = document.getElementById("color-panel");
                     if (existingPanel) { existingPanel.remove(); }
+                    const colorPalettePanel = document.getElementById("color-palette-panel");
+                    if (colorPalettePanel) { colorPalettePanel.remove(); }
                     
                     // Create panel with color picker
                     jsPanel.create({
@@ -163,7 +165,7 @@ const viewTreeChart = {
                             of: nodeCircle.node()
                         },
                         callback: panel => {
-                            panel.content.innerHTML = `<form><input type="text" id="color-val" name="color-val" value="#123456" style='display="none";' /><form>
+                            panel.content.innerHTML = `<form><input type="text" id="color-val" name="color-val" value="#123456"/><form>
                                                         <div id="colorpicker"></div>`
                         },
                     });
