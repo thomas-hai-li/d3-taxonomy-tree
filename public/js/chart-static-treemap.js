@@ -3,7 +3,7 @@ const viewStaticTreemapChart = {
         this.svg = d3.select("#chart-display");
         this.margin = {top: 30, right: 10, bottom: 10, left: 5};
         this.drawLabels = true;
-        this.drawDepth = 0;
+        this.drawDepth = 1;
         this.menu = [
             {
                 title: "Compare Sample Intensities",
@@ -22,9 +22,10 @@ const viewStaticTreemapChart = {
         this.svg.selectAll("*").remove();
 
         // Setup:
-        const { root, treemap  } = ctrlMain.getHierarchical(),
+        const { root, treemap, taxonRanks  } = ctrlMain.getHierarchical(),
             margin = this.margin,
             drawDepth = this.drawDepth,
+            drawDepthRank = taxonRanks[drawDepth],
             chart = this.svg.append("g")
                 .attr("class", "chart")
                 .attr("transform", `translate(${margin.left}, ${margin.top})`),
@@ -50,7 +51,7 @@ const viewStaticTreemapChart = {
             .sort((a, b) => b.value - a.value);
         treemap(root);
 
-        const data = root.leaves(),
+        const data = root.descendants().filter(d => d.data.rank === drawDepthRank),
             maxValue = d3.max(data, d => +d.data.value),
             opacity = d3.scaleLinear()
                 .domain([0,maxValue])

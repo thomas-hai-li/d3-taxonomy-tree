@@ -74,7 +74,7 @@ let ctrlToolbar = {
 
         // control depth of depth of nodes/rectangles
         d3.select("#zoom-in").on("click", () => {
-            if (viewStaticTreemapChart.drawDepth < 7) {
+            if (viewStaticTreemapChart.drawDepth < 8) {
                 viewStaticTreemapChart.drawDepth++;
                 viewStaticTreemapChart.render();
             }
