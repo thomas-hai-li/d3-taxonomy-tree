@@ -91,7 +91,9 @@ let ctrlToolbar = {
                 fontSize = parseInt(labels.style("font-size")),
                 maxFontSize = 20;
             if (fontSize < maxFontSize) {
-                labels.style("font-size", ++fontSize + "px")
+                ++fontSize;
+                viewStaticTreemapChart.labelSize = fontSize;
+                labels.style("font-size", fontSize + "px")
             }
         });
         d3.select("#font-down").on("click", () => {
@@ -99,7 +101,9 @@ let ctrlToolbar = {
                 fontSize = parseInt(labels.style("font-size")),
                 minFontSize = 2;
             if (fontSize > minFontSize) {
-                labels.style("font-size", --fontSize + "px")
+                --fontSize;
+                viewStaticTreemapChart.labelSize = fontSize;
+                labels.style("font-size", fontSize + "px")
             }
         });
         // Toggle node labels
@@ -109,10 +113,10 @@ let ctrlToolbar = {
             
             if (display === "block") {
                 labels.style("display", "none");
-                viewTreeChart.drawLabels = false;
+                viewStaticTreemapChart.drawLabels = false;
             } else {
                 labels.style("display", "block");
-                viewTreeChart.drawLabels = true;
+                viewStaticTreemapChart.drawLabels = true;
             }
         });
 

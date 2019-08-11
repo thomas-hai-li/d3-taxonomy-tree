@@ -53,7 +53,7 @@ let ctrlMain = {
         viewSamples.init();
         viewTreeChart.init();
         viewHierarchicalBarChart.init();
-        viewStaticTreemapChart.init();
+
         viewCirclePacking.init();
         viewSunburst.init();
         viewZoom.init();
@@ -201,6 +201,7 @@ let ctrlMain = {
             case "static-treemap":
                 this.buildRoot(data);
                 this.buildTreemap();
+                viewStaticTreemapChart.init();
                 viewStaticTreemapChart.render();
                 ctrlToolbar.initTreemapChart();
                 viewMiniChart.init(data);
