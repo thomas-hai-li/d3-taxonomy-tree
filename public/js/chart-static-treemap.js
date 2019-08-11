@@ -60,7 +60,8 @@ const viewStaticTreemapChart = {
         const node = chart.selectAll("g")
             .data(data)
             .join("g")
-            .attr("transform", d => `translate(${d.x0},${d.y0})`);
+                .attr("class", "node")
+                .attr("transform", d => `translate(${d.x0},${d.y0})`);
 
         node.append("title")
             .text(d => `${d.id.replace(/@/g,"/")}\nAverage MS Intensity: ${format(d.data.avgIntensity)}`);
@@ -89,6 +90,14 @@ const viewStaticTreemapChart = {
                 .attr("y", (d, i, node) => `${(i === node.length - 1) * 0.3 + 1.1 + i * 0.9}em`)
                 .attr("fill-opacity", (d, i, node) => i === node.length - 1 ? 0.7 : null)
                 .text(d => d);
+
+
+        function zoomed() {
+            chart.attr("transform", d3.event.transform)
+        }
+        var zoom = d3.zoom().on("zoom", zoomed);
+
+        this.svg.call(zoom);
     },
     colorNode: function(d) {
         const { taxonRanks, color: { currentRank, branchColor } } = ctrlMain.getHierarchical();

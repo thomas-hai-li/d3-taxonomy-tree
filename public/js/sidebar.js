@@ -127,7 +127,7 @@ let ctrlToolbar = {
             const currentVal = parseInt(slider.valueOf()._groups[0][0].value);
             color.currentRank = taxonRanks[currentVal];
             colorLabel.text(color.currentRank);
-            d3.selectAll("rect")
+            d3.selectAll(".node rect")
                 .transition().duration(200)
                 .style("fill", (d) => viewStaticTreemapChart.colorNode(d));
         });
@@ -222,33 +222,40 @@ let ctrlToolbar = {
     },
     initExport: function() {
         // Export buttons
-        d3.select("#convert-svg").on("click", () => {
-            if (! document.querySelector("#chart-display g")) {
-                alert("No chart to export!")
-            } else {
-                // Really hacky, pls rework
-                let svgData = document.querySelector("#chart-display").outerHTML.replace("</svg>", "<style>"),
-                    sheets = document.styleSheets,
-                    style;
-                for (let i = 0; i < sheets.length; i++) {
-                    if (sheets[i].href && sheets[i].href.match("charts.css")) {style = sheets[i].cssRules || sheet[i].rules;}
-                }
-                for (let i = 0; i < style.length; i++) {
-                    svgData += style[i].cssText;
-                }
-                svgData += "</style></svg>";
-                
-                let svgBlob = new Blob([svgData], {type:"image/svg+xml;charset=utf-8"}),
-                    svgUrl = URL.createObjectURL(svgBlob),
-                    downloadLink = document.createElement("a");
-        
-                downloadLink.href = svgUrl;
-                downloadLink.download = "visualization.svg";
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-            }
+        document.getElementById("convert-svg").addEventListener("click", () => {
+            (function () {
+                var e = document.createElement('script');
+                e.setAttribute('src', 'https://nytimes.github.io/svg-crowbar/svg-crowbar.js');
+                e.setAttribute('class', 'svg-crowbar'); 
+                document.body.appendChild(e);
+            })();
+            
+            // needed to remove all the created elements
+            const exitButton = document.createElement("button")
+            exitButton.className = "exit-export";
+            document.body.prepend(exitButton);
+            
+            d3.select(".exit-export")
+                .style("position", "absolute")
+                .style("z-index", 9999)
+                .classed("btn btn-md btn-info", true)
+                .html("&times;")
+                .on("click", function() {
+                    const exportElems = document.querySelectorAll('.svg-crowbar');
+                    exportElems.forEach(e => e.remove());
+                    // finally remove this button
+                    this.remove();
+                });
         });
+
+        document.getElementById("convert-png").addEventListener("click", () => {
+            if (! document.querySelector("#chart-display g")) {
+                alert("No chart to export!");
+            }
+            else {
+                saveSvgAsPng(document.getElementById("chart-display"), "visualization.png");
+            }
+        })
     }
 }
 

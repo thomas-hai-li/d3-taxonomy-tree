@@ -39,7 +39,10 @@ const viewSunburst = {
             .style("opacity", 0.5)
             .text("Sample: " + (sample || "Averaged Values"));
 
-        root.sum(d => d.value)
+        root.sum(d => {
+                d.value = (d.rank === "Species" ? d.value : 0);
+                return d.value;
+            })
             .sort((a, b) => b.value - a.value);
         partition(root);
         root.each(d => d.current = d);
