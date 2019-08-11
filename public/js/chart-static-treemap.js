@@ -9,15 +9,34 @@ const viewStaticTreemapChart = {
         this.drawDepth = 1;
         this.menu = [
             {
-                title: "Compare Sample Intensities",
-                action: d => {
-                    if (!d.data.samples) {
-                        alert("No additional MS quantities for this dataset");  // change to modal
-                        return;
-                    }
-                    const name = d.data.taxon;
-                    viewMiniChart.renderSamples(name, Object.entries(d.data.samples));
-                }
+                title: d => "Selection: " + d.data.taxon
+            },
+            {
+                title: "MS Intensity",
+                children: [
+                    {
+                        title: "Compare Sample Intensities",
+                        action: d => {
+                            if (!d.data.samples) {
+                                alert("No additional MS quantities for this dataset");  // change to modal
+                                return;
+                            }
+                            const name = d.data.taxon;
+                            viewMiniChart.renderSamples(name, Object.entries(d.data.samples));
+                        }
+                    },
+                    {
+                        title: "Compare subtaxa proportions",
+                        action: d => {
+                            if (!d.children) {
+                                alert("No subtaxa to compare");
+                                return;
+                            }
+                            const sample = ctrlMain.getCurrentSample();
+                            viewMiniChart.renderSubtaxa(sample, d);
+                        }
+                    },
+                ]
             }
         ];
 
