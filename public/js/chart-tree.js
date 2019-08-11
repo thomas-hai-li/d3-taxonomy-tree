@@ -1,13 +1,17 @@
 const viewTreeChart = {
     init: function() {
-        this.svg = d3.select("#chart-display")
-            .style("background-color", "white")
-            .on("contextmenu", () => d3.event.preventDefault());
         this.drawLabels = true;
         this.nodeSizeNormalized = false;
 
-        // Context Menu
-        this.menu = [
+        // Context Menues
+        this.menuSVG = [
+            {
+                title: "Clear selection",
+                action: () => ctrlMain.clearCurrentSelection()
+            }
+        ];
+
+        this.menuNode = [
             {
                 title: d => "Selection: " + d.data.taxon
             },
@@ -180,6 +184,9 @@ const viewTreeChart = {
                 }
             }
         ];
+        this.svg = d3.select("#chart-display")
+            .style("background-color", "white")
+            .on("contextmenu", d3.contextMenu(this.menuSVG));
     },
     render: function(type) {
         // Renders either simple or radial tree
@@ -289,7 +296,7 @@ const viewTreeChart = {
                     viewTreeChart.render(ctrlMain.getChartType());
                 }
             })
-            .on("contextmenu", d3.contextMenu(this.menu));
+            .on("contextmenu", d3.contextMenu(this.menuNode));
     
         // Update nodes
         let nodeUpdate = node.merge(nodeEnter)

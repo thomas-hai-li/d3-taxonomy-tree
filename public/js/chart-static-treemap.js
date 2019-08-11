@@ -6,48 +6,29 @@ const viewStaticTreemapChart = {
         this.drawDepth = 0;
         this.menu = [
             {
-                title: "MS Intensity",
-                children: [
-                    {
-                        title: "Compare Sample Intensities",
-                        action: d => {
-                            if (!d.data.samples) {
-                                alert("No additional MS quantities for this dataset");  // change to modal
-                                return;
-                            }
-                            const name = d.data.taxon;
-                            viewMiniChart.renderSamples(name, Object.entries(d.data.samples));
-                        }
-                    },
-                    {
-                        title: "Compare Subtaxa Intensities",
-                        action: d => {
-                            if (!d.children) {
-                                alert("No subtaxa to compare");
-                                return;
-                            }
-                            const sample = ctrlMain.getCurrentSample();
-                            viewMiniChart.renderSubtaxa(sample, d);
-                        }
-                    },
-                ]
-            },
+                title: "Compare Sample Intensities",
+                action: d => {
+                    if (!d.data.samples) {
+                        alert("No additional MS quantities for this dataset");  // change to modal
+                        return;
+                    }
+                    const name = d.data.taxon;
+                    viewMiniChart.renderSamples(name, Object.entries(d.data.samples));
+                }
+            }
         ];
     },
     render: function() {
         this.svg.selectAll("*").remove();
 
         // Setup:
-        const { root, treemap, /* color */ } = ctrlMain.getHierarchical(),
+        const { root, treemap  } = ctrlMain.getHierarchical(),
             margin = this.margin,
             drawDepth = this.drawDepth,
             chart = this.svg.append("g")
                 .attr("class", "chart")
                 .attr("transform", `translate(${margin.left}, ${margin.top})`),
-            format = d3.format(".4g"),
-            color = d3.scaleOrdinal()   // based on superkingdom
-                .domain(["Bacteria","Archaea","Eukaryota"])
-                .range(d3.schemeSet3);
+            format = d3.format(".4g");
 
         // Display name of sample viewed
         let sample = ctrlMain.getCurrentSample();
@@ -61,13 +42,18 @@ const viewStaticTreemapChart = {
             .style("opacity", 0.5)
             .text("Sample: " + (sample || "Averaged Values"));
 
-        // Generate layout
-        root.sum(d => d.children ? 0 : 1)
-            .each(d => --d.value)
+        // discards unknown peptide intensities (works but mutilates data)
+        root.sum(d => {
+                d.value = (d.rank === "Species" ? d.value : 0);
+                return d.value;
+            })
             .sort((a, b) => b.value - a.value);
+
+        // console.table(root.descendants());
+
         treemap(root);
 
-        const data = root.descendants(),
+        const data = root.leaves(),
             maxValue = d3.max(data, d => +d.data.value),
             opacity = d3.scaleLinear()
                 .domain([0,maxValue])
@@ -85,8 +71,8 @@ const viewStaticTreemapChart = {
             .attr("width", d => d.x1 - d.x0)
             .attr("height", d =>  d.y1 - d.y0)
             .style("stroke", "black")
-            .style("fill", d => {while(d.depth > 1) { d = d.parent }; return color(d.id)})
-            .style("opacity", d => opacity(+d.data.value))
+            .style("fill", d => viewStaticTreemapChart.colorNode(d))
+            // .style("opacity", d => opacity(+d.data.value))
             .on("contextmenu", d3.contextMenu(this.menu));
 
         node.append("clipPath")
@@ -97,7 +83,7 @@ const viewStaticTreemapChart = {
         node.append("text")
                 .attr("clip-path", d => "url(#clip-" + d.data.id + ")")
                 .attr("class", "node-label")
-                .style("display", d => this.drawLabels && d.depth === 0 ? "block" : "none")
+                .style("display", d => this.drawLabels ? "block" : "none")
             .selectAll("tspan")
                 .data(d => d.data.taxon.split().concat((d.value)))
             .join("tspan")
@@ -106,19 +92,33 @@ const viewStaticTreemapChart = {
                 .attr("fill-opacity", (d, i, node) => i === node.length - 1 ? 0.7 : null)
                 .text(d => d);
     },
-    colorNode: function(d, taxonLevelColor, branchColor) {
-        const {color} = ctrlMain.getHierarchical();
-        const ranks = d.id.split("@");
-        const count = ranks.length - 1;   // number of "@" in d.id
-
-        if (count >= color.currentRank) {    // Specify rank for color to be based on (colors branches)
-            const rank = ranks[color.currentRank];
-
-            // Save color and last updated rank level for consistency
-            d._color = branchColor(rank);
-            d._currentRank = count;
-            return branchColor(rank);
+    colorNode: function(d) {
+        const { taxonRanks, color: { currentRank, taxonLevelColor, branchColor } } = ctrlMain.getHierarchical();
+        const invert = function (json) {         // invert key-value pairs
+            var ret = {};
+            for(var key in json) {
+                ret[json[key]] = +key;
+            }
+            return ret;
         }
-        return taxonLevelColor(count);
+        const rankToNum = invert(taxonRanks); // key = taxon level, value = number (ascending)
+
+        // color by taxonomic rank/level:
+        let thisRank = d.data.rank;
+        if (rankToNum[thisRank] < rankToNum[currentRank]) { return taxonLevelColor(thisRank); }
+        
+        // color by the specific taxon/branch:
+        else {
+            const thisTaxon = d.data.taxon;
+            if (rankToNum[thisRank] === rankToNum[currentRank]) { return branchColor(thisTaxon); }
+            else {
+                let p = d;
+                while(rankToNum[thisRank] > rankToNum[currentRank]) {
+                    p = p.parent;
+                    thisRank = p.data.rank;
+                }
+                return branchColor(p.data.taxon);
+            }
+        }
     }
 }
