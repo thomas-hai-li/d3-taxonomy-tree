@@ -366,12 +366,12 @@ const viewTreeChart = {
     },
     colorNode: function(d) {
         const { taxonRanks, color: { currentRank, taxonLevelColor, branchColor } } = ctrlMain.getHierarchical();
-        const invert = function (json) {         // invert key-value pairs
-            var ret = {};
-            for(var key in json) {
-                ret[json[key]] = +key;
+        function invert (obj) {         // invert key-value pairs
+            var inverted = {};
+            for (var key in obj) {
+                inverted[obj[key]] = +key;
             }
-            return ret;
+            return inverted;
         }
         const rankToNum = invert(taxonRanks); // key = taxon level, value = number (ascending)
 
