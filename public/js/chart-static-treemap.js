@@ -48,9 +48,6 @@ const viewStaticTreemapChart = {
                 return d.value;
             })
             .sort((a, b) => b.value - a.value);
-
-        // console.table(root.descendants());
-
         treemap(root);
 
         const data = root.leaves(),
@@ -65,7 +62,7 @@ const viewStaticTreemapChart = {
             .attr("transform", d => `translate(${d.x0},${d.y0})`);
 
         node.append("title")
-            .text(d => `${d.id.replace(/@/g,"/")}\nSubtaxa Identified: ${d.value}\nAverage MS Intensity: ${format(d.data.avgIntensity)}`);
+            .text(d => `${d.id.replace(/@/g,"/")}\nAverage MS Intensity: ${format(d.data.avgIntensity)}`);
 
         node.append("rect")
             .attr("width", d => d.x1 - d.x0)
@@ -85,7 +82,7 @@ const viewStaticTreemapChart = {
                 .attr("class", "node-label")
                 .style("display", d => this.drawLabels ? "block" : "none")
             .selectAll("tspan")
-                .data(d => d.data.taxon.split().concat((d.value)))
+                .data(d => d.data.taxon.split().concat((format(d.value))))
             .join("tspan")
                 .attr("x", 3)
                 .attr("y", (d, i, node) => `${(i === node.length - 1) * 0.3 + 1.1 + i * 0.9}em`)
@@ -93,32 +90,22 @@ const viewStaticTreemapChart = {
                 .text(d => d);
     },
     colorNode: function(d) {
-        const { taxonRanks, color: { currentRank, taxonLevelColor, branchColor } } = ctrlMain.getHierarchical();
-        const invert = function (json) {         // invert key-value pairs
+        const { taxonRanks, color: { currentRank, branchColor } } = ctrlMain.getHierarchical();
+        const rankToNum = invert(taxonRanks); // key = taxon level, value = number (ascending)
+        function invert (json) {         // invert key-value pairs
             var ret = {};
             for(var key in json) {
                 ret[json[key]] = +key;
             }
             return ret;
         }
-        const rankToNum = invert(taxonRanks); // key = taxon level, value = number (ascending)
-
-        // color by taxonomic rank/level:
-        let thisRank = d.data.rank;
-        if (rankToNum[thisRank] < rankToNum[currentRank]) { return taxonLevelColor(thisRank); }
         
-        // color by the specific taxon/branch:
-        else {
-            const thisTaxon = d.data.taxon;
-            if (rankToNum[thisRank] === rankToNum[currentRank]) { return branchColor(thisTaxon); }
-            else {
-                let p = d;
-                while(rankToNum[thisRank] > rankToNum[currentRank]) {
-                    p = p.parent;
-                    thisRank = p.data.rank;
-                }
-                return branchColor(p.data.taxon);
-            }
+        let thisRank = d.data.rank;
+        let p = d;
+        while(rankToNum[thisRank] > rankToNum[currentRank]) {
+            p = p.parent;
+            thisRank = p.data.rank;
         }
+        return branchColor(p.data.taxon);
     }
 }
