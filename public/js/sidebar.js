@@ -97,7 +97,7 @@ let ctrlToolbar = {
         d3.select("#font-down").on("click", () => {
             let labels = d3.selectAll(".node-label"),
                 fontSize = parseInt(labels.style("font-size")),
-                minFontSize = 9;
+                minFontSize = 2;
             if (fontSize > minFontSize) {
                 labels.style("font-size", --fontSize + "px")
             }

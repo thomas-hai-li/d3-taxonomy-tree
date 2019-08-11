@@ -247,7 +247,7 @@ let ctrlMain = {
     buildTreemap: function() {
         const { width, height } = this.getDim();
         const treemap = d3.treemap()
-            .size([width*0.95, height*0.95]);
+            .size([width*0.99, height*0.9]);
         
         model.hierarchical.treemap = treemap;
     },

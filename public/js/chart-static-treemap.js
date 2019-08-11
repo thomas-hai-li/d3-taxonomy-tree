@@ -1,7 +1,7 @@
 const viewStaticTreemapChart = {
     init: function() {
         this.svg = d3.select("#chart-display");
-        this.margin = {top: 30, right: 10, bottom: 10, left: 5};
+        this.margin = {top: 55, right: 10, bottom: 10, left: 5};
         this.drawLabels = true;
         this.drawDepth = 1;
         this.menu = [
@@ -23,6 +23,7 @@ const viewStaticTreemapChart = {
 
         // Setup:
         const { root, treemap, taxonRanks  } = ctrlMain.getHierarchical(),
+            { width, height } = ctrlMain.getDim(),
             margin = this.margin,
             drawDepth = this.drawDepth,
             drawDepthRank = taxonRanks[drawDepth],
@@ -42,6 +43,17 @@ const viewStaticTreemapChart = {
             .style("fill", "black")
             .style("opacity", 0.5)
             .text("Sample: " + (sample || "Averaged Values"));
+
+        // Display current rank/depth
+        this.svg.append("text")
+            .attr("class", "current-rank")
+            .attr("y", 45)
+            .attr("x", 5)
+            .style("font", "sans-serif")
+            .style("font-size", "20px")
+            .style("fill", "black")
+            .style("opacity", 0.75)
+            .text("Depth: " + taxonRanks[drawDepth]);
 
         // discards unknown peptide intensities (works but mutilates data)
         root.sum(d => {
@@ -95,9 +107,28 @@ const viewStaticTreemapChart = {
         function zoomed() {
             chart.attr("transform", d3.event.transform)
         }
-        var zoom = d3.zoom().on("zoom", zoomed);
-
+        const zoom = d3.zoom().on("zoom", zoomed);
         this.svg.call(zoom);
+
+        const resetZoom = this.svg.append("g")
+            .attr("transform", `translate(${ width - 84 - margin.right }, 3)`)
+        resetZoom.append("rect")
+            .attr("width", 84)
+            .attr("height", 20)
+            .attr("stroke", "black")
+            .attr("fill", "lightsteelblue")
+            .on("mouseover", function() { d3.select(this).transition().attr("opacity", 0.5) })
+            .on("mouseout", function() { d3.select(this).transition().attr("opacity", 1) })
+            .on("click", () => {
+                this.svg.transition()
+                    .duration(750)
+                    .call(zoom.transform, d3.zoomIdentity.translate(margin.left, margin.top));
+            });
+        resetZoom.append("text")
+            .attr("text-anchor", "start")
+            .attr("y", 15)
+            .attr("pointer-events", "none")
+            .text("Reset Zoom")
     },
     colorNode: function(d) {
         const { taxonRanks, color: { currentRank, branchColor } } = ctrlMain.getHierarchical();
