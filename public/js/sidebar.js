@@ -61,6 +61,7 @@ let ctrlToolbar = {
             color.currentRank = taxonRanks[currentVal];
             colorLabel.text(color.currentRank);
             d3.selectAll(".node circle")
+                .transition().duration(200)
                 .style("fill", (d) => viewTreeChart.colorNode(d));
         });
     },
@@ -127,6 +128,7 @@ let ctrlToolbar = {
             color.currentRank = taxonRanks[currentVal];
             colorLabel.text(color.currentRank);
             d3.selectAll("rect")
+                .transition().duration(200)
                 .style("fill", (d) => viewStaticTreemapChart.colorNode(d));
         });
     },
@@ -213,7 +215,7 @@ let ctrlToolbar = {
                         document.querySelectorAll('.rank-color').forEach(e => { newColors.push(e.value) });
                         
                         taxonLevelColor.range(newColors);
-                        viewTreeChart.render(ctrlMain.getChartType());
+                        viewTreeChart.recolorNodes(d3.selectAll(".node"));
                     });
                 }
             });

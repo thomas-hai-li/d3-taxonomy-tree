@@ -364,6 +364,11 @@ const viewTreeChart = {
             nodeElem.classList.remove("node-collapsed");
         }
     },
+    recolorNodes: function(selection) {
+        selection.selectAll("circle")
+            .transition().duration(200)
+            .style("fill", d => this.colorNode(d));
+    },
     colorNode: function(d) {
         const { taxonRanks, color: { currentRank, taxonLevelColor, branchColor } } = ctrlMain.getHierarchical();
         function invert (obj) {         // invert key-value pairs
