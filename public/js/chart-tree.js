@@ -444,6 +444,7 @@ const viewTreeChart = {
         }
     },
     recolorNodes: function(selection) {
+        const { t } = this;
         selection.selectAll("circle")
             .transition(t)
             .style("fill", d => this.colorNode(d));
