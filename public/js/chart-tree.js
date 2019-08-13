@@ -1,7 +1,60 @@
 const viewTreeChart = {
-    init: function() {
+    init: function(type) {
+        // State
+        this.chartType = type;
         this.drawLabels = true;
         this.nodeSizeNormalized = false;
+        this.updateDuration = 200;
+        this.tooltipDuration = 200;
+
+        // D3 functions
+        this.format = d3.format(".4g");
+        this.propToPixels = d3.scaleLinear()   // proportion of taxon to radius/stroke width in pixels
+            .domain([0, 1])
+            .range([3, 15]);
+        this.t = d3.transition().duration(this.updateDuration);
+        
+        // DOM elems
+        this.svg = d3.select("#chart-display");
+        this.svg.selectAll("*").remove();       // reset main visualization chart
+
+        this.chart = this.svg.append("g")
+            .attr("id", "chart");
+
+        this.links = this.chart.append("g")
+            .attr("class", "links")
+
+        this.nodes = this.chart.append("g")
+            .attr("class", "nodes")
+
+        this.tooltip = d3.select(".viz-tooltip");
+
+        // Display name of the current sample viewed
+        const sample = ctrlMain.getCurrentSample();
+        this.svg.append("text")
+            .attr("class", "current-sample")
+            .attr("y", 20)
+            .attr("x", 5)
+            .style("font", "sans-serif")
+            .style("font-size", "20px")
+            .style("fill", "black")
+            .style("opacity", 0.5)
+            .text("Sample: " + (sample || "Averaged Values"));
+
+        // Save root initial position (needed for updating chart)
+        const { root, tree } = ctrlMain.getHierarchical();
+        const { width, height } = ctrlMain.getDim();
+        root.x0 = width / 6;
+        root.y0 = 0;
+
+        // Determine initial chart position
+        if (type === "radial-tree") {
+            this.chart.attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ")");
+        }
+        else {
+            this.chart.attr("transform", `translate(${ width * 0.08 }, ${ height * 0.05 })`);
+            tree.size([height * 0.9, width * 0.8]);
+        }
 
         // Context Menues
         this.menuSVG = [
@@ -10,6 +63,7 @@ const viewTreeChart = {
                 action: () => ctrlMain.clearCurrentSelection()
             }
         ];
+        this.svg.on("contextmenu", d3.contextMenu(this.menuSVG));   // attach
 
         this.menuNode = [
             {
@@ -62,7 +116,7 @@ const viewTreeChart = {
                                     viewTreeChart.collapseNode(node.__data__, node);
                                 }
                             });
-                            viewTreeChart.render(ctrlMain.getChartType());
+                            viewTreeChart.render(d);
                         }
                     },
                     {
@@ -81,7 +135,7 @@ const viewTreeChart = {
                                     }
                                 });
                             }
-                            viewTreeChart.render(ctrlMain.getChartType());
+                            viewTreeChart.render(d);
                         }
                     },
                 ]
@@ -184,86 +238,59 @@ const viewTreeChart = {
                 }
             }
         ];
-        this.svg = d3.select("#chart-display")
-            .style("background-color", "white")
-            .on("contextmenu", d3.contextMenu(this.menuSVG));
     },
-    render: function(type) {
-        // Renders either simple or radial tree
-        const { root, tree, color } = ctrlMain.getHierarchical(),
-              { width, height } = ctrlMain.getDim();
-        const tooltip = d3.select(".tooltip"),
-              tooltipDuration = 200;
-        const format = d3.format(".4g");
-        const propToPixels = d3.scaleLinear()   // proportion to radius/stroke width
-            .domain([0, 1])
-            .range([3, 15]);                    // Math.log10(d.data.value + 1) + 1
+    render: function(source) {
+        // Renders and updates either simple-tree or radial-tree
 
+        // Get state
+        let { chartType, drawLabels, nodeSizeNormalized } = this;
+        let { updateDuration, tooltipDuration } = this;
+        let { format, propToPixels, t } = this;
+        let { svg, chart, nodes, links, tooltip } = this;
+
+        // Re-calculate new tree layout
+        let { root, tree } = ctrlMain.getHierarchical();
         root.sort((a, b) => b.data.value - a.data.value);
-            
-        // Reset chart display and previous tooltips
-        this.svg.selectAll("*").remove();
-        tooltip.transition()
-            .duration(tooltipDuration)
-            .style("opacity", 0);
-
-        // Display name of sample viewed
-        let sample = ctrlMain.getCurrentSample();
-        this.svg.append("text")
-            .attr("class", "current-sample")
-            .attr("y", 20)
-            .attr("x", 5)
-            .style("font", "sans-serif")
-            .style("font-size", "20px")
-            .style("fill", "black")
-            .style("opacity", 0.5)
-            .text("Sample: " + (sample || "Averaged Values"));
-        
-        const chart = this.svg.append("g")
-            .attr("id", "chart");
-
-        if (type === "radial-tree") {
-            chart.attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ")");
-        } else {
-            chart.attr("transform", `translate(${ width * 0.08 }, ${ height * 0.05 })`);
-            tree.size([height * 0.9, width * 0.8]);
-        }
-
+        root.each(d => d.collapsedChild = false);
         tree(root);
 
-        // Enter links
-        const link = chart.selectAll(".link")
-            .data(root.descendants().slice(1));
-    
-        const linkEnter = link.enter().append("path")
+        // Links section:
+        let link = links.selectAll(".link")
+            .data(root.descendants().slice(1), d => d.id);
+        
+        // Enter new links at parent's previous position
+        let linkEnter = link.enter().append("path")
             .attr("class", "link")
-            .style("stroke-width", d => 2 * propToPixels(d.data.avgProportion));
-        
-        // Update and exit links
-        link.merge(linkEnter)
-            .attr("d", d => {
-                if (type === "radial-tree") {
-                    return "M" + this.project(d.x, d.y)  
-                    + "C" + this.project(d.x, (d.y + d.parent.y) / 2)
-                    + " " + this.project(d.parent.x, (d.y + d.parent.y) / 2)
-                    + " " + this.project(d.parent.x, d.parent.y);
-                }
-                // Simple-tree:
-                return "M" + d.y + "," + d.x                            // Move to coords (y,x), this is flipped to make the tree horizontal instead of vertical
-                    + "C" + (d.y + d.parent.y) / 2 + "," + d.x
-                    + " " + (d.y + d.parent.y) / 2 + "," + d.parent.x
-                    + " " + d.parent.y + "," + d.parent.x;
-            })
             .attr("stroke-opacity", 0.4)
-    
-        link.exit().remove();
+            .style("stroke-width", d => 2 * propToPixels(d.data.avgProportion))
+            .attr("d", d => {
+                const o = {x: source.x0, y: source.y0};
+                return this.diagonal(o, o);
+            });
         
-        // Enter nodes
-        const node = chart.selectAll("g.node")
-            .data(root.descendants());
+        // Update links
+        let linkUpdate = link.merge(linkEnter)
+            .transition(t)
+            .attr("d", d => this.diagonal(d, d.parent));
 
-        const nodeEnter = node.enter().append("g")
+        // Exit links
+        let linkExit = link.exit();
+
+        linkExit.transition(t)
+        .attr("d", d => {
+            const o = {x: source.x, y: source.y};
+            return this.diagonal(o, o);
+        });
+        
+        // Nodes section:
+        let node = nodes.selectAll(".node")
+            .data(root.descendants(), d => d.id);
+
+        let nodeEnter = node.enter().append("g")
             .classed("node", true)
+            .attr("transform", function(d) {
+                return "translate(" + source.y0 + "," + source.x0 + ")";
+            })
             .on("mouseover", function(d) {
                 tooltip.transition()
                     .duration(tooltipDuration)
@@ -293,40 +320,51 @@ const viewTreeChart = {
                 }
                 else {
                     viewTreeChart.collapseNode(d, this);  // pass in data and this elem                
-                    viewTreeChart.render(ctrlMain.getChartType());
+                    viewTreeChart.render(d);
                 }
             })
             .on("contextmenu", d3.contextMenu(this.menuNode));
-    
-        // Update nodes
-        let nodeUpdate = node.merge(nodeEnter)
-            .classed("node-collapsed", d => d._children)
-            .classed("node-normalized", this.nodeSizeNormalized)
-        if (type === "radial-tree") {
-            nodeUpdate.attr("transform", d => "translate(" + this.project(d.x, d.y) + ")")
-        } else {
-            nodeUpdate.attr("transform", d => "translate(" + d.y + "," + d.x + ")") // simple tree
-        }
 
-        nodeUpdate.append("circle")
-            .attr("r", d => d.depth === 0 ? 20 : propToPixels(d.data.avgProportion))
-            .style("fill", d => viewTreeChart.colorNode(d));
-        
-        const nodeLabel = nodeUpdate.append("text")
+        nodeEnter.append("circle")
+            .attr("r", 1e-6);
+
+        nodeEnter.append("text")
             .attr("class", "node-label")
             .style("font", "sans-serif")
             .style("font-size", "10px")
             .style("fill", "black")
             .style("display", this.drawLabels ? "block" : "none")
             .text(d => d.data.taxon);
-        
-        if (type === "radial-tree") {
+
+        // Update nodes
+        let nodeUpdate = node.merge(nodeEnter)
+            .classed("node-collapsed", d => d._children)
+            .classed("node-normalized", nodeSizeNormalized);
+
+        if (chartType === "radial-tree") {
+            nodeUpdate.transition(t)
+                .attr("transform", d => "translate(" + this.project(d.x, d.y) + ")")    // radial tree
+                .attr("fill-opacity", 1);
+        }
+        else {
+            nodeUpdate.transition(t)
+                .attr("transform", d => "translate(" + d.y + "," + d.x + ")") // simple tree
+                .attr("fill-opacity", 1);
+        }
+
+        nodeUpdate.select("circle").transition(t)
+            .attr("r", d => d.depth === 0 ? 20 : propToPixels(d.data.avgProportion))
+            .style("fill", d => this.colorNode(d));
+
+        let nodeLabel =  nodeUpdate.select("text");
+        if (chartType === "radial-tree") {
             nodeLabel
                 .attr("dy", ".31em")
                 .attr("x", d => d.x < 180 === !d.children ? 6 : -6)
                 .style("text-anchor", d => d.x < 180 === !d.children ? "start" : "end");
+            // no rotation if not too cluttered 
             if (nodeUpdate.size() < 100) {
-                nodeLabel.attr("transform", d => "rotate(0)"); // no rotation if not too cluttered 
+                nodeLabel.attr("transform", d => "rotate(0)");
             }
             else {
                 nodeLabel.attr("transform", d => "rotate(" + (d.x < 180 ? d.x - 90 : d.x + 90) + ")");
@@ -339,13 +377,52 @@ const viewTreeChart = {
                 .style("text-anchor", "start");
         }
         // Exit Notes
-        node.exit().remove();
+        let nodeExit = node.exit();
 
+        nodeExit.transition(t)
+            .attr("transform", d => "translate(" + source.y + "," + source.x + ")")
+            .style("fill-opacity", 0)
+            .remove();
+
+        // reduce the node circles size to 0
+        nodeExit.select("circle")
+            .transition(t)
+            .attr("r", 1e-6);
+
+        // reduce the opacity of text labels
+        nodeExit.select("text")
+            .transition(t)
+            .style("fill-opacity", 1e-6);
+
+        // Stash the old positions for transition.
+        root.eachBefore(d => {
+            d.x0 = d.x;
+            d.y0 = d.y;
+        });
+
+        // Reset zoom
         viewZoom.render(ctrlMain.getChartType());
-        // Resets to last position instead of default position if user has zoomed, by translating by a tiny bit
         if (viewZoom.zoom) {
-            viewZoom.zoom.translateBy(viewZoom.svg, 1e-9, 1e-9);
+            svg.transition().duration(0).delay(updateDuration)
+                .call(viewZoom.zoom.transform, d3.zoomIdentity);
         }
+    },
+    diagonal(s, d) {
+        let path;
+        if (this.chartType === "radial-tree") {
+            path = "M" + this.project(s.x, s.y)  
+            + "C" + this.project(s.x, (s.y + d.y) / 2)
+            + " " + this.project(d.x, (s.y + d.y) / 2)
+            + " " + this.project(d.x, d.y);
+        }
+        else {
+            path = `M ${s.y} ${s.x}
+                    C ${(s.y + d.y) / 2} ${s.x},
+                        ${(s.y + d.y) / 2} ${d.x},
+                        ${d.y} ${d.x}`
+        }
+
+        return path;
     },
     project: function(x, y) {
         // calculate node and link position For radial tree
@@ -354,6 +431,8 @@ const viewTreeChart = {
     },
     collapseNode: function(d, nodeElem) {
         if (d.children) {
+            const parent = d.id;
+            d.each(node => { if (node.id !== parent) node.collapsedChild = true; });
             d._children = d.children;
             d.children = null;
             nodeElem.classList.add("node-collapsed");
@@ -366,7 +445,7 @@ const viewTreeChart = {
     },
     recolorNodes: function(selection) {
         selection.selectAll("circle")
-            .transition().duration(200)
+            .transition(t)
             .style("fill", d => this.colorNode(d));
     },
     colorNode: function(d) {

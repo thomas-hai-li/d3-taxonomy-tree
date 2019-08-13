@@ -1,3 +1,4 @@
+// Global object that holds data relevant to all charts/visualizations:
 let model = {
     dim: {
         width: parseInt(d3.select("#chart-display").style("width")),
@@ -51,9 +52,8 @@ let ctrlMain = {
     // Responsible for file handling, building charts, and getting/setting data from model
     init: function() {
         viewSamples.init();
-        viewTreeChart.init();
-        viewHierarchicalBarChart.init();
 
+        viewHierarchicalBarChart.init();
         viewCirclePacking.init();
         viewSunburst.init();
         viewZoom.init();
@@ -186,8 +186,10 @@ let ctrlMain = {
             case "radial-tree":
                 this.buildRoot(data);
                 this.buildTree();
-                viewTreeChart.render(type);
-                // viewBrush.render();
+
+                const { root } = ctrlMain.getHierarchical();
+                viewTreeChart.init(type);
+                viewTreeChart.render(root);   // initial render with root as source
                 ctrlToolbar.initTreeChart();
                 viewMiniChart.init(data);
                 break;
@@ -237,8 +239,6 @@ let ctrlMain = {
         model.hierarchical.root = root;
     },
     buildTree: function() {
-        // Generate the tree layout function
-        // const { width, height } = this.getDim();
         const tree = d3.tree()
             .size([360, 500])
             .separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });

@@ -56,7 +56,7 @@
     pointer-events: none;
 }
 
-.tooltip {
+.viz-tooltip {
     position: absolute;
     /* text-align: inherit; */
     width: auto;

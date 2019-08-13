@@ -45,7 +45,7 @@ const viewCirclePacking = {
         const chart = this.svg.append("g")
                 .attr("class", "chart")
                 .attr("transform", `translate(${width / 2}, ${height / 2})`),
-            tooltip = d3.select(".tooltip"),
+            tooltip = d3.select(".viz-tooltip"),
             tooltipDuration = 200;
             
         const format = d3.format(".4g"),

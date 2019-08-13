@@ -9,6 +9,10 @@ svg {
     height: 100%;
 }
 
+#chart-display {
+    background-color: white;
+}
+
 #csv-display {
     display: none;
     height: 800px;

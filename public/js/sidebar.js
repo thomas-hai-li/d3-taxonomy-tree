@@ -433,7 +433,7 @@ let viewMiniChart = {
 
         const { svg, chart, margin, xScale, yScale } = this,
             format = d3.format(".4g"),
-            tooltip = d3.select(".tooltip"),
+            tooltip = d3.select(".viz-tooltip"),
             duration = 200;
         // Draw title
         svg.select(".mini-chart-title").remove()
@@ -493,7 +493,7 @@ let viewMiniChart = {
 
         const { svg, chart, margin, xScale, yScale } = this,
             format = d3.format(".4g"),
-            tooltip = d3.select(".tooltip"),
+            tooltip = d3.select(".viz-tooltip"),
             duration = 200;
 
         // Draw title
