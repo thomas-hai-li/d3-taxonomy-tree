@@ -62,7 +62,7 @@ let ctrlToolbar = {
             colorLabel.text(color.currentRank);
             d3.selectAll(".node circle")
                 .transition().duration(200)
-                .style("fill", (d) => viewTreeChart.colorNode(d));
+                .style("fill", (d) => d.customColor ? d.customColor : viewTreeChart.colorNode(d));
         });
     },
     initTreemapChart: function () {
@@ -160,7 +160,7 @@ let ctrlToolbar = {
                         },
                         callback: panel => {
                             panel.content.innerHTML = `
-                                <div style="display: flex;">
+                                <div class="pr-2" style="display: flex;">
                                     <div>
                                         <form>
                                             <input type="text" readonly id="organisms-color" class="rank-color" value="#123456" />
@@ -183,13 +183,14 @@ let ctrlToolbar = {
                                     </div>
                                     <div>
                                         <div id="colorpicker"></div>
-                                        <button type="submit" id="submit-rank-color" class="btn btn-outline-success mt-5" onsubmit="return false">Confirm Epic Selection</button>
+                                        <button type="submit" id="submit-rank-color" class="btn btn-outline-success btn-block" onsubmit="return false">Confirm Epic Selection</button>
+                                        <button type="submit" id="reset-all-colors" class="btn btn-outline-danger btn-block" onsubmit="return false">Reset Colors</button>
                                     </div>
                                 </div>
                             `
                         },
                     });
-                    const { color: { taxonLevelColor } } = ctrlMain.getHierarchical();
+                    const { color: { taxonLevelColor, branchColor } } = ctrlMain.getHierarchical();
                     const colors = taxonLevelColor.range();
                     document.querySelectorAll('.rank-color').forEach((e,i) => {
                         let currentColor = colors[i];
@@ -213,12 +214,21 @@ let ctrlToolbar = {
                     });
 
                     // on submission
-                    document.getElementById("submit-rank-color").addEventListener("click", (event) => {
-                        event.preventDefault();
+                    document.getElementById("submit-rank-color").addEventListener("click", () => {
                         let newColors = [];
                         document.querySelectorAll('.rank-color').forEach(e => { newColors.push(e.value) });
                         
                         taxonLevelColor.range(newColors);
+                        viewTreeChart.recolorNodes(d3.selectAll(".node"));
+                    });
+
+                    // on reset
+                    document.getElementById("reset-all-colors").addEventListener("click", () => {
+                        const { color: { defaultTaxonColors, defaultBranchColors } } = ctrlMain.getHierarchical();
+                        taxonLevelColor.range(defaultTaxonColors);
+                        branchColor.range(defaultBranchColors);
+                        d3.selectAll(".node").data().forEach(d => d.customColor = null);
+
                         viewTreeChart.recolorNodes(d3.selectAll(".node"));
                     });
                 }

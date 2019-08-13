@@ -39,6 +39,9 @@ let model = {
         },
         color: {
             currentRank: "Kingdom",
+            // Default colors (array):
+            defaultTaxonColors: d3.schemePastel1,
+            defaultBranchColors: d3.schemeSet3,
             // Color schemes for nodes:
             taxonLevelColor: d3.scaleOrdinal()
                 .range(d3.schemePastel1),

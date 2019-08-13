@@ -234,6 +234,7 @@ const viewTreeChart = {
                             .attr("value", color);
                         
                         nodeCircle.style("fill", color);
+                        nodeCircle.data().forEach(d => d.customColor = color);
                     });
                 }
             }
@@ -354,7 +355,7 @@ const viewTreeChart = {
 
         nodeUpdate.select("circle").transition(t)
             .attr("r", d => d.depth === 0 ? 20 : propToPixels(d.data.avgProportion))
-            .style("fill", d => this.colorNode(d));
+            .style("fill", d => d.customColor ? d.customColor : this.colorNode(d));
 
         let nodeLabel =  nodeUpdate.select("text");
         if (chartType === "radial-tree") {
@@ -447,7 +448,7 @@ const viewTreeChart = {
         const { t } = this;
         selection.selectAll("circle")
             .transition(t)
-            .style("fill", d => this.colorNode(d));
+            .style("fill", d => d.customColor ? d.customColor : this.colorNode(d));
     },
     colorNode: function(d) {
         const { taxonRanks, color: { currentRank, taxonLevelColor, branchColor } } = ctrlMain.getHierarchical();
