@@ -21,7 +21,9 @@
 <body>
     <!-- Top Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark p-0">
-        <a class="navbar-brand ml-3" href="#">Visualization Dashboard</a>
+        <a class="navbar-brand ml-3" href="#">
+            <img src="/public/img/logo_imetalab.png" alt="iMetaLab Logo">
+        </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#nav-items" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -50,12 +52,12 @@
                 <div class="sidebar py-3 d-flex flex-column h-100">
                     <!-- Chart Select -->
                     <select id="chart-selection" class="sidebar-item custom-select">
-                        <option value="simple-tree">Simple Tree</option>
+                        <option value="circle-packing">Circle Packing</option>
                         <option value="static-treemap">Treemap</option>
                         <option value="sunburst">Sunburst</option>
-                        <option value="circle-packing">Circle Packing</option>
-                        <option value="hierarchical-bars">Hierarchical Bar Chart</option>
+                        <option value="simple-tree">Simple Tree</option>
                         <option value="radial-tree">Radial Tree</option>
+                        <option value="hierarchical-bars">Hierarchical Bar Chart</option>
                     </select>
                     <!-- Data-specific Sample Selection -->
                     <div class="sidebar-item">
