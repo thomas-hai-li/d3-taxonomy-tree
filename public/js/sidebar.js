@@ -131,14 +131,18 @@ let ctrlToolbar = {
 
         // control zoom (+/-)
         const duration = 500;
-        d3.select("#zoom-in").on("click", () => {
-            viewZoom.zoom
-                .scaleBy(viewZoom.svg.transition().duration(duration), 1.3);
-        });
-        d3.select("#zoom-out").on("click", () => {
-            viewZoom.zoom
-                .scaleBy(viewZoom.svg.transition().duration(duration), 1 / 1.3);
-        });
+        d3.select("#zoom-in")
+            .attr("data-original-title", "Zoom In")
+            .on("click", () => {
+                viewZoom.zoom
+                    .scaleBy(viewZoom.svg.transition().duration(duration), 1.3);
+            });
+        d3.select("#zoom-out")
+            .attr("data-original-title", "Zoom Out")
+            .on("click", () => {
+                viewZoom.zoom
+                    .scaleBy(viewZoom.svg.transition().duration(duration), 1 / 1.3);
+            });
 
         // control fontsize
         d3.select("#font-up").on("click", () => {
