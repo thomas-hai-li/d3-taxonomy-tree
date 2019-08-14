@@ -1,4 +1,4 @@
-const viewCirclePacking = {
+const viewCirclePackingChart = {
     init: function() {
         this.svg = d3.select("#chart-display");
         this.drawLabels = true;

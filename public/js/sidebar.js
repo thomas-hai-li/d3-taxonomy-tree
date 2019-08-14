@@ -1,7 +1,134 @@
 let ctrlToolbar = {
+    initCirclePackingChart: function() {
+        // disable irrelevant buttons
+        d3.selectAll(".zoom-button, .toggle-button, #color-palette, #toolbar-slider")
+            .attr("disabled", true);
+
+        // control fontsize
+        d3.select("#font-up")
+            .attr("disabled", null)
+            .on("click", () => {
+                let labels = d3.selectAll(".node-label"),
+                    fontSize = parseInt(labels.style("font-size")),
+                    maxFontSize = 20;
+                if (fontSize < maxFontSize) {
+                    labels.style("font-size", ++fontSize + "px")
+                }
+            });
+        d3.select("#font-down")
+            .attr("disabled", null)
+            .on("click", () => {
+                let labels = d3.selectAll(".node-label"),
+                    fontSize = parseInt(labels.style("font-size")),
+                    minFontSize = 9;
+                if (fontSize > minFontSize) {
+                    labels.style("font-size", --fontSize + "px")
+                }
+            });
+
+        // set help button to target correct modal
+        d3.select("#chart-help").attr("data-target", "#circle-packing-help-modal");
+    },
+    initTreemapChart: function () {
+        // disable irrelevant buttons
+        d3.selectAll("#toggle-node-circles, #color-palette")
+            .attr("disabled", true);
+
+        // control depth of depth of nodes/rectangles
+        d3.select("#zoom-in")
+            .attr("disabled", null)
+            .attr("data-original-title", "We need to go deeper...")
+            .on("click", () => {
+                if (viewStaticTreemapChart.drawDepth < 8) {
+                    viewStaticTreemapChart.drawDepth++;
+                    viewStaticTreemapChart.render();
+                }
+            });
+        d3.select("#zoom-out")
+            .attr("disabled", null)
+            .attr("data-original-title", "Return")
+            .on("click", () => {
+                if (viewStaticTreemapChart.drawDepth > 0) {
+                    viewStaticTreemapChart.drawDepth--;
+                    viewStaticTreemapChart.render();
+                }
+            });
+
+        // control fontsize
+        d3.select("#font-up")
+            .attr("disabled", null)
+            .on("click", () => {
+                let labels = d3.selectAll(".node-label"),
+                    fontSize = parseInt(labels.style("font-size")),
+                    maxFontSize = 20;
+                if (fontSize < maxFontSize) {
+                    ++fontSize;
+                    viewStaticTreemapChart.labelSize = fontSize;
+                    labels.style("font-size", fontSize + "px")
+                }
+            });
+        d3.select("#font-down")
+            .attr("disabled", null)
+            .on("click", () => {
+                let labels = d3.selectAll(".node-label"),
+                    fontSize = parseInt(labels.style("font-size")),
+                    minFontSize = 2;
+                if (fontSize > minFontSize) {
+                    --fontSize;
+                    viewStaticTreemapChart.labelSize = fontSize;
+                    labels.style("font-size", fontSize + "px")
+                }
+            });
+
+        // Toggle node labels
+        d3.select("#toggle-node-labels")
+            .attr("disabled", null)
+            .on("click", () => {
+                let labels = d3.selectAll(".node-label"),
+                    display = labels.style("display");
+
+                if (display === "block") {
+                    labels.style("display", "none");
+                    viewStaticTreemapChart.drawLabels = false;
+                }
+                else {
+                    labels.style("display", "block");
+                    viewStaticTreemapChart.drawLabels = true;
+                }
+            });
+
+        // set help button to target correct modal
+        d3.select("#chart-help").attr("data-target", "#treemap-help-modal");
+
+        // slider controls color based on taxonomic rank (kingdom, phylum, etc ...)
+        const slider = d3.select("#toolbar-slider"),
+            colorLabel = d3.select("#color-rank");
+
+        slider
+            .attr("disabled", null)
+            .on("input", () => {
+                const { color, taxonRanks } = ctrlMain.getHierarchical();
+                const currentVal = parseInt(slider.valueOf()._groups[0][0].value);
+                color.currentRank = taxonRanks[currentVal];
+                colorLabel.text(color.currentRank);
+                d3.selectAll(".node rect")
+                    .transition().duration(200)
+                    .style("fill", (d) => viewStaticTreemapChart.colorNode(d));
+            });
+    },
+    initSunburstChart: function() {
+        // disable all buttons
+        d3.selectAll(".toolbar-button, #toolbar-slider")
+            .attr("disabled", true);
+
+        // set help button to target correct modal
+        d3.select("#chart-help").attr("data-target", "#sunburst-help-modal");
+    },
     initTreeChart: function() {
-        d3.selectAll(".toolbar-button")
+        // enable all buttons
+        d3.selectAll(".toolbar-button, #toolbar-slider")
             .attr("disabled", null);
+
         // control zoom (+/-)
         const duration = 500;
         d3.select("#zoom-in").on("click", () => {
@@ -12,6 +139,7 @@ let ctrlToolbar = {
             viewZoom.zoom
                 .scaleBy(viewZoom.svg.transition().duration(duration), 1 / 1.3);
         });
+
         // control fontsize
         d3.select("#font-up").on("click", () => {
             let labels = d3.selectAll(".node-label"),
@@ -29,11 +157,12 @@ let ctrlToolbar = {
                 labels.style("font-size", --fontSize + "px")
             }
         });
+
         // toggle nodes and node-labels respectively
         d3.select("#toggle-node-circles").on("click", () => {
             d3.selectAll(".node")
                 .classed("node-normalized", d3.selectAll(".node").classed("node-normalized") ? false : true);
-            // toggle bool
+            // toggle state
             viewTreeChart.nodeSizeNormalized = ! viewTreeChart.nodeSizeNormalized;
         });
         d3.select("#toggle-node-labels").on("click", () => {
@@ -49,12 +178,16 @@ let ctrlToolbar = {
             }
         });
 
+        // set help button to target correct modal
+        d3.select("#chart-help").attr("data-target", "#tree-help-modal");
+
+        // enable palette
         this.initColorPalette();
+
         // slider controls color based on taxonomic rank (kingdom, phylum, etc ...)
         const slider = d3.select("#toolbar-slider"),
             colorLabel = d3.select("#color-rank");
-        
-        slider.attr("disabled", null);
+
         slider.on("input", () => {
             const { color, taxonRanks } = ctrlMain.getHierarchical();
             const currentVal = parseInt(slider.valueOf()._groups[0][0].value);
@@ -65,78 +198,14 @@ let ctrlToolbar = {
                 .style("fill", (d) => d.customColor ? d.customColor : viewTreeChart.colorNode(d));
         });
     },
-    initTreemapChart: function () {
-        // Disable font and toggle buttons
-        d3.selectAll("#toggle-node-circles")
+    initHierarchicalBarChart: function() {
+        // disable all buttons
+        d3.selectAll(".toolbar-button, #toolbar-slider")
             .attr("disabled", true);
-        d3.selectAll(".zoom-button, .font-button, #toggle-node-labels")
-            .attr("disabled", null);
 
-        // control depth of depth of nodes/rectangles
-        d3.select("#zoom-in").on("click", () => {
-            if (viewStaticTreemapChart.drawDepth < 8) {
-                viewStaticTreemapChart.drawDepth++;
-                viewStaticTreemapChart.render();
-            }
-        });
-        d3.select("#zoom-out").on("click", () => {
-            if (viewStaticTreemapChart.drawDepth > 0) {
-              viewStaticTreemapChart.drawDepth--;
-              viewStaticTreemapChart.render();
-            }
-        });
-        // control fontsize
-        d3.select("#font-up").on("click", () => {
-            let labels = d3.selectAll(".node-label"),
-                fontSize = parseInt(labels.style("font-size")),
-                maxFontSize = 20;
-            if (fontSize < maxFontSize) {
-                ++fontSize;
-                viewStaticTreemapChart.labelSize = fontSize;
-                labels.style("font-size", fontSize + "px")
-            }
-        });
-        d3.select("#font-down").on("click", () => {
-            let labels = d3.selectAll(".node-label"),
-                fontSize = parseInt(labels.style("font-size")),
-                minFontSize = 2;
-            if (fontSize > minFontSize) {
-                --fontSize;
-                viewStaticTreemapChart.labelSize = fontSize;
-                labels.style("font-size", fontSize + "px")
-            }
-        });
-        // Toggle node labels
-        d3.select("#toggle-node-labels").on("click", () => {
-            let labels = d3.selectAll(".node-label"),
-                display = labels.style("display");
-            
-            if (display === "block") {
-                labels.style("display", "none");
-                viewStaticTreemapChart.drawLabels = false;
-            } else {
-                labels.style("display", "block");
-                viewStaticTreemapChart.drawLabels = true;
-            }
-        });
-
-        this.disableColorPalette();
-        // slider controls color based on taxonomic rank (kingdom, phylum, etc ...)
-        const slider = d3.select("#toolbar-slider"),
-            colorLabel = d3.select("#color-rank");
-        
-        slider.attr("disabled", null);
-        slider.on("input", () => {
-            const { color, taxonRanks } = ctrlMain.getHierarchical();
-            const currentVal = parseInt(slider.valueOf()._groups[0][0].value);
-            color.currentRank = taxonRanks[currentVal];
-            colorLabel.text(color.currentRank);
-            d3.selectAll(".node rect")
-                .transition().duration(200)
-                .style("fill", (d) => viewStaticTreemapChart.colorNode(d));
-        });
+        // set help button to target correct modal
+        d3.select("#chart-help").attr("data-target", "#hierarchical-bars-help-modal");
     },
-    disableColorPalette: function() { d3.select("#color-palette").attr("disabled", true); },
     initColorPalette: function() {
         d3.select("#color-palette")
             .attr("disabled", null)

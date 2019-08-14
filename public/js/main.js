@@ -57,8 +57,8 @@ let ctrlMain = {
         viewSamples.init();
 
         viewHierarchicalBarChart.init();
-        viewCirclePacking.init();
-        viewSunburst.init();
+        viewCirclePackingChart.init();
+        viewSunburstChart.init();
         viewZoom.init();
 
         this.onFileChange();
@@ -185,7 +185,7 @@ let ctrlMain = {
         
         const type = this.getChartType();
         switch (type) {
-            case "simple-tree":
+            case "horizontal-tree":
             case "radial-tree":
                 this.buildRoot(data);
                 this.buildTree();
@@ -199,9 +199,8 @@ let ctrlMain = {
             case "hierarchical-bars":
                 this.buildRoot(data);
                 viewHierarchicalBarChart.render();
+                ctrlToolbar.initHierarchicalBarChart();
                 viewMiniChart.init(data);
-                // disable toolbar
-                // disable mini chart?
                 break;
             case "static-treemap":
                 this.buildRoot(data);
@@ -214,12 +213,14 @@ let ctrlMain = {
             case "circle-packing":
                 this.buildRoot(data);
                 this.buildPack();
-                viewCirclePacking.render();
+                viewCirclePackingChart.render();
+                ctrlToolbar.initCirclePackingChart();
                 viewMiniChart.init(data);
                 break;
             case "sunburst":
                 this.buildRoot(data);
-                viewSunburst.render();
+                viewSunburstChart.render();
+                ctrlToolbar.initSunburstChart();
                 viewMiniChart.init(data);
                 break;
         }

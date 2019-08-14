@@ -241,7 +241,7 @@ const viewTreeChart = {
         ];
     },
     render: function(source) {
-        // Renders and updates either simple-tree or radial-tree
+        // Renders and updates either horizontal-tree or radial-tree
 
         // Get state
         let { chartType, drawLabels, nodeSizeNormalized } = this;
@@ -349,7 +349,7 @@ const viewTreeChart = {
         }
         else {
             nodeUpdate.transition(t)
-                .attr("transform", d => "translate(" + d.y + "," + d.x + ")") // simple tree
+                .attr("transform", d => "translate(" + d.y + "," + d.x + ")") // horizontal tree
                 .attr("fill-opacity", 1);
         }
 

@@ -1,4 +1,4 @@
-const viewSunburst = {
+const viewSunburstChart = {
     init: function() {
         this.svg = d3.select("#chart-display");
         this.drawLabels = true;
