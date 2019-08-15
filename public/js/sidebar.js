@@ -431,9 +431,9 @@ let viewMiniChart = {
         this.chart = d3.select("#mini-chart").append("g")
             .style("transform", `translate(${margin.x}px, ${margin.y}px)`);
         
-        // Value selection:
-        d3.select("#abs-option").on("change", () => console.log(123))
-        d3.select("#normalized-option").on("change", () => console.log(456))
+        // Radio buttons:
+        this.absoluteOption = document.getElementById("abs-option");
+        this.relativeOption = document.getElementById("relative-option");
         
         // Set up scales
         this.xScale = d3.scaleLinear()
@@ -442,7 +442,8 @@ let viewMiniChart = {
             .range([0, height - 2 * margin.y])
             .padding(0.5);
 
-        this.scalesToSamples(data);
+        let rootSampleValues = Object.entries(data[0].samples); // root guaranteed to be at index = 0
+        this.scalesToSamples(rootSampleValues);
 
         // x-axis label
         svg.append("text")
@@ -468,21 +469,32 @@ let viewMiniChart = {
         // initial render with root node (cellular organisms)
         let rootName = data[0].id;
         let rootData = Object.entries(data[0].samples);
+        this.lastSample = { rootName, rootData };
         this.renderSamples(rootName, rootData);
+
+        // if user clicks on radio button, render last data
+        const renderLastSample = () => {
+            let { name, data } = this.lastSample;
+            this.renderSamples(name, data);
+        }
+
+        this.absoluteOption.addEventListener("change", renderLastSample);
+        this.relativeOption.addEventListener("change", renderLastSample);
     },
     scalesToSamples: function(data) {
         // Helper function for this.renderSamples
-        let areSamples = data[0].samples;
-        if (!areSamples) { return }
 
-        // Find max value of MS intensities in all samples, for unbiased x-axis
+        // data:
+        // d[0] = sample name
+        // d[1] = sample intensity (value)
+
+        // find the max value (required for xScale)
         let values = [];
-        data.forEach(ele => { values = values.concat(Object.values(ele.samples)); });
+        data.forEach(d => values.push(d[1]));
         const maxVal = d3.max(values);
         
-        this.samples =  Object.keys(data[0].samples).map((ele) => {
-            return ele.replace("Intensity", "").trim();
-        });
+        this.samples = []
+        data.forEach(d => this.samples.push(d[0]))
 
         this.xScale.domain([0, maxVal]);
         this.yScale.domain(this.samples);
@@ -495,7 +507,11 @@ let viewMiniChart = {
     scalesToSubtaxa: function(sample, data) {
         // Helper function for this.renderSubtaxa
 
-        // Find max value of MS intensity in given sample, for unbiased x-axis
+        // rendering this data is always relative
+        this.absoluteOption.disabled = true;
+        this.relativeOption.disabled = true;
+        this.relativeOption.checked = true;
+
         let values = [];
         if (sample) { data.forEach(d => values.push(d.samples[sample])); }
         else { data.forEach(d => values.push(d.avgIntensity)); }
@@ -513,9 +529,25 @@ let viewMiniChart = {
     renderSamples: function(name, data) {
         // data:
         // d[0] = sample name
-        // d[1] = sample intensity
+        // d[1] = sample intensity (value)
 
-        this.scalesToSamples(ctrlMain.getCurrentData());
+        this.lastSample = { name, data }    // save this data if user clicks on radio button
+
+        // enable radio buttons
+        this.absoluteOption.disabled = false;
+        this.relativeOption.disabled = false;
+
+        if (this.absoluteOption.checked){
+            // find max value of root
+            let globalData = ctrlMain.getCurrentData();
+            let rootSampleValues = Object.entries(globalData[0].samples);
+            this.scalesToSamples(rootSampleValues);
+        }
+        else if (this.relativeOption.checked) { // not "else", because might add more options
+            // find max value of current taxa
+            this.scalesToSamples(data);
+        }
+
         d3.select(".x-axis").call(this.xAxis);
         d3.select(".y-axis").call(this.yAxis);
 
