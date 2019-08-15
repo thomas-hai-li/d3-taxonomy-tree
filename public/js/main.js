@@ -1,4 +1,4 @@
-// Global object that holds data relevant to all charts/visualizations:
+// Global object that holds data/state relevant to all charts/visualizations:
 let model = {
     dim: {
         width: parseInt(d3.select("#chart-display").style("width")),
@@ -52,14 +52,10 @@ let model = {
 }
 
 let ctrlMain = {
-    // Responsible for file handling, building charts, and getting/setting data from model
+    // ctrlMain: Responsible for file handling, building charts, and getting/setting data from model
+
     init: function() {
         viewSamples.init();
-
-        viewHierarchicalBarChart.init();
-        viewCirclePackingChart.init();
-        viewSunburstChart.init();
-        viewZoom.init();
 
         this.onFileChange();
         this.onChartTypeChange();
@@ -198,6 +194,8 @@ let ctrlMain = {
                 break;
             case "hierarchical-bars":
                 this.buildRoot(data);
+
+                viewHierarchicalBarChart.init();
                 viewHierarchicalBarChart.render();
                 ctrlToolbar.initHierarchicalBarChart();
                 viewMiniChart.init(data);
@@ -205,6 +203,7 @@ let ctrlMain = {
             case "static-treemap":
                 this.buildRoot(data);
                 this.buildTreemap();
+
                 viewStaticTreemapChart.init();
                 viewStaticTreemapChart.render();
                 ctrlToolbar.initTreemapChart();
@@ -213,12 +212,16 @@ let ctrlMain = {
             case "circle-packing":
                 this.buildRoot(data);
                 this.buildPack();
+
+                viewCirclePackingChart.init();
                 viewCirclePackingChart.render();
                 ctrlToolbar.initCirclePackingChart();
                 viewMiniChart.init(data);
                 break;
             case "sunburst":
                 this.buildRoot(data);
+
+                viewSunburstChart.init();
                 viewSunburstChart.render();
                 ctrlToolbar.initSunburstChart();
                 viewMiniChart.init(data);

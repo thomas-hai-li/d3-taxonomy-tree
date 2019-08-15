@@ -1,8 +1,6 @@
 let viewZoom = {
-    init: function() {
-        this.svg = d3.select("#chart-display");
-    },
     render: function(type) {
+        this.svg = d3.select("#chart-display");
         this.zoom = d3.zoom()
                 .scaleExtent([0.4, 10])
                 .on("zoom", zoomed);

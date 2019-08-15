@@ -1,7 +1,9 @@
 const viewCirclePackingChart = {
     init: function() {
+        // State
         this.svg = d3.select("#chart-display");
-        this.drawLabels = true;
+        this.svg.selectAll("*").remove();       // reset main visualization chart
+
         this.menu = [
             {
                 title: d => "Selection: " + d.data.taxon
@@ -36,8 +38,8 @@ const viewCirclePackingChart = {
         ];
     },
     render: function() {
-        this.svg.selectAll("*").remove();
-        
+        // rendering is only called once
+
         // Setup:
         const { root, pack } = ctrlMain.getHierarchical(),
             { width, height } = ctrlMain.getDim();
@@ -148,6 +150,5 @@ const viewCirclePackingChart = {
                     .on("start", function(d) { if (d.parent === focus) this.style.display = "inline"; })
                     .on("end", function(d) { if (d.parent !== focus) this.style.display = "none"; });
         }
-
     }
 }

@@ -1,6 +1,8 @@
 const viewHierarchicalBarChart = {
     init: function() {
+        // State
         this.svg = d3.select("#chart-display");
+        this.svg.selectAll("*").remove();       // reset main visualization chart
 
         const margin = {top: 30, right: 150, bottom: 0, left: 120},
             width = 960 - margin.left - margin.right,
@@ -50,8 +52,7 @@ const viewHierarchicalBarChart = {
         ];
     },
     render: function() {
-        this.svg.selectAll("*").remove();
-
+        // Setup
         const chart = this.svg
                 .append("g")
                 .attr("class", "chart"),

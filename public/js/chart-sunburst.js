@@ -1,10 +1,11 @@
 const viewSunburstChart = {
     init: function() {
+        // State
         this.svg = d3.select("#chart-display");
-        this.drawLabels = true;
+        this.svg.selectAll("*").remove();
     },
     render: function() {
-        this.svg.selectAll("*").remove();
+        // render only called once
 
         // Setup:
         const { root } = ctrlMain.getHierarchical(),
