@@ -59,8 +59,15 @@ let ctrlMain = {
 
         this.onFileChange();
         this.onChartTypeChange();
-        // Load data from global variable and save each node's value if it changes
+        // Load data from global variable and sort by "@" count (so root node always at index = 0)
         let loadedData = JSON.parse(data);
+        loadedData.sort((a,b) => {
+            let aVal = a.id.split('@').length;
+            let bVal = b.id.split('@').length;
+            if (aVal < bVal) { return -1; }
+            if (aVal > bVal) { return 1; }
+            return 0;
+        })
         console.log(loadedData)
         
         this.parseTaxonRank(loadedData);

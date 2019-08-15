@@ -464,6 +464,11 @@ let viewMiniChart = {
             .attr("class", "y-axis")
             .style("transform", `translate(${margin.x}px, ${margin.y}px)`)
             .call(this.yAxis);
+
+        // initial render with root node (cellular organisms)
+        let rootName = data[0].id;
+        let rootData = Object.entries(data[0].samples);
+        this.renderSamples(rootName, rootData);
     },
     scalesToSamples: function(data) {
         // Helper function for this.renderSamples

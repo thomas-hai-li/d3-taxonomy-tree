@@ -130,7 +130,14 @@ const viewStaticTreemapChart = {
             .style("opacity", 0);
 
         nodeEnter.append("title")
-            .text(d => `${d.id.replace(/@/g,"/")}\nAverage MS Intensity: ${format(d.data.avgIntensity)}`);
+            .text(d => {
+                let sample = ctrlMain.getCurrentSample();
+                let measuredIntensity = sample ? d.data.samples[sample] : d.data.avgIntensity;
+
+                return `${d.id.replace(/@/g,"/")} \n` +
+                    `MS Intensity (excludes unknown peptides): ${format(d.value)} \n` +
+                    `MS Intensity (includes unknown peptides): ${format(measuredIntensity)} \n`;
+            });
 
         nodeEnter.append("rect")
             .attr("width", d => d.x1 - d.x0)

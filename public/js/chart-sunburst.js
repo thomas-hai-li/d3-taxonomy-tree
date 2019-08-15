@@ -62,7 +62,14 @@ const viewSunburstChart = {
             .on("click", clicked);
       
         path.append("title")
-            .text(d => `${d.id.replace(/@/g,"/")}\nSubtaxa: ${d.children ? d.children.length: 3}\nAverage MS Intensity: ${format(d.data.avgIntensity)}`);
+            .text(d => {
+                let sample = ctrlMain.getCurrentSample();
+                let measuredIntensity = sample ? d.data.samples[sample] : d.data.avgIntensity;
+
+                return `${d.id.replace(/@/g,"/")} \n` +
+                    `MS Intensity (excludes unknown peptides): ${format(d.value)} \n` +
+                    `MS Intensity (includes unknown peptides): ${format(measuredIntensity)} \n`;
+            });
       
         const label = chart.append("g")
             .attr("pointer-events", "none")
