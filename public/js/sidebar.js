@@ -606,6 +606,11 @@ let viewMiniChart = {
                 tooltip.transition()
                     .duration(duration)
                     .style("opacity", 0.9);
+
+                // highlight the actual node on the main visualization
+                let a = d3.selectAll(".node")
+                    .filter(e => e.id === d.id)
+                    .attr("stroke", "black");
             })
             .on("mousemove", function(d) {
                 let height = tooltip.node().clientHeight;
@@ -618,13 +623,18 @@ let viewMiniChart = {
                     .style("left", (d3.event.pageX) + "px")
                     .style("top", (d3.event.pageY - height) + "px");
             })
-            .on("mouseout", function() {
+            .on("mouseout", function(d) {
                 d3.select(this).transition()
                     .duration(duration)
                     .style("opacity", 1);
                 tooltip.transition()
                     .duration(duration)
                     .style("opacity", 0);
+
+                // stop highlighting the actual node on the main visualization
+                d3.selectAll(".node")
+                    .filter(e => e.id === d.id)
+                    .attr("stroke", "none");
             });
 
         let currentBar = bar.merge(barsEnter)

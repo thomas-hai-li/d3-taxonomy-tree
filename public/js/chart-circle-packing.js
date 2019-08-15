@@ -75,6 +75,7 @@ const viewCirclePackingChart = {
         const node = chart.selectAll("circle")
             .data(root.descendants().slice(1).filter(d => d.value))
             .join("circle")
+                .attr("class", "node")
                 .attr("fill", d => colorNode(d.height))
                 .attr("opacity", d => d.depth * 0.6)
                 .attr("cursor", "pointer")
@@ -104,7 +105,12 @@ const viewCirclePackingChart = {
                         .style("opacity", 0);
                     d3.select(this).attr("stroke", null);
                 })
-                .on("click", d => focus !== d && (zoom(d), d3.event.stopPropagation()))
+                .on("click", d => {
+                    let compareSubtaxaProportions = this.menu[1].children[1].action;
+                    compareSubtaxaProportions(d);
+
+                    focus !== d && (zoom(d), d3.event.stopPropagation());
+                })
                 .on("contextmenu", d3.contextMenu(this.menu));
 
         const label = chart.append("g")
