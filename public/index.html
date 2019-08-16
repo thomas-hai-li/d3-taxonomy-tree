@@ -63,8 +63,8 @@
                     </select>
                     <!-- Data-specific Sample Selection -->
                     <div class="sidebar-item">
-                        <label for="samples" class="text-primary">Samples</label>
-                        <div class="d-inline-flex w-75">
+                        <div class="d-flex align-items-baseline">
+                            <label for="samples" class="text-primary">Samples</label>
                             <button class="btn btn-sm btn-light" data-toggle="modal" data-target="#samples-modal">
                                 <i class="fas fa-info-circle"></i>
                             </button>
@@ -127,14 +127,20 @@
                     </div>
                     <!-- Mini Chart -->
                     <div class="sidebar-item mt-auto">
-                        <input type="radio" id="abs-option" name="ms-intensity-option" value="abs" checked>
-                        <label for="abs-option">Absolute</label>
-                        <input type="radio" id="relative-option" name="ms-intensity-option" value="rel">
-                        <label for="relative-option">Relative</label>
+                        <div class="d-flex align-items-baseline">
+                            <input type="radio" id="abs-option" name="ms-intensity-option" value="abs" checked>
+                            <label for="abs-option">Absolute</label>
+                            <input type="radio" id="relative-option" name="ms-intensity-option" value="rel">
+                            <label for="relative-option">Relative</label>
+                            <button id="toggle-mini-chart-type" class="btn btn-sm btn-light ml-auto" data-tooltip="tooltip" data-placement="top" title="Placeholder" data-delay='{"show":"500"}'>
+                                <i class="fas fa-chart-pie"></i>
+                            </button>
+                        </div>
                         <svg id="mini-chart" class="border" xmlns="http://www.w3.org/2000/svg"></svg>
                     </div>
                 </div>
             </div>
+
             <!-- Visualization window -->
             <div class="col-lg-10">
                 <div id="main-view" class="p-2s h-100 d-flex flex-column justify-content-between">
@@ -434,7 +440,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Warning</h5>
+                    <h5 class="modal-title">Oh Snap</h5>
                     <button type="button" class="close" data-dismiss="modal">
                         <span>&times;</span>
                     </button>

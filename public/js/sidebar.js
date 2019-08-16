@@ -434,6 +434,14 @@ let viewMiniChart = {
         // Radio buttons:
         this.absoluteOption = document.getElementById("abs-option");
         this.relativeOption = document.getElementById("relative-option");
+
+        // Button to toggle bar/pie chart
+        this.toggleChartType = document.querySelector("#toggle-mini-chart-type");
+        this.toggleChartType.addEventListener("click", function() {
+            let buttonIcon = document.querySelector("#toggle-mini-chart-type i");
+            buttonIcon.classList.toggle("fa-chart-pie");
+            buttonIcon.classList.toggle("fa-chart-bar");
+        });
         
         // Set up scales
         this.xScale = d3.scaleLinear()
