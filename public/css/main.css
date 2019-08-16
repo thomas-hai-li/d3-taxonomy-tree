@@ -45,3 +45,7 @@ svg {
     background-color: rgb(236, 236, 236);
     height: 300px;
 }
+
+.dropdown-toggle::after { /* removes arrow from dropdown button */
+    display:none;
+}
