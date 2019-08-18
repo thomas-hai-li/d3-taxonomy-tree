@@ -31,13 +31,13 @@ let ctrlToolbar = {
     },
     initTreemapChart: function () {
         // disable irrelevant buttons
-        d3.selectAll("#toggle-node-circles, #color-palette")
+        d3.selectAll("#color-palette")
             .attr("disabled", true);
 
         // control depth of depth of nodes/rectangles
         d3.select("#zoom-in")
             .attr("disabled", null)
-            .attr("data-original-title", "We need to go deeper...")
+            .attr("data-original-title", "Increase Depth")
             .on("click", () => {
                 if (viewStaticTreemapChart.drawDepth < 8) {
                     viewStaticTreemapChart.drawDepth++;
@@ -46,7 +46,7 @@ let ctrlToolbar = {
             });
         d3.select("#zoom-out")
             .attr("disabled", null)
-            .attr("data-original-title", "Return")
+            .attr("data-original-title", "Decrease Depth")
             .on("click", () => {
                 if (viewStaticTreemapChart.drawDepth > 0) {
                     viewStaticTreemapChart.drawDepth--;
@@ -80,7 +80,7 @@ let ctrlToolbar = {
                 }
             });
 
-        // Toggle node labels
+        // toggle node labels
         d3.select("#toggle-node-labels")
             .attr("disabled", null)
             .on("click", () => {
@@ -96,6 +96,14 @@ let ctrlToolbar = {
                     viewStaticTreemapChart.drawLabels = true;
                 }
             });
+
+        d3.select("#toggle-node-circles")
+            .attr("disabled", null)
+            .attr("data-original-title", "Exclude/Include Unknown Peptide Intensity")
+            .on("click", () => {
+                viewStaticTreemapChart.excludeUnknownPeptides = ! viewStaticTreemapChart.excludeUnknownPeptides;
+                viewStaticTreemapChart.render();
+            })
 
         // set help button to target correct modal
         d3.select("#chart-help").attr("data-target", "#treemap-help-modal");

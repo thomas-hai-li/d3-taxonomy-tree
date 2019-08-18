@@ -6,7 +6,8 @@ const viewStaticTreemapChart = {
         this.margin = {top: 55, right: 10, bottom: 10, left: 5};
         this.drawLabels = true;
         this.labelSize = 16;
-        this.drawDepth = 1;
+        this.drawDepth = 5;
+        this.excludeUnknownPeptides = true;
         this.menu = [
             {
                 title: d => "Selection: " + d.data.taxon
@@ -60,19 +61,19 @@ const viewStaticTreemapChart = {
             .style("font-size", "20px")
             .style("fill", "black")
             .style("opacity", 0.75);
+        // Display if excluding unknown peptides
+        this.excludingLabel = this.svg.append("text")
+            .attr("class", "is-excluding")
+            .attr("y", 18)
+            .attr("x", 250)
+            .style("font", "sans-serif")
+            .style("font-size", "14px")
+            .style("fill", "black")
+            .style("opacity", 0.5);
         
         this.chart = this.svg.append("g")
             .attr("class", "chart")
             .attr("transform", `translate(${this.margin.left}, ${this.margin.top})`);
-
-        // Generate layout and data (discards unknown peptide intensities)
-        const { root, treemap } = ctrlMain.getHierarchical();
-        root.sum(d => {
-            d.value = (d.rank === "Species" ? d.value : 0);
-            return d.value;
-        })
-        .sort((a, b) => b.value - a.value);
-        treemap(root);
 
         // Zoom utility
         const zoomed = () => {
@@ -104,14 +105,16 @@ const viewStaticTreemapChart = {
     },
     render: function() {
         // Setup:
-        const { root, taxonRanks  } = ctrlMain.getHierarchical(),
+        const { root, treemap, taxonRanks  } = ctrlMain.getHierarchical(),
             drawDepth = this.drawDepth,
             drawDepthRank = taxonRanks[drawDepth],
             format = d3.format(".4g"),
             t = d3.transition().duration(500);
 
         this.currentDepth.text("Depth: " + drawDepthRank);
+        this.excludingLabel.text(this.excludeUnknownPeptides ? "(*excluding unknown peptides*)" : "(*including unknown peptides*)");
 
+        this.calculateLayout(root, treemap)
         const data = root.descendants().filter(d => d.data.rank === drawDepthRank);
 
         const node = this.chart.selectAll(".node")
@@ -123,7 +126,19 @@ const viewStaticTreemapChart = {
                 .style("opacity", 0)
                 .remove();
 
-        // enter (with this treemap implementation, there is no nodeUpdate because depths dont have common nodes)
+        // update (only takes effect when toggling the exclude/include unknown peptides button)
+        node.transition(t)
+            .attr("transform", d => `translate(${d.x0},${d.y0})`);
+
+        node.select("rect")
+            .transition(t)
+                .attr("width", d => d.x1 - d.x0)
+                .attr("height", d =>  d.y1 - d.y0);
+
+        node.select(".value")
+            .text(d => format(d.value));
+
+        // enter
         const nodeEnter = node.enter().append("g")
             .attr("class", "node")
             .attr("transform", d => `translate(${d.x0},${d.y0})`)
@@ -162,10 +177,28 @@ const viewStaticTreemapChart = {
                 .attr("x", 3)
                 .attr("y", (d, i, node) => `${(i === node.length - 1) * 0.3 + 1.1 + i * 0.9}em`)
                 .attr("fill-opacity", (d, i, node) => i === node.length - 1 ? 0.7 : null)
+                .attr("class", (d, i, node) => i === node.length - 1 ? "value" : "")
                 .text(d => d);
         
         nodeEnter.transition(t)
             .style("opacity", 1);
+    },
+    calculateLayout: function(root, treemap) {
+        if (this.excludeUnknownPeptides) {
+            root.sum(d => {
+                d.value = (d.rank === "Species" ? d.value : 0); // sum up values from the species level only
+                return d.value;
+            });
+        }
+        else {
+            root.each(d => {
+                const sample = ctrlMain.getCurrentSample();
+                d.data.value = (sample ? d.data.samples[sample] : d.data.avgIntensity);
+                d.value = d.data.value;
+            });
+        }
+        root.sort((a, b) => b.value - a.value);
+        treemap(root);
     },
     colorNode: function(d) {
         const { taxonRanks, color: { currentRank, branchColor } } = ctrlMain.getHierarchical();
