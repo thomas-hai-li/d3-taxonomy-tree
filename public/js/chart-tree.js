@@ -46,6 +46,14 @@ const viewTreeChart = {
         const { width, height } = ctrlMain.getDim();
         root.x0 = width / 6;
         root.y0 = 0;
+        
+        // Collapse all nodes on init
+        // root.eachAfter(d => {
+        //     if (d.children && d.depth > 0) {
+        //         d._children = d.children;
+        //         d.children = null;
+        //     }
+        // })
 
         // Determine initial chart position
         if (type === "radial-tree") {
@@ -252,7 +260,11 @@ const viewTreeChart = {
         // Re-calculate new tree layout
         let { root, tree } = ctrlMain.getHierarchical();
         root.sort((a, b) => b.data.value - a.data.value);
-        root.each(d => d.collapsedChild = false);
+        root.each(d => {
+            d.collapsedChild = false;
+            d.r = (d.parent ? d.parent.r * d.data.avgProportion : 75);   // save radius of node
+            d.r = (d.r < 3 ? 3 : d.r);  // minimum radius
+        });
         tree(root);
 
         // Links section:
@@ -263,7 +275,7 @@ const viewTreeChart = {
         let linkEnter = link.enter().append("path")
             .attr("class", "link")
             .attr("stroke-opacity", 0.4)
-            .style("stroke-width", d => 2 * propToPixels(d.data.avgProportion))
+            .style("stroke-width", d => 2 * d.r)
             .attr("d", d => {
                 const o = {x: source.x0, y: source.y0};
                 return this.diagonal(o, o);
@@ -354,7 +366,7 @@ const viewTreeChart = {
         }
 
         nodeUpdate.select("circle").transition(t)
-            .attr("r", d => d.depth === 0 ? 20 : propToPixels(d.data.avgProportion))
+            .attr("r", d => d.r)
             .style("fill", d => d.customColor ? d.customColor : this.colorNode(d));
 
         let nodeLabel =  nodeUpdate.select("text");

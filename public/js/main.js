@@ -247,7 +247,11 @@ let ctrlMain = {
 
         // calculate proportion to parent node
         root.each(node => {
-            if (node.parent) { node.data.avgProportion = node.data.avgIntensity / node.parent.data.avgIntensity; }
+            if (node.parent) {
+                const currentValue = node.data.avgIntensity;
+                const parentValue = node.parent.data.avgIntensity;
+                node.data.avgProportion = (parentValue === 0 ? 0 : currentValue / parentValue);
+            }
         })
 
         model.hierarchical.root = root;
