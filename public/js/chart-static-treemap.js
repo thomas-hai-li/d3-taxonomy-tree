@@ -51,7 +51,7 @@ const viewStaticTreemapChart = {
             .style("font-size", "20px")
             .style("fill", "black")
             .style("opacity", 0.5)
-            .text("Sample: " + (sample || "Averaged Values"));
+            .text("Sample: " + (sample || "*All Samples Summed*"));
         // Display current rank/depth
         this.currentDepth = this.svg.append("text")
             .attr("class", "current-depth")
@@ -147,7 +147,7 @@ const viewStaticTreemapChart = {
         nodeEnter.append("title")
             .text(d => {
                 let sample = ctrlMain.getCurrentSample();
-                let measuredIntensity = sample ? d.data.samples[sample] : d.data.avgIntensity;
+                let measuredIntensity = sample ? d.data.samples[sample] : d.data.sumIntensity;
 
                 return `${d.id.replace(/@/g,"/")} \n` +
                     `MS Intensity (excludes unknown peptides): ${format(d.value)} \n` +
@@ -193,7 +193,7 @@ const viewStaticTreemapChart = {
         else {
             root.each(d => {
                 const sample = ctrlMain.getCurrentSample();
-                d.data.value = (sample ? d.data.samples[sample] : d.data.avgIntensity);
+                d.data.value = (sample ? d.data.samples[sample] : d.data.sumIntensity);
                 d.value = d.data.value;
             });
         }

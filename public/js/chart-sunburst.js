@@ -38,7 +38,7 @@ const viewSunburstChart = {
             .style("font-size", "20px")
             .style("fill", "black")
             .style("opacity", 0.5)
-            .text("Sample: " + (sample || "Averaged Values"));
+            .text("Sample: " + (sample || "*All Samples Summed*"));
 
         root.sum(d => {
                 d.value = (d.rank === "Species" ? d.value : 0);
@@ -64,7 +64,7 @@ const viewSunburstChart = {
         path.append("title")
             .text(d => {
                 let sample = ctrlMain.getCurrentSample();
-                let measuredIntensity = sample ? d.data.samples[sample] : d.data.avgIntensity;
+                let measuredIntensity = sample ? d.data.samples[sample] : d.data.sumIntensity;
 
                 return `${d.id.replace(/@/g,"/")} \n` +
                     `MS Intensity (excludes unknown peptides): ${format(d.value)} \n` +

@@ -73,7 +73,7 @@ const viewHierarchicalBarChart = {
             .style("font-size", "20px")
             .style("fill", "black")
             .style("opacity", 0.50)
-            .text("Sample: " + (sample || "Averaged Values"));
+            .text("Sample: " + (sample || "*All Samples Summed*"));
 
         // For displaying rank and taxon
         chart.append("text")

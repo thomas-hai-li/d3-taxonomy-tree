@@ -147,8 +147,8 @@ let ctrlMain = {
 
         data = data.map(e => {
             e.value = +e.value;
-            e.avgIntensity = e.value;   // the "value" column in the originial csv is the average MS intensity
-            e.avgNormalizedIntensity = e.value > 0 ? Math.log10(e.value) * 10 : 0;    // log transform
+            e.sumIntensity = e.value;   // the "value" column in the originial csv is the total summed sample MS intensity
+            e.sumIntensityNormalized = e.value > 0 ? Math.log10(e.value) * 10 : 0;    // log transform
             
             const sampleNames = col.split(";"),
                 sampleIntensies = e[col].split(";").map(val => +val);
@@ -248,8 +248,8 @@ let ctrlMain = {
         // calculate proportion to parent node
         root.each(node => {
             if (node.parent) {
-                const currentValue = node.data.avgIntensity;
-                const parentValue = node.parent.data.avgIntensity;
+                const currentValue = node.data.sumIntensity;
+                const parentValue = node.parent.data.sumIntensity;
                 node.data.avgProportion = (parentValue === 0 ? 0 : currentValue / parentValue);
             }
         })

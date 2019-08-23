@@ -64,14 +64,18 @@ const viewCirclePackingChart = {
             .style("font-size", "20px")
             .style("fill", "black")
             .style("opacity", 0.5)
-            .text("Sample: " + (sample || "Averaged Values"));
+            .text("Sample: " + (sample || "*All Samples Summed*"));
         
         // Generate layout
-        root.sum(d => d.value)
+        root.each(d => d.value = d.data.value)
             .sort((a, b) => b.value - a.value);
         pack(root);
 
-        this.svg.on("click", () => zoom(root));
+        this.svg.on("click", () => {
+            let compareSampleIntensities = this.menu[1].children[0].action;
+            compareSampleIntensities(root);
+            zoom(root);
+        });
         const node = chart.selectAll("circle")
             .data(root.descendants().slice(1).filter(d => d.value))
             .join("circle")
@@ -106,8 +110,8 @@ const viewCirclePackingChart = {
                     d3.select(this).attr("stroke", null);
                 })
                 .on("click", d => {
-                    let compareSubtaxaProportions = this.menu[1].children[1].action;
-                    compareSubtaxaProportions(d);
+                    let compareSampleIntensities = this.menu[1].children[0].action;
+                    compareSampleIntensities(d);
 
                     focus !== d && (zoom(d), d3.event.stopPropagation());
                 })

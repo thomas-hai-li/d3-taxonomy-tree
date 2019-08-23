@@ -39,7 +39,7 @@ const viewTreeChart = {
             .style("font-size", "20px")
             .style("fill", "black")
             .style("opacity", 0.5)
-            .text("Sample: " + (sample || "Averaged Values"));
+            .text("Sample: " + (sample || "*All Samples Summed*"));
 
         // Save root initial position (needed for updating chart)
         const { root, tree } = ctrlMain.getHierarchical();

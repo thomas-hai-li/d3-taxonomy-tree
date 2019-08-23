@@ -530,7 +530,7 @@ let viewMiniChart = {
 
         let values = [];
         if (sample) { data.forEach(d => values.push(d.samples[sample])); }
-        else { data.forEach(d => values.push(d.avgIntensity)); }
+        else { data.forEach(d => values.push(d.sumIntensity)); }
         const maxVal = d3.max(values);
         const subtaxa = data.map(d => d.taxon);
 
@@ -636,7 +636,7 @@ let viewMiniChart = {
         svg.select(".mini-chart-title").remove()
         svg.append("text")
             .attr("class", "mini-chart-title")
-            .text(sample ? sample : "Average Intensity")
+            .text(sample ? sample : "All Samples Summed")
             .style("font", "sans-serif")
             .style("font-size", "14px")
             .attr("text-anchor", "middle")
@@ -664,9 +664,9 @@ let viewMiniChart = {
                 let height = tooltip.node().clientHeight;
                 let proportion;
                 if (sample) { proportion = d.samples[sample] / parent.data.samples[sample]; }
-                else { proportion = d.avgIntensity / parent.data.avgIntensity; }
+                else { proportion = d.sumIntensity / parent.data.sumIntensity; }
                
-                tooltip.html(`<strong>Taxon</strong>: ${d.taxon} (${d.rank})<br><strong>MS Intensity</strong>: ${format(sample ? d.samples[sample] : d.avgIntensity)}<br><br>
+                tooltip.html(`<strong>Taxon</strong>: ${d.taxon} (${d.rank})<br><strong>MS Intensity</strong>: ${format(sample ? d.samples[sample] : d.sumIntensity)}<br><br>
                                <i class="fas fa-chart-pie"></i> \t${d3.format(".1%")(proportion)} of ${parent.data.taxon}`)
                     .style("left", (d3.event.pageX) + "px")
                     .style("top", (d3.event.pageY - height) + "px");
@@ -691,7 +691,7 @@ let viewMiniChart = {
             .attr("fill", "#2a5599");
         
         currentBar.transition().duration(750)
-            .attr("width", d => xScale(sample ? d.samples[sample] : d.avgIntensity))
+            .attr("width", d => xScale(sample ? d.samples[sample] : d.sumIntensity))
 
         bar.exit().remove();
     }
