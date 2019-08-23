@@ -48,12 +48,12 @@ const viewTreeChart = {
         root.y0 = 0;
         
         // Collapse all nodes on init
-        // root.eachAfter(d => {
-        //     if (d.children && d.depth > 0) {
-        //         d._children = d.children;
-        //         d.children = null;
-        //     }
-        // })
+        root.eachAfter(d => {
+            if (d.children && d.depth > 0) {
+                d._children = d.children;
+                d.children = null;
+            }
+        });
 
         // Determine initial chart position
         if (type === "radial-tree") {
@@ -66,6 +66,21 @@ const viewTreeChart = {
 
         // Context Menues
         this.menuSVG = [
+            {
+                title: "Expand all nodes",
+                action: () => {
+                    root.each(d => {
+                        if (d._children) {
+                            d.children = d._children;
+                            d._children = null;
+                        }
+                    });
+                    this.render(root);
+                }
+            },
+            {
+                divider: true
+            },
             {
                 title: "Clear selection",
                 action: () => ctrlMain.clearCurrentSelection()
@@ -109,7 +124,7 @@ const viewTreeChart = {
                 children: [
                     {
                         title: "Collapse all other nodes",
-                        action: function(d, i) {
+                        action: function(d) {
                             // Make selected node visible
                             if (this.classList.contains("node-collapsed")) {
                                 viewTreeChart.collapseNode(d, this);
@@ -128,8 +143,8 @@ const viewTreeChart = {
                         }
                     },
                     {
-                        title: "Expand child nodes",
-                        action: function(d, i) {
+                        title: "Expand direct subnodes",
+                        action: function(d) {
                             // Get array of child DOM elements
                             const childNodeElems = d3.selectAll(".node").nodes().filter(ele => ele.__data__.parent === d);
                             // Make all nodes in array visible
@@ -146,6 +161,21 @@ const viewTreeChart = {
                             viewTreeChart.render(d);
                         }
                     },
+                    {
+                        title: "Expand all subnodes",
+                        action: (d) => {
+                            const taxonToExpand = d.data.taxon;
+
+                            root.each(d => {
+                                let isSubnode = d.data.id.indexOf(taxonToExpand) !== -1;
+                                if (d._children && isSubnode) {
+                                    d.children = d._children;
+                                    d._children = null;
+                                }
+                            });
+                            this.render(root);
+                        }
+                    },
                 ]
             },
             {
@@ -153,13 +183,13 @@ const viewTreeChart = {
                 children: [
                     {
                         title: "Select this node (or ctrl+click)",
-                        action: function(d, i) {
+                        action: function(d) {
                             ctrlMain.addToCurrentSelection(this);
                         }
                     },
                     {
                         title: "Select direct subnodes",
-                        action: function(d, i) {
+                        action: function(d) {
                             if (!d.children) {
                                 alert("No subnodes to select");
                                 return;
@@ -174,7 +204,7 @@ const viewTreeChart = {
                     },
                     {
                         title: "Select all subnodes",
-                        action: function(d, i) {
+                        action: function(d) {
                             if (!d.children) {
                                 alert("No subnodes to select");
                                 return;
