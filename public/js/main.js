@@ -106,7 +106,11 @@ let ctrlMain = {
     },
     onChartTypeChange: function() {
         const chartSelection = document.getElementById("chart-selection");
+
         chartSelection.addEventListener("change", () => {
+            this.clearCurrentSelection();
+
+            // set chart type, and rebuild chart
             const type = chartSelection.value,
                 data = this.getCurrentData();
             this.setChartType(type);
@@ -171,7 +175,10 @@ let ctrlMain = {
         });
         // On sample selection, display the correct information in chart
         d3.select("#samples")
-            .on("change", function() {     
+            .on("change", function() {
+                ctrlMain.clearCurrentSelection();
+
+                // set sample and load data
                 let sample = this.value;
                 ctrlMain.setCurrentSample(sample);
                 data.map((e) => {
