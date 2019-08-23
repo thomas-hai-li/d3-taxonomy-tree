@@ -173,7 +173,7 @@ const viewTreeChart = {
                                     d._children = null;
                                 }
                             });
-                            this.render(root);
+                            this.render(d);
                         }
                     },
                 ]
