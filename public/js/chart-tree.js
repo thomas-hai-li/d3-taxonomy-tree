@@ -362,7 +362,12 @@ const viewTreeChart = {
                     ctrlMain.toggleCurrentSelection(this);
                 }
                 else {
-                    viewTreeChart.collapseNode(d, this);  // pass in data and this elem                
+                    // update the mini-chart
+                    let compareSampleIntensities = viewTreeChart.menuNode[1].children[0].action;
+                    compareSampleIntensities(d);
+
+                    // collapse node and rerender
+                    viewTreeChart.collapseNode(d, this);  // pass in data and this elem
                     viewTreeChart.render(d);
                 }
             })
